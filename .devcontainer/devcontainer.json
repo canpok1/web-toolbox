@@ -24,7 +24,8 @@
 		"vscode": {
 			"extensions": [
 				"golang.go",
-				"google.geminicodeassist"
+				"google.geminicodeassist",
+				"bierner.markdown-mermaid"
 			]
 		}
 	}

@@ -192,3 +192,98 @@ Redisには以下のデータ構造で情報を格納します。
 *   投票結果の履歴保存機能。
 *   チャット機能の追加。
 
+## 10. シーケンス図
+
+### 10.1. セッション作成
+
+```mermaid
+sequenceDiagram
+    participant Client as クライアント
+    participant Server as サーバー
+    participant Redis as Redis
+
+    Client->>Server: POST /api/planning-poker/sessions (セッション作成リクエスト)
+    Server->>Redis: セッション情報を保存
+    Server->>Redis: ホストの参加者情報を保存
+    Server-->>Client: 201 Created (sessionId, hostIdを返す)
+    Client->>Client: セッションURLを表示
+```
+
+### 10.2. セッション参加
+
+```mermaid
+sequenceDiagram
+    participant Client as クライアント
+    participant Server as サーバー
+    participant Redis as Redis
+
+    Client->>Server: POST /api/planning-poker/sessions/{sessionId}/participants (セッション参加リクエスト)
+    Server->>Redis: 参加者情報を保存
+    Server->>Redis: セッション参加者リストに追加
+    Server-->>Client: 201 Created (participantIdを返す)
+    Server-->>Client: WebSocket: participantJoined (新しい参加者を通知)
+    Client->>Client: 参加者一覧を更新
+```
+
+### 10.3. ラウンド開始
+
+```mermaid
+sequenceDiagram
+    participant Client as クライアント (ホスト)
+    participant Server as サーバー
+    participant Redis as Redis
+
+    Client->>Server: POST /api/planning-poker/sessions/{sessionId}/rounds (ラウンド開始リクエスト)
+    Server->>Redis: ラウンド情報を保存
+    Server->>Redis: セッション情報のcurrentRoundIdを更新
+    Server-->>Client: 201 Created (roundIdを返す)
+    Server-->>Client: WebSocket: roundStarted (ラウンド開始を通知)
+    Client->>Client: 投票画面を表示
+```
+
+### 10.4. 投票送信
+
+```mermaid
+sequenceDiagram
+    participant Client as クライアント
+    participant Server as サーバー
+    participant Redis as Redis
+
+    Client->>Server: POST /api/planning-poker/rounds/{roundId}/votes (投票送信リクエスト)
+    Server->>Redis: 投票情報を保存
+    Server->>Redis: ラウンド投票リストに追加
+    Server-->>Client: 201 Created (voteIdを返す)
+    Server-->>Client: WebSocket: voteSubmitted (投票送信を通知)
+    Client->>Client: 投票送信済みを表示
+```
+
+### 10.5. ラウンド終了（投票公開）
+
+```mermaid
+sequenceDiagram
+    participant Client as クライアント (ホスト)
+    participant Server as サーバー
+    participant Redis as Redis
+
+    Client->>Server: POST /api/planning-poker/rounds/{roundId}/reveal (ラウンド終了リクエスト)
+    Server->>Redis: ラウンド情報を更新
+    Server->>Redis: 投票情報を取得
+    Server-->>Client: 200 OK
+    Server-->>Client: WebSocket: votesRevealed (投票公開を通知)
+    Client->>Client: 結果表示画面を表示
+```
+
+### 10.6. セッション終了
+
+```mermaid
+sequenceDiagram
+    participant Client as クライアント (ホスト)
+    participant Server as サーバー
+    participant Redis as Redis
+
+    Client->>Server: POST /api/planning-poker/sessions/{sessionId}/end (セッション終了リクエスト)
+    Server->>Redis: セッション情報を更新
+    Server-->>Client: 200 OK
+    Server-->>Client: WebSocket: sessionEnded (セッション終了を通知)
+    Client->>Client: セッション終了画面を表示
+```
