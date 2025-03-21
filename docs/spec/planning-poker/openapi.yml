@@ -1,0 +1,206 @@
+openapi: 3.0.0
+info:
+  title: Planning Poker API
+  version: v1
+paths:
+  /api/planning-poker/sessions:
+    post:
+      summary: セッションを作成する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sessionName:
+                  type: string
+                scaleType:
+                  type: string
+                customScale:
+                  type: array
+                  items:
+                    type: string
+                hostName:
+                  type: string
+      responses:
+        '201':
+          description: セッション作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    format: uuid
+                  hostId:
+                    type: string
+                    format: uuid
+  /api/planning-poker/sessions/{sessionId}/participants:
+    post:
+      summary: セッションに参加する
+      parameters:
+        - in: path
+          name: sessionId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: セッションID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: セッション参加成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  participantId:
+                    type: string
+                    format: uuid
+  /api/planning-poker/sessions/{sessionId}:
+    get:
+      summary: セッションを取得する
+      parameters:
+        - in: path
+          name: sessionId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: セッションID
+      responses:
+        '200':
+          description: セッション取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    format: uuid
+                  sessionName:
+                    type: string
+                  hostId:
+                    type: string
+                    format: uuid
+                  scaleType:
+                    type: string
+                  customScale:
+                    type: array
+                    items:
+                      type: string
+                  currentRoundId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+                  updatedAt:
+                    type: string
+                    format: date-time
+  /api/planning-poker/sessions/{sessionId}/end:
+    post:
+      summary: セッションを終了する
+      parameters:
+        - in: path
+          name: sessionId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: セッションID
+      responses:
+        '200':
+          description: セッション終了成功
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/planning-poker/sessions/{sessionId}/rounds:
+    post:
+      summary: ラウンドを開始する
+      parameters:
+        - in: path
+          name: sessionId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: セッションID
+      responses:
+        '201':
+          description: ラウンド開始成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roundId:
+                    type: string
+                    format: uuid
+  /api/planning-poker/rounds/{roundId}/reveal:
+    post:
+      summary: ラウンドを終了する
+      parameters:
+        - in: path
+          name: roundId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ラウンドID
+      responses:
+        '200':
+          description: ラウンド終了成功
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/planning-poker/rounds/{roundId}/votes:
+    post:
+      summary: 投票を送信する
+      parameters:
+        - in: path
+          name: roundId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ラウンドID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                participantId:
+                  type: string
+                  format: uuid
+                value:
+                  type: string
+      responses:
+        '201':
+          description: 投票送信成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  voteId:
+                    type: string
+                    format: uuid
