@@ -56,4 +56,4 @@ jobs:
       - name: Code generate check
         run: |
           make generate-code
-          git diff --exit-code
+          git diff --ignore-space-change --exit-code

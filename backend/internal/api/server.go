@@ -14,29 +14,36 @@ func NewServer() *Server {
 }
 
 func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(w http.ResponseWriter, r *http.Request, roundId openapi_types.UUID) {
-	panic("not implemented")
+	w.WriteHeader(http.StatusNotImplemented)
+	w.Write([]byte("not implemented"))
 }
 
 func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(w http.ResponseWriter, r *http.Request, roundId openapi_types.UUID) {
-	panic("not implemented")
+	w.WriteHeader(http.StatusNotImplemented)
+	w.Write([]byte("not implemented"))
 }
 
 func (s *Server) PostApiPlanningPokerSessions(w http.ResponseWriter, r *http.Request) {
-	panic("not implemented")
+	w.WriteHeader(http.StatusNotImplemented)
+	w.Write([]byte("not implemented"))
 }
 
 func (s *Server) GetApiPlanningPokerSessionsSessionId(w http.ResponseWriter, r *http.Request, sessionId openapi_types.UUID) {
-	panic("not implemented")
+	w.WriteHeader(http.StatusNotImplemented)
+	w.Write([]byte("not implemented"))
 }
 
 func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(w http.ResponseWriter, r *http.Request, sessionId openapi_types.UUID) {
-	panic("not implemented")
+	w.WriteHeader(http.StatusNotImplemented)
+	w.Write([]byte("not implemented"))
 }
 
 func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(w http.ResponseWriter, r *http.Request, sessionId openapi_types.UUID) {
-	panic("not implemented")
+	w.WriteHeader(http.StatusNotImplemented)
+	w.Write([]byte("not implemented"))
 }
 
 func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(w http.ResponseWriter, r *http.Request, sessionId openapi_types.UUID) {
-	panic("not implemented")
+	w.WriteHeader(http.StatusNotImplemented)
+	w.Write([]byte("not implemented"))
 }
