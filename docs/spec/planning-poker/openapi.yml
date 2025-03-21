@@ -24,7 +24,7 @@ paths:
                 hostName:
                   type: string
       responses:
-        '201':
+        "201":
           description: セッション作成成功
           content:
             application/json:
@@ -37,6 +37,18 @@ paths:
                   hostId:
                     type: string
                     format: uuid
+        "400":
+          description: 不正なリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/planning-poker/sessions/{sessionId}/participants:
     post:
       summary: セッションに参加する
@@ -58,7 +70,7 @@ paths:
                 name:
                   type: string
       responses:
-        '201':
+        "201":
           description: セッション参加成功
           content:
             application/json:
@@ -68,6 +80,24 @@ paths:
                   participantId:
                     type: string
                     format: uuid
+        "400":
+          description: 不正なリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: セッションが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/planning-poker/sessions/{sessionId}:
     get:
       summary: セッションを取得する
@@ -80,7 +110,7 @@ paths:
           required: true
           description: セッションID
       responses:
-        '200':
+        "200":
           description: セッション取得成功
           content:
             application/json:
@@ -112,6 +142,18 @@ paths:
                   updatedAt:
                     type: string
                     format: date-time
+        "404":
+          description: セッションが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/planning-poker/sessions/{sessionId}/end:
     post:
       summary: セッションを終了する
@@ -124,12 +166,24 @@ paths:
           required: true
           description: セッションID
       responses:
-        '200':
+        "200":
           description: セッション終了成功
           content:
             application/json:
               schema:
                 type: object
+        "404":
+          description: セッションが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/planning-poker/sessions/{sessionId}/rounds:
     post:
       summary: ラウンドを開始する
@@ -142,7 +196,7 @@ paths:
           required: true
           description: セッションID
       responses:
-        '201':
+        "201":
           description: ラウンド開始成功
           content:
             application/json:
@@ -152,6 +206,24 @@ paths:
                   roundId:
                     type: string
                     format: uuid
+        "400":
+          description: 不正なリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: セッションが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/planning-poker/rounds/{roundId}/reveal:
     post:
       summary: ラウンドを終了する
@@ -164,12 +236,24 @@ paths:
           required: true
           description: ラウンドID
       responses:
-        '200':
+        "200":
           description: ラウンド終了成功
           content:
             application/json:
               schema:
                 type: object
+        "404":
+          description: ラウンドが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/planning-poker/rounds/{roundId}/votes:
     post:
       summary: 投票を送信する
@@ -194,7 +278,7 @@ paths:
                 value:
                   type: string
       responses:
-        '201':
+        "201":
           description: 投票送信成功
           content:
             application/json:
@@ -204,3 +288,30 @@ paths:
                   voteId:
                     type: string
                     format: uuid
+        "400":
+          description: 不正なリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: ラウンドが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
