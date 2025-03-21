@@ -5,10 +5,17 @@ import (
 	"net/http"
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
+	"github.com/canpok1/web-toolbox/backend/internal/redis"
 )
 
 func main() {
-	server := api.NewServer()
+	redisClient, err := redis.NewClient("redis:6379", "", 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer redisClient.Close()
+
+	server := api.NewServer(redisClient)
 	r := http.NewServeMux()
 	h := api.HandlerWithOptions(server, api.StdHTTPServerOptions{
 		BaseRouter: r,
