@@ -23,7 +23,8 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"golang.go"
+				"golang.go",
+				"google.geminicodeassist"
 			]
 		}
 	}
