@@ -13,6 +13,11 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// ErrorResponse defines model for ErrorResponse.
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
 // PostApiPlanningPokerRoundsRoundIdVotesJSONBody defines parameters for PostApiPlanningPokerRoundsRoundIdVotes.
 type PostApiPlanningPokerRoundsRoundIdVotesJSONBody struct {
 	ParticipantId *openapi_types.UUID `json:"participantId,omitempty"`
