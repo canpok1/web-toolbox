@@ -83,6 +83,7 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 			mockRedis := mock_redis.NewMockClient(ctrl)
 			server := api.NewServer(mockRedis)
 
@@ -94,7 +95,6 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 			} else {
 				assert.NoError(t, err, "Expected no error")
 			}
-			ctrl.Finish()
 		})
 	}
 }
@@ -136,6 +136,7 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 			mockRedis := mock_redis.NewMockClient(ctrl)
 			server := api.NewServer(mockRedis)
 
@@ -153,7 +154,6 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 				assert.NotEmpty(t, res.SessionId, "Expected SessionId to be non-empty")
 				assert.NotEmpty(t, res.HostId, "Expected HostId to be non-empty")
 			}
-			ctrl.Finish()
 		})
 	}
 }
