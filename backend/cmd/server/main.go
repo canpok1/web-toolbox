@@ -9,9 +9,10 @@ import (
 )
 
 func main() {
-	redisClient, err := redis.NewClient("redis:6379", "", 0)
+	redisAddress := "redis:6379"
+	redisClient, err := redis.NewClient(redisAddress, "", 0)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to connect to Redis: %s, error: %v", redisAddress, err)
 	}
 	defer redisClient.Close()
 

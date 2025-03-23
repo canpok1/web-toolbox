@@ -48,7 +48,7 @@ func NewClient(addr, password string, db int) (Client, error) {
 	defer cancel()
 	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
+		return nil, fmt.Errorf("failed to connect to Redis at %s: %w", addr, err)
 	}
 
 	return &client{client: rdb}, nil
@@ -90,9 +90,9 @@ func (c *client) GetSession(ctx context.Context, sessionId string) (*Session, er
 	key := fmt.Sprintf("web-toolbox:planning-poker:session:%s", sessionId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil { // redislib.Nil を使用
-		return nil, fmt.Errorf("session %s not found", sessionId)
+		return nil, fmt.Errorf("session with key %s not found", key)
 	} else if err != nil {
-		return nil, fmt.Errorf("failed to get session %s: %w", sessionId, err)
+		return nil, fmt.Errorf("failed to get session with key %s: %w", key, err)
 	}
 	var session Session
 	err = json.Unmarshal([]byte(data), &session)
@@ -140,9 +140,9 @@ func (c *client) GetRound(ctx context.Context, roundId string) (*Round, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s", roundId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil { // redislib.Nil を使用
-		return nil, fmt.Errorf("round %s not found", roundId)
+		return nil, fmt.Errorf("round with key %s not found", key)
 	} else if err != nil {
-		return nil, fmt.Errorf("failed to get round %s: %w", roundId, err)
+		return nil, fmt.Errorf("failed to get round with key %s: %w", key, err)
 	}
 	var round Round
 	err = json.Unmarshal([]byte(data), &round)
