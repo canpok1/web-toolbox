@@ -22,6 +22,9 @@ func (s *Server) PostApiPlanningPokerSessions(ctx echo.Context) error {
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
 	}
+	if err := s.ValidatePostApiPlanningPokerSessions(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: err.Error()})
+	}
 
 	res, err := s.HandlePostApiPlanningPokerSessions(&req)
 	if err != nil {

@@ -9,28 +9,34 @@ import (
 	"github.com/google/uuid"
 )
 
+func (s *Server) ValidatePostApiPlanningPokerSessions(body *CreateSessionRequest) error {
+	if body == nil {
+		return fmt.Errorf("request body is required")
+	}
+	if body.SessionName == "" {
+		return fmt.Errorf("sessionName is required")
+	}
+	if body.HostName == "" {
+		return fmt.Errorf("hostName is required")
+	}
+	if body.ScaleType == "" {
+		return fmt.Errorf("scaleType is required")
+	}
+	if body.ScaleType != "fibonacci" && body.ScaleType != "t-shirt" && body.ScaleType != "custom" {
+		return fmt.Errorf("invalid scaleType: %s", body.ScaleType)
+	}
+	if body.ScaleType == "custom" && len(*body.CustomScale) == 0 {
+		return fmt.Errorf("customScale is required when scaleType is custom")
+	}
+
+	return nil
+}
+
 func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) (*CreateSessionResponse, error) {
-	// リクエストボディの検証
 	if body == nil {
 		return nil, fmt.Errorf("request body is required")
 	}
-	if body.SessionName == "" {
-		return nil, fmt.Errorf("sessionName is required")
-	}
-	if body.HostName == "" {
-		return nil, fmt.Errorf("hostName is required")
-	}
-	if body.ScaleType == "" {
-		return nil, fmt.Errorf("scaleType is required")
-	}
-	if body.ScaleType != "fibonacci" && body.ScaleType != "t-shirt" && body.ScaleType != "custom" {
-		return nil, fmt.Errorf("invalid scaleType: %s", body.ScaleType)
-	}
-	if body.ScaleType == "custom" && len(*body.CustomScale) == 0 {
-		return nil, fmt.Errorf("customScale is required when scaleType is custom")
-	}
 
-	// セッションIDとホストIDの生成
 	hostId, err := uuid.NewUUID()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate host uuid: %v", err)
@@ -46,10 +52,13 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 		SessionName: body.SessionName,
 		HostId:      hostId.String(),
 		ScaleType:   body.ScaleType,
-		CustomScale: *body.CustomScale,
+		CustomScale: []string{},
 		Status:      "waiting",
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
+	}
+	if body.CustomScale != nil {
+		session.CustomScale = *body.CustomScale
 	}
 
 	ctx := context.Background()
