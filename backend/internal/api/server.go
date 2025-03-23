@@ -18,18 +18,19 @@ func NewServer(redis redis.Client) *Server {
 }
 
 func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId uuid.UUID) error {
-	return ctx.String(http.StatusNotImplemented, fmt.Sprintf("PostApiPlanningPokerRoundsRoundIdReveal: %s", roundId))
+	// TODO: 実装をここに記述
+	return ctx.JSON(http.StatusNotImplemented, ErrorResponse{Message: fmt.Sprintf("PostApiPlanningPokerRoundsRoundIdReveal: %s is not implemented yet", roundId)})
 }
 
 func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundId uuid.UUID) error {
 	var req SendVoteRequest
 	if err := ctx.Bind(&req); err != nil {
-		return ctx.String(http.StatusBadRequest, "bad request")
+		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
 	}
 
 	voteId, err := uuid.NewUUID()
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "failed to generate uuid")
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: fmt.Sprintf("failed to generate vote uuid: %v", err)})
 	}
 
 	res := SendVoteResponse{
@@ -42,17 +43,17 @@ func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundI
 func (s *Server) PostApiPlanningPokerSessions(ctx echo.Context) error {
 	var req CreateSessionRequest
 	if err := ctx.Bind(&req); err != nil {
-		return ctx.String(http.StatusBadRequest, "bad request")
+		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
 	}
 
 	hostId, err := uuid.NewUUID()
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "failed to generate uuid")
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: fmt.Sprintf("failed to generate host uuid: %v", err)})
 	}
 
 	sessionId, err := uuid.NewUUID()
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "failed to generate uuid")
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: fmt.Sprintf("failed to generate session uuid: %v", err)})
 	}
 
 	res := CreateSessionResponse{
@@ -64,25 +65,24 @@ func (s *Server) PostApiPlanningPokerSessions(ctx echo.Context) error {
 }
 
 func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionId uuid.UUID) error {
-	return ctx.String(http.StatusNotImplemented, fmt.Sprintf("GetApiPlanningPokerSessionsSessionId: %s", sessionId))
+	// TODO: 実装をここに記述
+	return ctx.JSON(http.StatusNotImplemented, ErrorResponse{Message: fmt.Sprintf("GetApiPlanningPokerSessionsSessionId: %s is not implemented yet", sessionId)})
 }
 
 func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sessionId uuid.UUID) error {
-	return ctx.String(http.StatusNotImplemented, fmt.Sprintf("PostApiPlanningPokerSessionsSessionIdEnd: %s", sessionId))
+	// TODO: 実装をここに記述
+	return ctx.JSON(http.StatusNotImplemented, ErrorResponse{Message: fmt.Sprintf("PostApiPlanningPokerSessionsSessionIdEnd: %s is not implemented yet", sessionId)})
 }
 
 func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Context, sessionId uuid.UUID) error {
 	var req JoinSessionRequest
 	if err := ctx.Bind(&req); err != nil {
-		return ctx.String(http.StatusBadRequest, "bad request")
+		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
 	}
 
 	participantId, err := uuid.NewUUID()
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "failed to generate uuid")
-	}
-	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "failed to generate uuid")
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: fmt.Sprintf("failed to generate participant uuid: %v", err)})
 	}
 
 	res := JoinSessionResponse{
@@ -95,7 +95,7 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Cont
 func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId uuid.UUID) error {
 	roundId, err := uuid.NewUUID()
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "failed to generate uuid")
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: fmt.Sprintf("failed to generate round uuid: %v", err)})
 	}
 	res := StartRoundResponse{RoundId: &roundId}
 	return ctx.JSON(http.StatusCreated, res)
