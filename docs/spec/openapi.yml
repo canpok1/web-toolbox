@@ -11,32 +11,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                sessionName:
-                  type: string
-                scaleType:
-                  type: string
-                customScale:
-                  type: array
-                  items:
-                    type: string
-                hostName:
-                  type: string
+              $ref: "#/components/schemas/CreateSessionRequest"
       responses:
         "201":
           description: セッション作成成功
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  sessionId:
-                    type: string
-                    format: uuid
-                  hostId:
-                    type: string
-                    format: uuid
+                $ref: "#/components/schemas/CreateSessionResponse"
         "400":
           description: 不正なリクエスト
           content:
@@ -65,21 +47,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
+              $ref: "#/components/schemas/JoinSessionRequest"
       responses:
         "201":
           description: セッション参加成功
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  participantId:
-                    type: string
-                    format: uuid
+                $ref: "#/components/schemas/JoinSessionResponse"
         "400":
           description: 不正なリクエスト
           content:
@@ -115,33 +90,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  sessionId:
-                    type: string
-                    format: uuid
-                  sessionName:
-                    type: string
-                  hostId:
-                    type: string
-                    format: uuid
-                  scaleType:
-                    type: string
-                  customScale:
-                    type: array
-                    items:
-                      type: string
-                  currentRoundId:
-                    type: string
-                    format: uuid
-                  status:
-                    type: string
-                  createdAt:
-                    type: string
-                    format: date-time
-                  updatedAt:
-                    type: string
-                    format: date-time
+                $ref: "#/components/schemas/GetSessionResponse"
         "404":
           description: セッションが見つからない
           content:
@@ -171,7 +120,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/EndSessionResponse"
         "404":
           description: セッションが見つからない
           content:
@@ -201,11 +150,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  roundId:
-                    type: string
-                    format: uuid
+                $ref: "#/components/schemas/StartRoundResponse"
         "400":
           description: 不正なリクエスト
           content:
@@ -241,7 +186,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/RevealRoundResponse"
         "404":
           description: ラウンドが見つからない
           content:
@@ -270,24 +215,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                participantId:
-                  type: string
-                  format: uuid
-                value:
-                  type: string
+              $ref: "#/components/schemas/SendVoteRequest"
       responses:
         "201":
           description: 投票送信成功
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  voteId:
-                    type: string
-                    format: uuid
+                $ref: "#/components/schemas/SendVoteResponse"
         "400":
           description: 不正なリクエスト
           content:
@@ -315,3 +250,88 @@ components:
       properties:
         message:
           type: string
+    CreateSessionRequest:
+      type: object
+      properties:
+        sessionName:
+          type: string
+        scaleType:
+          type: string
+        customScale:
+          type: array
+          items:
+            type: string
+        hostName:
+          type: string
+    CreateSessionResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        hostId:
+          type: string
+          format: uuid
+    JoinSessionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+    JoinSessionResponse:
+      type: object
+      properties:
+        participantId:
+          type: string
+          format: uuid
+    GetSessionResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        sessionName:
+          type: string
+        hostId:
+          type: string
+          format: uuid
+        scaleType:
+          type: string
+        customScale:
+          type: array
+          items:
+            type: string
+        currentRoundId:
+          type: string
+          format: uuid
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    EndSessionResponse:
+      type: object
+    StartRoundResponse:
+      type: object
+      properties:
+        roundId:
+          type: string
+          format: uuid
+    RevealRoundResponse:
+      type: object
+    SendVoteRequest:
+      type: object
+      properties:
+        participantId:
+          type: string
+          format: uuid
+        value:
+          type: string
+    SendVoteResponse:
+      type: object
+      properties:
+        voteId:
+          type: string
+          format: uuid
