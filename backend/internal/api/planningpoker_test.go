@@ -21,7 +21,7 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 			req: &api.CreateSessionRequest{
 				SessionName: "Test Session",
 				HostName:    "Test Host",
-				ScaleType:   "custom",
+				ScaleType:   api.Custom,
 				CustomScale: &[]string{"1", "2", "3"},
 			},
 			expectedError: "",
@@ -40,7 +40,7 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 			name: "failure - missing session name",
 			req: &api.CreateSessionRequest{
 				HostName:    "Test Host",
-				ScaleType:   "fibonacci",
+				ScaleType:   api.Fibonacci,
 				CustomScale: &[]string{"1", "2", "3"},
 			},
 			expectedError: "sessionName is required",
@@ -49,7 +49,7 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 			name: "failure - missing host name",
 			req: &api.CreateSessionRequest{
 				SessionName: "Test Session",
-				ScaleType:   "fibonacci",
+				ScaleType:   api.Fibonacci,
 				CustomScale: &[]string{"1", "2", "3"},
 			},
 			expectedError: "hostName is required",
@@ -68,7 +68,7 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 			req: &api.CreateSessionRequest{
 				SessionName: "Test Session",
 				HostName:    "Test Host",
-				ScaleType:   "custom",
+				ScaleType:   api.Custom,
 				CustomScale: &[]string{},
 			},
 			expectedError: "customScale is required when scaleType is custom",
@@ -111,7 +111,7 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 			req: &api.CreateSessionRequest{
 				SessionName: "Test Session",
 				HostName:    "Test Host",
-				ScaleType:   "custom",
+				ScaleType:   api.Custom,
 				CustomScale: &[]string{"1", "2", "3"},
 			},
 			mockSetup: func(mockRedis *mock_redis.MockClient) {
@@ -123,7 +123,7 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 			req: &api.CreateSessionRequest{
 				SessionName: "Test Session",
 				HostName:    "Test Host",
-				ScaleType:   "custom",
+				ScaleType:   api.Custom,
 				CustomScale: &[]string{"1", "2", "3"},
 			},
 			mockSetup: func(mockRedis *mock_redis.MockClient) {
@@ -154,7 +154,6 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 				assert.NotEmpty(t, res.HostId, "Expected HostId to be non-empty")
 			}
 			ctrl.Finish()
-
 		})
 	}
 }

@@ -22,10 +22,10 @@ func (s *Server) ValidatePostApiPlanningPokerSessions(body *CreateSessionRequest
 	if body.ScaleType == "" {
 		return fmt.Errorf("scaleType is required")
 	}
-	if body.ScaleType != "fibonacci" && body.ScaleType != "t-shirt" && body.ScaleType != "custom" {
+	if body.ScaleType != Fibonacci && body.ScaleType != TShirt && body.ScaleType != Custom {
 		return fmt.Errorf("invalid scaleType: %s", body.ScaleType)
 	}
-	if body.ScaleType == "custom" && len(*body.CustomScale) == 0 {
+	if body.ScaleType == Custom && len(*body.CustomScale) == 0 {
 		return fmt.Errorf("customScale is required when scaleType is custom")
 	}
 
@@ -51,7 +51,7 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 	session := redis.Session{
 		SessionName: body.SessionName,
 		HostId:      hostId.String(),
-		ScaleType:   body.ScaleType,
+		ScaleType:   string(body.ScaleType),
 		CustomScale: []string{},
 		Status:      "waiting",
 		CreatedAt:   time.Now(),

@@ -13,11 +13,18 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for ScaleType.
+const (
+	Custom    ScaleType = "custom"
+	Fibonacci ScaleType = "fibonacci"
+	TShirt    ScaleType = "t-shirt"
+)
+
 // CreateSessionRequest defines model for CreateSessionRequest.
 type CreateSessionRequest struct {
 	CustomScale *[]string `json:"customScale,omitempty"`
 	HostName    string    `json:"hostName"`
-	ScaleType   string    `json:"scaleType"`
+	ScaleType   ScaleType `json:"scaleType"`
 	SessionName string    `json:"sessionName"`
 }
 
@@ -41,7 +48,7 @@ type GetSessionResponse struct {
 	CurrentRoundId *openapi_types.UUID `json:"currentRoundId,omitempty"`
 	CustomScale    []string            `json:"customScale"`
 	HostId         openapi_types.UUID  `json:"hostId"`
-	ScaleType      string              `json:"scaleType"`
+	ScaleType      ScaleType           `json:"scaleType"`
 	SessionId      openapi_types.UUID  `json:"sessionId"`
 	SessionName    string              `json:"sessionName"`
 	Status         string              `json:"status"`
@@ -60,6 +67,9 @@ type JoinSessionResponse struct {
 
 // RevealRoundResponse defines model for RevealRoundResponse.
 type RevealRoundResponse = map[string]interface{}
+
+// ScaleType defines model for ScaleType.
+type ScaleType string
 
 // SendVoteRequest defines model for SendVoteRequest.
 type SendVoteRequest struct {

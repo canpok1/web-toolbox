@@ -250,6 +250,12 @@ components:
       properties:
         message:
           type: string
+    ScaleType:
+      type: string
+      enum:
+        - fibonacci
+        - t-shirt
+        - custom
     CreateSessionRequest:
       type: object
       required:
@@ -260,7 +266,7 @@ components:
         sessionName:
           type: string
         scaleType:
-          type: string
+          $ref: "#/components/schemas/ScaleType"
         customScale:
           type: array
           items:
@@ -315,7 +321,7 @@ components:
           type: string
           format: uuid
         scaleType:
-          type: string
+          $ref: "#/components/schemas/ScaleType"
         customScale:
           type: array
           items:
