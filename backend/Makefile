@@ -5,6 +5,7 @@ SERVER_BINARY=server
 .PHONY: setup
 setup:
 	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+	go install go.uber.org/mock/mockgen@latest
 
 .PHONY: run
 run:
