@@ -8,43 +8,84 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/oapi-codegen/runtime"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-// ErrorResponse defines model for ErrorResponse.
-type ErrorResponse struct {
-	Message string `json:"message"`
-}
-
-// PostApiPlanningPokerRoundsRoundIdVotesJSONBody defines parameters for PostApiPlanningPokerRoundsRoundIdVotes.
-type PostApiPlanningPokerRoundsRoundIdVotesJSONBody struct {
-	ParticipantId *openapi_types.UUID `json:"participantId,omitempty"`
-	Value         *string             `json:"value,omitempty"`
-}
-
-// PostApiPlanningPokerSessionsJSONBody defines parameters for PostApiPlanningPokerSessions.
-type PostApiPlanningPokerSessionsJSONBody struct {
+// CreateSessionRequest defines model for CreateSessionRequest.
+type CreateSessionRequest struct {
 	CustomScale *[]string `json:"customScale,omitempty"`
 	HostName    *string   `json:"hostName,omitempty"`
 	ScaleType   *string   `json:"scaleType,omitempty"`
 	SessionName *string   `json:"sessionName,omitempty"`
 }
 
-// PostApiPlanningPokerSessionsSessionIdParticipantsJSONBody defines parameters for PostApiPlanningPokerSessionsSessionIdParticipants.
-type PostApiPlanningPokerSessionsSessionIdParticipantsJSONBody struct {
+// CreateSessionResponse defines model for CreateSessionResponse.
+type CreateSessionResponse struct {
+	HostId    *openapi_types.UUID `json:"hostId,omitempty"`
+	SessionId *openapi_types.UUID `json:"sessionId,omitempty"`
+}
+
+// EndSessionResponse defines model for EndSessionResponse.
+type EndSessionResponse = map[string]interface{}
+
+// ErrorResponse defines model for ErrorResponse.
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
+// GetSessionResponse defines model for GetSessionResponse.
+type GetSessionResponse struct {
+	CreatedAt      *time.Time          `json:"createdAt,omitempty"`
+	CurrentRoundId *openapi_types.UUID `json:"currentRoundId,omitempty"`
+	CustomScale    *[]string           `json:"customScale,omitempty"`
+	HostId         *openapi_types.UUID `json:"hostId,omitempty"`
+	ScaleType      *string             `json:"scaleType,omitempty"`
+	SessionId      *openapi_types.UUID `json:"sessionId,omitempty"`
+	SessionName    *string             `json:"sessionName,omitempty"`
+	Status         *string             `json:"status,omitempty"`
+	UpdatedAt      *time.Time          `json:"updatedAt,omitempty"`
+}
+
+// JoinSessionRequest defines model for JoinSessionRequest.
+type JoinSessionRequest struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// JoinSessionResponse defines model for JoinSessionResponse.
+type JoinSessionResponse struct {
+	ParticipantId *openapi_types.UUID `json:"participantId,omitempty"`
+}
+
+// RevealRoundResponse defines model for RevealRoundResponse.
+type RevealRoundResponse = map[string]interface{}
+
+// SendVoteRequest defines model for SendVoteRequest.
+type SendVoteRequest struct {
+	ParticipantId *openapi_types.UUID `json:"participantId,omitempty"`
+	Value         *string             `json:"value,omitempty"`
+}
+
+// SendVoteResponse defines model for SendVoteResponse.
+type SendVoteResponse struct {
+	VoteId *openapi_types.UUID `json:"voteId,omitempty"`
+}
+
+// StartRoundResponse defines model for StartRoundResponse.
+type StartRoundResponse struct {
+	RoundId *openapi_types.UUID `json:"roundId,omitempty"`
+}
+
 // PostApiPlanningPokerRoundsRoundIdVotesJSONRequestBody defines body for PostApiPlanningPokerRoundsRoundIdVotes for application/json ContentType.
-type PostApiPlanningPokerRoundsRoundIdVotesJSONRequestBody PostApiPlanningPokerRoundsRoundIdVotesJSONBody
+type PostApiPlanningPokerRoundsRoundIdVotesJSONRequestBody = SendVoteRequest
 
 // PostApiPlanningPokerSessionsJSONRequestBody defines body for PostApiPlanningPokerSessions for application/json ContentType.
-type PostApiPlanningPokerSessionsJSONRequestBody PostApiPlanningPokerSessionsJSONBody
+type PostApiPlanningPokerSessionsJSONRequestBody = CreateSessionRequest
 
 // PostApiPlanningPokerSessionsSessionIdParticipantsJSONRequestBody defines body for PostApiPlanningPokerSessionsSessionIdParticipants for application/json ContentType.
-type PostApiPlanningPokerSessionsSessionIdParticipantsJSONRequestBody PostApiPlanningPokerSessionsSessionIdParticipantsJSONBody
+type PostApiPlanningPokerSessionsSessionIdParticipantsJSONRequestBody = JoinSessionRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
