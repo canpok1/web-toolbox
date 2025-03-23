@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -17,18 +17,11 @@ func main() {
 	defer redisClient.Close()
 
 	server := api.NewServer(redisClient)
-	r := http.NewServeMux()
-	h := api.HandlerWithOptions(server, api.StdHTTPServerOptions{
-		BaseRouter: r,
-	})
+	e := echo.New()
+	api.RegisterHandlers(e, server)
 
 	addr := "0.0.0.0:8080"
 	log.Printf("listen : %s\n", addr)
 
-	s := &http.Server{
-		Handler: h,
-		Addr:    addr,
-	}
-
-	log.Fatal(s.ListenAndServe())
+	log.Fatal(e.Start(addr))
 }
