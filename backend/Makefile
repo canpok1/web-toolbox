@@ -11,6 +11,10 @@ setup:
 run:
 	go run ${SERVER_MAIN_FILE}
 
+.PHONY: test
+test:
+	go test ./...
+
 .PHONY: build
 build:
 	go build -o ${BUILD_OUTPUT_DIR}/${SERVER_BINARY} ${SERVER_MAIN_FILE}

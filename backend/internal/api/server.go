@@ -13,7 +13,7 @@ type Server struct {
 	redis redis.Client
 }
 
-func NewServer(redisClient redis.Client) ServerInterface {
+func NewServer(redisClient redis.Client) *Server {
 	return &Server{redis: redisClient}
 }
 
