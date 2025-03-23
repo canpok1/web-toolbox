@@ -13,18 +13,25 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for ScaleType.
+const (
+	Custom    ScaleType = "custom"
+	Fibonacci ScaleType = "fibonacci"
+	TShirt    ScaleType = "t-shirt"
+)
+
 // CreateSessionRequest defines model for CreateSessionRequest.
 type CreateSessionRequest struct {
 	CustomScale *[]string `json:"customScale,omitempty"`
-	HostName    *string   `json:"hostName,omitempty"`
-	ScaleType   *string   `json:"scaleType,omitempty"`
-	SessionName *string   `json:"sessionName,omitempty"`
+	HostName    string    `json:"hostName"`
+	ScaleType   ScaleType `json:"scaleType"`
+	SessionName string    `json:"sessionName"`
 }
 
 // CreateSessionResponse defines model for CreateSessionResponse.
 type CreateSessionResponse struct {
-	HostId    *openapi_types.UUID `json:"hostId,omitempty"`
-	SessionId *openapi_types.UUID `json:"sessionId,omitempty"`
+	HostId    openapi_types.UUID `json:"hostId"`
+	SessionId openapi_types.UUID `json:"sessionId"`
 }
 
 // EndSessionResponse defines model for EndSessionResponse.
@@ -37,44 +44,47 @@ type ErrorResponse struct {
 
 // GetSessionResponse defines model for GetSessionResponse.
 type GetSessionResponse struct {
-	CreatedAt      *time.Time          `json:"createdAt,omitempty"`
+	CreatedAt      time.Time           `json:"createdAt"`
 	CurrentRoundId *openapi_types.UUID `json:"currentRoundId,omitempty"`
-	CustomScale    *[]string           `json:"customScale,omitempty"`
-	HostId         *openapi_types.UUID `json:"hostId,omitempty"`
-	ScaleType      *string             `json:"scaleType,omitempty"`
-	SessionId      *openapi_types.UUID `json:"sessionId,omitempty"`
-	SessionName    *string             `json:"sessionName,omitempty"`
-	Status         *string             `json:"status,omitempty"`
-	UpdatedAt      *time.Time          `json:"updatedAt,omitempty"`
+	CustomScale    []string            `json:"customScale"`
+	HostId         openapi_types.UUID  `json:"hostId"`
+	ScaleType      ScaleType           `json:"scaleType"`
+	SessionId      openapi_types.UUID  `json:"sessionId"`
+	SessionName    string              `json:"sessionName"`
+	Status         string              `json:"status"`
+	UpdatedAt      time.Time           `json:"updatedAt"`
 }
 
 // JoinSessionRequest defines model for JoinSessionRequest.
 type JoinSessionRequest struct {
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 }
 
 // JoinSessionResponse defines model for JoinSessionResponse.
 type JoinSessionResponse struct {
-	ParticipantId *openapi_types.UUID `json:"participantId,omitempty"`
+	ParticipantId openapi_types.UUID `json:"participantId"`
 }
 
 // RevealRoundResponse defines model for RevealRoundResponse.
 type RevealRoundResponse = map[string]interface{}
 
+// ScaleType defines model for ScaleType.
+type ScaleType string
+
 // SendVoteRequest defines model for SendVoteRequest.
 type SendVoteRequest struct {
-	ParticipantId *openapi_types.UUID `json:"participantId,omitempty"`
-	Value         *string             `json:"value,omitempty"`
+	ParticipantId openapi_types.UUID `json:"participantId"`
+	Value         string             `json:"value"`
 }
 
 // SendVoteResponse defines model for SendVoteResponse.
 type SendVoteResponse struct {
-	VoteId *openapi_types.UUID `json:"voteId,omitempty"`
+	VoteId openapi_types.UUID `json:"voteId"`
 }
 
 // StartRoundResponse defines model for StartRoundResponse.
 type StartRoundResponse struct {
-	RoundId *openapi_types.UUID `json:"roundId,omitempty"`
+	RoundId openapi_types.UUID `json:"roundId"`
 }
 
 // PostApiPlanningPokerRoundsRoundIdVotesJSONRequestBody defines body for PostApiPlanningPokerRoundsRoundIdVotes for application/json ContentType.

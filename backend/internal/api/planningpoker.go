@@ -1,13 +1,48 @@
 package api
 
 import (
+	"context"
 	"fmt"
+	"time"
 
+	"github.com/canpok1/web-toolbox/backend/internal/redis"
 	"github.com/google/uuid"
 )
 
+var validScaleTypeMap = map[ScaleType]struct{}{
+	Fibonacci: {},
+	TShirt:    {},
+	Custom:    {},
+}
+
+func (s *Server) ValidatePostApiPlanningPokerSessions(body *CreateSessionRequest) error {
+	if body == nil {
+		return fmt.Errorf("request body is required")
+	}
+	if body.SessionName == "" {
+		return fmt.Errorf("sessionName is required")
+	}
+	if body.HostName == "" {
+		return fmt.Errorf("hostName is required")
+	}
+	if body.ScaleType == "" {
+		return fmt.Errorf("scaleType is required")
+	}
+	if _, exists := validScaleTypeMap[ScaleType(body.ScaleType)]; !exists {
+		return fmt.Errorf("invalid scaleType: %s", body.ScaleType)
+	}
+	if body.ScaleType == Custom && len(*body.CustomScale) == 0 {
+		return fmt.Errorf("customScale is required when scaleType is custom")
+	}
+
+	return nil
+}
+
 func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) (*CreateSessionResponse, error) {
-	// TODO POST /api/planning-poker/sessions の処理を実装
+	if body == nil {
+		return nil, fmt.Errorf("request body is required")
+	}
+
 	hostId, err := uuid.NewUUID()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate host uuid: %v", err)
@@ -18,9 +53,29 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 		return nil, fmt.Errorf("failed to generate session uuid: %v", err)
 	}
 
+	// セッション情報の保存
+	session := redis.Session{
+		SessionName: body.SessionName,
+		HostId:      hostId.String(),
+		ScaleType:   string(body.ScaleType),
+		CustomScale: []string{},
+		Status:      "waiting",
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	if body.CustomScale != nil {
+		session.CustomScale = *body.CustomScale
+	}
+
+	ctx := context.Background()
+	if err = s.redis.CreateSession(ctx, sessionId.String(), session); err != nil {
+		return nil, fmt.Errorf("failed to save session to redis: %v", err)
+	}
+
+	// レスポンスの作成
 	res := CreateSessionResponse{
-		HostId:    &hostId,
-		SessionId: &sessionId,
+		HostId:    hostId,
+		SessionId: sessionId,
 	}
 	return &res, nil
 }
@@ -33,7 +88,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 	}
 
 	res := JoinSessionResponse{
-		ParticipantId: &participantId,
+		ParticipantId: participantId,
 	}
 	return &res, nil
 }
@@ -51,7 +106,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(roundId uuid.UUID,
 	}
 
 	res := SendVoteResponse{
-		VoteId: &voteId,
+		VoteId: voteId,
 	}
 	return &res, nil
 }
@@ -72,6 +127,6 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(sessionID uui
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate round uuid: %v", err)
 	}
-	res := StartRoundResponse{RoundId: &roundId}
+	res := StartRoundResponse{RoundId: roundId}
 	return &res, nil
 }
