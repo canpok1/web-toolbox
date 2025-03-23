@@ -1,52 +1,91 @@
 package api
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
-	openapi_types "github.com/oapi-codegen/runtime/types"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
 	redis redis.Client
 }
 
-func NewServer(redis redis.Client) *Server {
-	return &Server{redis: redis}
+func NewServer(redisClient redis.Client) ServerInterface {
+	return &Server{redis: redisClient}
 }
 
-func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(w http.ResponseWriter, r *http.Request, roundId openapi_types.UUID) {
-	w.WriteHeader(http.StatusInternalServerError)
-	json.NewEncoder(w).Encode(ErrorResponse{Message: "not implemented"})
+func (s *Server) PostApiPlanningPokerSessions(ctx echo.Context) error {
+	var req CreateSessionRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
+	}
+
+	res, err := s.HandlePostApiPlanningPokerSessions(&req)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
+	}
+
+	return ctx.JSON(http.StatusCreated, res)
 }
 
-func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(w http.ResponseWriter, r *http.Request, roundId openapi_types.UUID) {
-	w.WriteHeader(http.StatusInternalServerError)
-	json.NewEncoder(w).Encode(ErrorResponse{Message: "not implemented"})
+func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Context, sessionId uuid.UUID) error {
+	var req JoinSessionRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
+	}
+
+	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionId, &req)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
+	}
+
+	return ctx.JSON(http.StatusCreated, res)
 }
 
-func (s *Server) PostApiPlanningPokerSessions(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusInternalServerError)
-	json.NewEncoder(w).Encode(ErrorResponse{Message: "not implemented"})
+func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId uuid.UUID) error {
+	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdReveal(roundId)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
+	}
+	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) GetApiPlanningPokerSessionsSessionId(w http.ResponseWriter, r *http.Request, sessionId openapi_types.UUID) {
-	w.WriteHeader(http.StatusInternalServerError)
-	json.NewEncoder(w).Encode(ErrorResponse{Message: "not implemented"})
+func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundId uuid.UUID) error {
+	var req SendVoteRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
+	}
+
+	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdVotes(roundId, &req)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
+	}
+	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(w http.ResponseWriter, r *http.Request, sessionId openapi_types.UUID) {
-	w.WriteHeader(http.StatusInternalServerError)
-	json.NewEncoder(w).Encode(ErrorResponse{Message: "not implemented"})
+func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionId uuid.UUID) error {
+	res, err := s.HandleGetApiPlanningPokerSessionsSessionId(sessionId)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
+	}
+	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(w http.ResponseWriter, r *http.Request, sessionId openapi_types.UUID) {
-	w.WriteHeader(http.StatusInternalServerError)
-	json.NewEncoder(w).Encode(ErrorResponse{Message: "not implemented"})
+func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sessionId uuid.UUID) error {
+	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdEnd(sessionId)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
+	}
+	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(w http.ResponseWriter, r *http.Request, sessionId openapi_types.UUID) {
-	w.WriteHeader(http.StatusInternalServerError)
-	json.NewEncoder(w).Encode(ErrorResponse{Message: "not implemented"})
+func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId uuid.UUID) error {
+	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdRounds(sessionId)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
+	}
+	return ctx.JSON(http.StatusOK, res)
 }
