@@ -9,6 +9,12 @@ import (
 	"github.com/google/uuid"
 )
 
+var validScaleTypeMap = map[ScaleType]struct{}{
+	Fibonacci: {},
+	TShirt:    {},
+	Custom:    {},
+}
+
 func (s *Server) ValidatePostApiPlanningPokerSessions(body *CreateSessionRequest) error {
 	if body == nil {
 		return fmt.Errorf("request body is required")
@@ -22,7 +28,7 @@ func (s *Server) ValidatePostApiPlanningPokerSessions(body *CreateSessionRequest
 	if body.ScaleType == "" {
 		return fmt.Errorf("scaleType is required")
 	}
-	if body.ScaleType != Fibonacci && body.ScaleType != TShirt && body.ScaleType != Custom {
+	if _, exists := validScaleTypeMap[ScaleType(body.ScaleType)]; !exists {
 		return fmt.Errorf("invalid scaleType: %s", body.ScaleType)
 	}
 	if body.ScaleType == Custom && len(*body.CustomScale) == 0 {
