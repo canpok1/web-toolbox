@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
@@ -28,6 +29,7 @@ func (s *Server) PostApiPlanningPokerSessions(ctx echo.Context) error {
 
 	res, err := s.HandlePostApiPlanningPokerSessions(&req)
 	if err != nil {
+		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
 	}
 
@@ -42,6 +44,7 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Cont
 
 	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionId, &req)
 	if err != nil {
+		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
 	}
 
@@ -51,6 +54,7 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Cont
 func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId uuid.UUID) error {
 	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdReveal(roundId)
 	if err != nil {
+		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, res)
@@ -64,6 +68,7 @@ func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundI
 
 	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdVotes(roundId, &req)
 	if err != nil {
+		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, res)
@@ -72,6 +77,7 @@ func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundI
 func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionId uuid.UUID) error {
 	res, err := s.HandleGetApiPlanningPokerSessionsSessionId(sessionId)
 	if err != nil {
+		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, res)
@@ -80,6 +86,7 @@ func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionI
 func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sessionId uuid.UUID) error {
 	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdEnd(sessionId)
 	if err != nil {
+		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, res)
@@ -88,6 +95,7 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sess
 func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId uuid.UUID) error {
 	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdRounds(sessionId)
 	if err != nil {
+		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, res)
