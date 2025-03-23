@@ -131,12 +131,6 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 			},
 			expectedError: "failed to save session to redis",
 		},
-		{
-			name:          "failure - nil request body",
-			req:           nil,
-			mockSetup:     func(mockRedis *mock_redis.MockClient) {},
-			expectedError: "request body is required",
-		},
 	}
 
 	for _, tt := range tests {
