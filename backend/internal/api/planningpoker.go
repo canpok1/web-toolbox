@@ -1,13 +1,36 @@
 package api
 
 import (
+	"context"
 	"fmt"
+	"time"
 
+	"github.com/canpok1/web-toolbox/backend/internal/redis"
 	"github.com/google/uuid"
 )
 
 func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) (*CreateSessionResponse, error) {
-	// TODO POST /api/planning-poker/sessions の処理を実装
+	// リクエストボディの検証
+	if body == nil {
+		return nil, fmt.Errorf("request body is required")
+	}
+	if body.SessionName == "" {
+		return nil, fmt.Errorf("sessionName is required")
+	}
+	if body.HostName == "" {
+		return nil, fmt.Errorf("hostName is required")
+	}
+	if body.ScaleType == "" {
+		return nil, fmt.Errorf("scaleType is required")
+	}
+	if body.ScaleType != "fibonacci" && body.ScaleType != "t-shirt" && body.ScaleType != "custom" {
+		return nil, fmt.Errorf("invalid scaleType: %s", body.ScaleType)
+	}
+	if body.ScaleType == "custom" && len(*body.CustomScale) == 0 {
+		return nil, fmt.Errorf("customScale is required when scaleType is custom")
+	}
+
+	// セッションIDとホストIDの生成
 	hostId, err := uuid.NewUUID()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate host uuid: %v", err)
@@ -18,9 +41,26 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 		return nil, fmt.Errorf("failed to generate session uuid: %v", err)
 	}
 
+	// セッション情報の保存
+	session := redis.Session{
+		SessionName: body.SessionName,
+		HostId:      hostId.String(),
+		ScaleType:   body.ScaleType,
+		CustomScale: *body.CustomScale,
+		Status:      "waiting",
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	ctx := context.Background()
+	if err = s.redis.CreateSession(ctx, sessionId.String(), session); err != nil {
+		return nil, fmt.Errorf("failed to save session to redis: %v", err)
+	}
+
+	// レスポンスの作成
 	res := CreateSessionResponse{
-		HostId:    &hostId,
-		SessionId: &sessionId,
+		HostId:    hostId,
+		SessionId: sessionId,
 	}
 	return &res, nil
 }
@@ -33,7 +73,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 	}
 
 	res := JoinSessionResponse{
-		ParticipantId: &participantId,
+		ParticipantId: participantId,
 	}
 	return &res, nil
 }
@@ -51,7 +91,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(roundId uuid.UUID,
 	}
 
 	res := SendVoteResponse{
-		VoteId: &voteId,
+		VoteId: voteId,
 	}
 	return &res, nil
 }
@@ -72,6 +112,6 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(sessionID uui
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate round uuid: %v", err)
 	}
-	res := StartRoundResponse{RoundId: &roundId}
+	res := StartRoundResponse{RoundId: roundId}
 	return &res, nil
 }
