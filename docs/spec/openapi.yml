@@ -252,6 +252,10 @@ components:
           type: string
     CreateSessionRequest:
       type: object
+      required:
+        - sessionName
+        - scaleType
+        - hostName
       properties:
         sessionName:
           type: string
@@ -265,6 +269,9 @@ components:
           type: string
     CreateSessionResponse:
       type: object
+      required:
+        - sessionId
+        - hostId
       properties:
         sessionId:
           type: string
@@ -274,17 +281,30 @@ components:
           format: uuid
     JoinSessionRequest:
       type: object
+      required:
+        - name
       properties:
         name:
           type: string
     JoinSessionResponse:
       type: object
+      required:
+        - participantId
       properties:
         participantId:
           type: string
           format: uuid
     GetSessionResponse:
       type: object
+      required:
+        - sessionId
+        - sessionName
+        - hostId
+        - scaleType
+        - customScale
+        - status
+        - createdAt
+        - updatedAt
       properties:
         sessionId:
           type: string
@@ -315,6 +335,8 @@ components:
       type: object
     StartRoundResponse:
       type: object
+      required:
+        - roundId
       properties:
         roundId:
           type: string
@@ -323,6 +345,9 @@ components:
       type: object
     SendVoteRequest:
       type: object
+      required:
+        - participantId
+        - value
       properties:
         participantId:
           type: string
@@ -331,6 +356,8 @@ components:
           type: string
     SendVoteResponse:
       type: object
+      required:
+        - voteId
       properties:
         voteId:
           type: string
