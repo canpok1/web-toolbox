@@ -180,7 +180,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 	// Check if the participant exists
 	participant, err := s.redis.GetParticipant(ctx, body.ParticipantId.String())
 	if err != nil {
-		return nil, fmt.Errorf("participant not found: roundID=%s, participantID=%s, err=%v", roundId, body.ParticipantId, err)
+		return nil, fmt.Errorf("failed to get participant from redis: roundID=%s, participantID=%s, err=%v", roundId, body.ParticipantId, err)
 	}
 	if participant == nil {
 		return nil, fmt.Errorf(

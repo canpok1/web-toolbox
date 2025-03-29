@@ -214,6 +214,21 @@ func (mr *MockClientMockRecorder) GetVote(ctx, voteId any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVote", reflect.TypeOf((*MockClient)(nil).GetVote), ctx, voteId)
 }
 
+// GetVoteIdByRoundIdAndParticipantId mocks base method.
+func (m *MockClient) GetVoteIdByRoundIdAndParticipantId(ctx context.Context, roundId, participantId string) (*string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetVoteIdByRoundIdAndParticipantId", ctx, roundId, participantId)
+	ret0, _ := ret[0].(*string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetVoteIdByRoundIdAndParticipantId indicates an expected call of GetVoteIdByRoundIdAndParticipantId.
+func (mr *MockClientMockRecorder) GetVoteIdByRoundIdAndParticipantId(ctx, roundId, participantId any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVoteIdByRoundIdAndParticipantId", reflect.TypeOf((*MockClient)(nil).GetVoteIdByRoundIdAndParticipantId), ctx, roundId, participantId)
+}
+
 // GetVotesInRound mocks base method.
 func (m *MockClient) GetVotesInRound(ctx context.Context, roundId string) ([]string, error) {
 	m.ctrl.T.Helper()
