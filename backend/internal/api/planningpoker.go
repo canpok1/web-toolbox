@@ -178,37 +178,67 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 	}
 
 	// Check if the participant exists
-	_, err = s.redis.GetParticipant(ctx, body.ParticipantId.String())
+	participant, err := s.redis.GetParticipant(ctx, body.ParticipantId.String())
 	if err != nil {
 		return nil, fmt.Errorf("participant not found: roundID=%s, participantID=%s, err=%v", roundId, body.ParticipantId, err)
 	}
+	if participant == nil {
+		return nil, fmt.Errorf(
+			"participant not found: roundID=%s, participantID=%s",
+			roundId,
+			body.ParticipantId,
+		)
+	}
 
-	// Create a new vote
-	voteId, err := uuid.NewUUID()
+	// Check if the participant has already voted in this round
+	voteId, err := s.redis.GetVoteIdByRoundIdAndParticipantId(ctx, roundId.String(), body.ParticipantId.String())
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate vote uuid: roundID=%s, err=%v", roundId, err)
+		return nil, fmt.Errorf("failed to get vote id from redis: roundID=%s, participantID=%s, err=%v", roundId.String(), body.ParticipantId.String(), err)
 	}
 
-	vote := redis.Vote{
-		RoundId:       roundId.String(),
-		ParticipantId: body.ParticipantId.String(),
-		Value:         body.Value,
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
-	}
+	var vote redis.Vote
+	if voteId == nil {
+		// Create a new vote
+		newVoteId, err := uuid.NewUUID()
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate vote uuid: roundID=%s, err=%v", roundId.String(), err)
+		}
 
-	// Save the vote to Redis
-	if err := s.redis.CreateVote(ctx, voteId.String(), vote); err != nil {
-		return nil, fmt.Errorf("failed to create vote in redis: roundID=%s, voteID=%s, err=%v", roundId, voteId, err)
-	}
+		vote = redis.Vote{
+			RoundId:       roundId.String(),
+			ParticipantId: body.ParticipantId.String(),
+			Value:         body.Value,
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
+		}
 
-	// Add the vote to the round's vote list
-	if err := s.redis.AddVoteToRound(ctx, roundId.String(), voteId.String()); err != nil {
-		return nil, fmt.Errorf("failed to add vote to round in redis: roundID=%s, voteID=%s, err=%v", roundId, voteId, err)
-	}
+		// Save the vote to Redis
+		if err := s.redis.CreateVote(ctx, newVoteId.String(), vote); err != nil {
+			return nil, fmt.Errorf("failed to create vote in redis: roundID=%s, voteID=%s, err=%v", roundId.String(), newVoteId.String(), err)
+		}
 
-	res := SendVoteResponse{VoteId: voteId}
-	return &res, nil
+		// Add the vote to the round's vote list
+		if err := s.redis.AddVoteToRound(ctx, roundId.String(), newVoteId.String()); err != nil {
+			return nil, fmt.Errorf("failed to add vote to round in redis: roundID=%s, voteID=%s, err=%v", roundId.String(), newVoteId.String(), err)
+		}
+
+		res := SendVoteResponse{VoteId: newVoteId}
+		return &res, nil
+	} else {
+		// Update the existing vote
+		vote, err := s.redis.GetVote(ctx, *voteId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get vote from redis: roundID=%s, voteID=%s, err=%v", roundId.String(), *voteId, err)
+		}
+		vote.Value = body.Value
+		vote.UpdatedAt = time.Now()
+
+		if err := s.redis.UpdateVote(ctx, *voteId, *vote); err != nil {
+			return nil, fmt.Errorf("failed to update vote in redis: roundID=%s, voteID=%s, err=%v", roundId.String(), *voteId, err)
+		}
+		res := SendVoteResponse{VoteId: uuid.MustParse(*voteId)}
+		return &res, nil
+	}
 }
 
 func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID uuid.UUID) (*GetSessionResponse, error) {
