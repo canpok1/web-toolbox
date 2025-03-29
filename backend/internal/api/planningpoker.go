@@ -80,12 +80,20 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 	return &res, nil
 }
 
+func (s *Server) ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessionID uuid.UUID, body *JoinSessionRequest) error {
+	if body == nil {
+		return fmt.Errorf("request body is required")
+	}
+	if body.Name == "" {
+		return fmt.Errorf("name is required")
+	}
+
+	return nil
+}
+
 func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionID uuid.UUID, body *JoinSessionRequest) (*JoinSessionResponse, error) {
 	if body == nil {
 		return nil, fmt.Errorf("request body is required")
-	}
-	if body.Name == "" {
-		return nil, fmt.Errorf("name is required")
 	}
 
 	participantId, err := uuid.NewUUID()

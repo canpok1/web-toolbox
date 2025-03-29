@@ -41,6 +41,9 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Cont
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
 	}
+	if err := s.ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessionId, &req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to validate request: %v", err)})
+	}
 
 	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionId, &req)
 	if err != nil {
