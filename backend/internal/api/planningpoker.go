@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
@@ -164,7 +165,11 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID uuid.UUID)
 		UpdatedAt:      session.UpdatedAt,
 	}
 	if session.CurrentRoundId != "" {
-		currendRoundId := uuid.MustParse(session.CurrentRoundId)
+		currendRoundId, err := uuid.Parse(session.CurrentRoundId)
+		if err != nil {
+			log.Printf("failed to parse CurrentRoundId: %v", err)
+			return nil, fmt.Errorf("failed to parse CurrentRoundId: %w", err)
+		}
 		res.CurrentRoundId = &currendRoundId
 	}
 
