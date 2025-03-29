@@ -585,3 +585,85 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 		})
 	}
 }
+
+func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
+	tests := []struct {
+		name          string
+		roundID       uuid.UUID
+		mockSetup     func(mockRedis *mock_redis.MockClient, roundID uuid.UUID)
+		expectedError string
+	}{
+		{
+			name:    "success",
+			roundID: uuid.New(),
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().UpdateRound(gomock.Any(), roundID.String(), gomock.Any()).Return(nil)
+			},
+		},
+		{
+			name:    "failure - round not found",
+			roundID: uuid.New(),
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(nil, errors.New("round not found"))
+			},
+			expectedError: "failed to get round from redis",
+		},
+		{
+			name:    "failure - redis get round error",
+			roundID: uuid.New(),
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(nil, errors.New("redis error"))
+			},
+			expectedError: "failed to get round from redis",
+		},
+		{
+			name:    "failure - redis update round error",
+			roundID: uuid.New(),
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().UpdateRound(gomock.Any(), roundID.String(), gomock.Any()).Return(errors.New("redis error"))
+			},
+			expectedError: "failed to update round in redis",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			mockRedis := mock_redis.NewMockClient(ctrl)
+			server := api.NewServer(mockRedis)
+
+			// Create a new roundID for each test case to avoid conflicts
+			roundID := uuid.New()
+			if tt.roundID != uuid.Nil {
+				roundID = tt.roundID
+			}
+
+			tt.mockSetup(mockRedis, roundID)
+
+			ctx := context.Background()
+			res, err := server.HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx, roundID)
+
+			if tt.expectedError == "" {
+				assert.NoError(t, err, "Expected no error")
+				assert.NotNil(t, res, "Expected non-nil response on success")
+			} else {
+				assert.Error(t, err, "Expected an error")
+				assert.Nil(t, res, "Expected nil response on error")
+				assert.Contains(t, err.Error(), tt.expectedError, "Expected error message to contain")
+			}
+		})
+	}
+}

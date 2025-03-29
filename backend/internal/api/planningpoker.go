@@ -122,9 +122,26 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 	return &res, nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(roundId uuid.UUID) (*RevealRoundResponse, error) {
-	// TODO POST /api/planning-poker/rounds/{roundId}/reveal の処理を実装
-	return nil, fmt.Errorf("HandlePostApiPlanningPokerRoundsRoundIdReveal: %s is not implemented yet", roundId)
+func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx context.Context, roundId uuid.UUID) (*RevealRoundResponse, error) {
+	// Retrieve the round from Redis
+	round, err := s.redis.GetRound(ctx, roundId.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get round from redis: roundID=%s, err=%v", roundId, err)
+	}
+	if round == nil {
+		return nil, fmt.Errorf("round not found: roundID=%s", roundId)
+	}
+
+	// Update the round status to "revealed"
+	round.Status = "revealed"
+	round.UpdatedAt = time.Now()
+	if err := s.redis.UpdateRound(ctx, roundId.String(), *round); err != nil {
+		return nil, fmt.Errorf("failed to update round in redis: roundID=%s, err=%v", roundId, err)
+	}
+
+	res := RevealRoundResponse{}
+
+	return &res, nil
 }
 
 func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(roundId uuid.UUID, body *SendVoteRequest) (*SendVoteResponse, error) {
