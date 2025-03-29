@@ -140,8 +140,35 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(roundId uuid.UUID,
 }
 
 func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID uuid.UUID) (*GetSessionResponse, error) {
-	// TODO POST /api/planning-poker/sessions/{sessionId}/participants の処理を実装
-	return nil, fmt.Errorf("GetApiPlanningPokerSessionsSessionId: %s is not implemented yet", sessionID)
+	ctx := context.Background()
+
+	// Retrieve the session from Redis
+	session, err := s.redis.GetSession(ctx, sessionID.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session from redis (sessionID: %s): %v", sessionID, err)
+	}
+	if session == nil {
+		return nil, fmt.Errorf("session not found (sessionID: %s)", sessionID)
+	}
+
+	// Convert the redis.Session to GetSessionResponse
+	res := GetSessionResponse{
+		SessionId:      sessionID,
+		SessionName:    session.SessionName,
+		HostId:         uuid.MustParse(session.HostId),
+		ScaleType:      ScaleType(session.ScaleType),
+		Status:         session.Status,
+		CustomScale:    session.CustomScale,
+		CurrentRoundId: nil,
+		CreatedAt:      session.CreatedAt,
+		UpdatedAt:      session.UpdatedAt,
+	}
+	if session.CurrentRoundId != "" {
+		currendRoundId := uuid.MustParse(session.CurrentRoundId)
+		res.CurrentRoundId = &currendRoundId
+	}
+
+	return &res, nil
 }
 
 func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdEnd(sessionID uuid.UUID) (*EndSessionResponse, error) {
