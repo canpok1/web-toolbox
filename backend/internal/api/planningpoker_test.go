@@ -383,3 +383,92 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 		})
 	}
 }
+
+func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
+	tests := []struct {
+		name          string
+		sessionID     uuid.UUID
+		mockSetup     func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID)
+		expectedError string
+	}{
+		{
+			name:      "success",
+			sessionID: uuid.New(),
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
+					SessionName:    "Test Session",
+					HostId:         uuid.New().String(),
+					ScaleType:      "fibonacci",
+					CustomScale:    []string{},
+					CurrentRoundId: "",
+					Status:         "waiting",
+					CreatedAt:      time.Now(),
+					UpdatedAt:      time.Now(),
+				}, nil)
+				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID.String(), gomock.Any()).Return(nil)
+			},
+		},
+		{
+			name:      "failure - session not found",
+			sessionID: uuid.New(),
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, nil)
+			},
+			expectedError: "session not found (sessionID:",
+		},
+		{
+			name:      "failure - redis get session error",
+			sessionID: uuid.New(),
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, errors.New("redis error"))
+			},
+			expectedError: "failed to get session from redis",
+		},
+		{
+			name:      "failure - redis update session error",
+			sessionID: uuid.New(),
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
+					SessionName:    "Test Session",
+					HostId:         uuid.New().String(),
+					ScaleType:      "fibonacci",
+					CustomScale:    []string{},
+					CurrentRoundId: "",
+					Status:         "waiting",
+					CreatedAt:      time.Now(),
+					UpdatedAt:      time.Now(),
+				}, nil)
+				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID.String(), gomock.Any()).Return(errors.New("redis error"))
+			},
+			expectedError: "failed to update session in redis",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			mockRedis := mock_redis.NewMockClient(ctrl)
+			server := api.NewServer(mockRedis)
+
+			// Create a new sessionID for each test case to avoid conflicts
+			sessionID := uuid.New()
+			if tt.sessionID != uuid.Nil {
+				sessionID = tt.sessionID
+			}
+
+			tt.mockSetup(mockRedis, sessionID)
+
+			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdEnd(sessionID)
+
+			if tt.expectedError == "" {
+				assert.NoError(t, err, "Expected no error")
+				assert.NotNil(t, res, "Expected non-nil response on success")
+			} else {
+				assert.Error(t, err, "Expected an error")
+				assert.Nil(t, res, "Expected nil response on error")
+				assert.Contains(t, err.Error(), tt.expectedError, "Expected error message to contain")
+			}
+		})
+	}
+}
