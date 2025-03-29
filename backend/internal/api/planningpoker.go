@@ -180,10 +180,10 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx context.Cont
 	// Retrieve the session from Redis
 	session, err := s.redis.GetSession(ctx, sessionID.String())
 	if err != nil {
-		return nil, fmt.Errorf("failed to get session from redis (sessionID: %s): %v", sessionID, err)
+		return nil, fmt.Errorf("failed to get session from redis: sessionID=%s, err=%v", sessionID, err)
 	}
 	if session == nil {
-		return nil, fmt.Errorf("session not found (sessionID: %s)", sessionID)
+		return nil, fmt.Errorf("session not found: sessionID=%s", sessionID)
 	}
 
 	// Update the session status to "finished"
@@ -192,7 +192,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx context.Cont
 
 	// Save the updated session back to Redis
 	if err := s.redis.UpdateSession(ctx, sessionID.String(), *session); err != nil {
-		return nil, fmt.Errorf("failed to update session in redis (sessionID: %s): %v", sessionID, err)
+		return nil, fmt.Errorf("failed to update session in redis: sessionID=%s, err=%v", sessionID, err)
 	}
 
 	return &EndSessionResponse{}, nil
