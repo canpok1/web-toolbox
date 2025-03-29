@@ -81,10 +81,30 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 }
 
 func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionID uuid.UUID, body *JoinSessionRequest) (*JoinSessionResponse, error) {
-	// TODO POST /api/planning-poker/sessions/{sessionId}/participants の処理を実装
+	if body == nil {
+		return nil, fmt.Errorf("request body is required")
+	}
+	if body.Name == "" {
+		return nil, fmt.Errorf("name is required")
+	}
+
 	participantId, err := uuid.NewUUID()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate participant uuid: %v", err)
+	}
+
+	ctx := context.Background()
+	participant := redis.Participant{
+		SessionId: sessionID.String(),
+		Name:      body.Name,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	if err := s.redis.CreateParticipant(ctx, participantId.String(), participant); err != nil {
+		return nil, fmt.Errorf("failed to create participant: %v", err)
+	}
+	if err := s.redis.AddParticipantToSession(ctx, sessionID.String(), participantId.String()); err != nil {
+		return nil, fmt.Errorf("failed to add participant to session: %v", err)
 	}
 
 	res := JoinSessionResponse{
