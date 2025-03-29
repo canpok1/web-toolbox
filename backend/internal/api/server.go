@@ -69,8 +69,11 @@ func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundI
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
 	}
+	if err := s.ValidatePostApiPlanningPokerRoundsRoundIdVotes(roundId, &req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to validate request: %v", err)})
+	}
 
-	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdVotes(roundId, &req)
+	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdVotes(context.Background(), roundId, &req)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
