@@ -90,7 +90,7 @@ func (c *client) GetSession(ctx context.Context, sessionId string) (*Session, er
 	key := fmt.Sprintf("web-toolbox:planning-poker:session:%s", sessionId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil { // redislib.Nil を使用
-		return nil, fmt.Errorf("session with key %s not found", key)
+		return nil, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to get session with key %s: %w", key, err)
 	}
