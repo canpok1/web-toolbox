@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -459,7 +460,8 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 
 			tt.mockSetup(mockRedis, sessionID)
 
-			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdEnd(sessionID)
+			ctx := context.Background()
+			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx, sessionID)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")

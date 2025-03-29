@@ -176,9 +176,7 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID uuid.UUID)
 	return &res, nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdEnd(sessionID uuid.UUID) (*EndSessionResponse, error) {
-	ctx := context.Background()
-
+func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx context.Context, sessionID uuid.UUID) (*EndSessionResponse, error) {
 	// Retrieve the session from Redis
 	session, err := s.redis.GetSession(ctx, sessionID.String())
 	if err != nil {
