@@ -140,7 +140,7 @@ func (c *client) GetRound(ctx context.Context, roundId string) (*Round, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s", roundId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil { // redislib.Nil を使用
-		return nil, fmt.Errorf("round with key %s not found", key)
+		return nil, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to get round with key %s: %w", key, err)
 	}

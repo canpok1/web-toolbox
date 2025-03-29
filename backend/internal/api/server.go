@@ -56,7 +56,7 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Cont
 }
 
 func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId uuid.UUID) error {
-	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdReveal(roundId)
+	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdReveal(context.Background(), roundId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
