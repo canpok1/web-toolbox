@@ -82,10 +82,10 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 
 func (s *Server) ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessionID uuid.UUID, body *JoinSessionRequest) error {
 	if body == nil {
-		return fmt.Errorf("request body is required")
+		return fmt.Errorf("request body is required (sessionID: %s)", sessionID.String())
 	}
 	if body.Name == "" {
-		return fmt.Errorf("name is required")
+		return fmt.Errorf("name is required (sessionID: %s)", sessionID.String())
 	}
 
 	return nil
@@ -93,12 +93,12 @@ func (s *Server) ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessi
 
 func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionID uuid.UUID, body *JoinSessionRequest) (*JoinSessionResponse, error) {
 	if body == nil {
-		return nil, fmt.Errorf("request body is required")
+		return nil, fmt.Errorf("request body is required (sessionID: %s)", sessionID.String())
 	}
 
 	participantId, err := uuid.NewUUID()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate participant uuid: %v", err)
+		return nil, fmt.Errorf("failed to generate participant uuid (sessionID: %s): %v", sessionID.String(), err)
 	}
 
 	ctx := context.Background()
@@ -109,10 +109,10 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 		UpdatedAt: time.Now(),
 	}
 	if err := s.redis.CreateParticipant(ctx, participantId.String(), participant); err != nil {
-		return nil, fmt.Errorf("failed to create participant: %v", err)
+		return nil, fmt.Errorf("failed to create participant (sessionID: %s): %v", sessionID.String(), err)
 	}
 	if err := s.redis.AddParticipantToSession(ctx, sessionID.String(), participantId.String()); err != nil {
-		return nil, fmt.Errorf("failed to add participant to session: %v", err)
+		return nil, fmt.Errorf("failed to add participant to session (sessionID: %s, participantID: %s): %v", sessionID.String(), participantId.String(), err)
 	}
 
 	res := JoinSessionResponse{
