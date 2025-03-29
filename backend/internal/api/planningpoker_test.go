@@ -2,7 +2,6 @@ package api_test
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
@@ -166,25 +165,25 @@ func TestValidatePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T)
 		name        string
 		sessionID   uuid.UUID
 		body        *api.JoinSessionRequest
-		expectedErr error
+		expectedErr string
 	}{
 		{
 			name:        "Valid request",
 			sessionID:   uuid.New(),
 			body:        &api.JoinSessionRequest{Name: "Test User"},
-			expectedErr: nil,
+			expectedErr: "",
 		},
 		{
 			name:        "Nil request body",
 			sessionID:   uuid.New(),
 			body:        nil,
-			expectedErr: fmt.Errorf("request body is required (sessionID: %s)", uuid.New().String()),
+			expectedErr: "request body is required",
 		},
 		{
 			name:        "Empty name",
 			sessionID:   uuid.New(),
 			body:        &api.JoinSessionRequest{Name: ""},
-			expectedErr: fmt.Errorf("name is required (sessionID: %s)", uuid.New().String()),
+			expectedErr: "name is required",
 		},
 	}
 
@@ -202,30 +201,14 @@ func TestValidatePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T)
 			err := s.ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessionID, tc.body)
 
 			// Check for errors
-			if tc.expectedErr != nil {
-				if err == nil {
-					t.Errorf("Expected error: %v, but got nil", tc.expectedErr)
-				} else if err.Error() != tc.expectedErr.Error() {
-					// Check if the error message is the same, ignoring the sessionID
-					expectedErrWithoutSessionID := tc.expectedErr.Error()
-					actualErrWithoutSessionID := err.Error()
-
-					// Remove the sessionID from the error message
-					if len(expectedErrWithoutSessionID) > 40 {
-						expectedErrWithoutSessionID = expectedErrWithoutSessionID[:len(expectedErrWithoutSessionID)-38]
-					}
-					if len(actualErrWithoutSessionID) > 40 {
-						actualErrWithoutSessionID = actualErrWithoutSessionID[:len(actualErrWithoutSessionID)-38]
-					}
-
-					if expectedErrWithoutSessionID != actualErrWithoutSessionID {
-						t.Errorf("Expected error: %v, but got: %v", tc.expectedErr, err)
-					}
-				}
-			} else {
-				if err != nil {
-					t.Errorf("Expected no error, but got: %v", err)
-				}
+			if tc.expectedErr == "" && err != nil {
+				t.Errorf("Expected no error, but got: %v", err)
+			}
+			if tc.expectedErr != "" && err == nil {
+				t.Errorf("Expected error: %v, but got nil", tc.expectedErr)
+			}
+			if tc.expectedErr != "" && err != nil {
+				assert.Contains(t, err.Error(), tc.expectedErr)
 			}
 		})
 	}
@@ -299,24 +282,14 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 
 			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionID, tt.req)
 
-			if tt.expectedError != "" {
-				assert.Error(t, err, "Expected an error")
-				assert.Nil(t, res, "Expected nil response on error")
-				// Check if the error message is the same, ignoring the sessionID
-				expectedErrWithoutSessionID := tt.expectedError
-				actualErrWithoutSessionID := err.Error()
-
-				if len(actualErrWithoutSessionID) > 40 {
-					actualErrWithoutSessionID = actualErrWithoutSessionID[:len(actualErrWithoutSessionID)-38]
-				}
-
-				if expectedErrWithoutSessionID != actualErrWithoutSessionID {
-					assert.Contains(t, err.Error(), tt.expectedError, "Expected error message to contain: "+tt.expectedError)
-				}
-			} else {
+			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
 				assert.NotNil(t, res, "Expected non-nil response on success")
 				assert.NotEmpty(t, res.ParticipantId, "Expected ParticipantId to be non-empty")
+			} else {
+				assert.Error(t, err, "Expected an error")
+				assert.Nil(t, res, "Expected nil response on error")
+				assert.Contains(t, err.Error(), tt.expectedError, "Expected error message to contain: "+tt.expectedError)
 			}
 		})
 	}
