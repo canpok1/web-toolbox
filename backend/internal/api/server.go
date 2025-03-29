@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -87,7 +88,7 @@ func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionI
 }
 
 func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sessionId uuid.UUID) error {
-	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdEnd(sessionId)
+	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdEnd(context.Background(), sessionId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
