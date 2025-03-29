@@ -20,6 +20,7 @@ type Client interface {
 	UpdateRound(ctx context.Context, roundId string, round Round) error
 	CreateParticipant(ctx context.Context, participantId string, participant Participant) error
 	GetParticipant(ctx context.Context, participantId string) (*Participant, error)
+	GetVoteIdByRoundIdAndParticipantId(ctx context.Context, roundId, participantId string) (*string, error)
 	UpdateParticipant(ctx context.Context, participantId string, participant Participant) error
 	CreateVote(ctx context.Context, voteId string, vote Vote) error
 	GetVote(ctx context.Context, voteId string) (*Vote, error)
@@ -201,6 +202,25 @@ func (c *client) GetParticipant(ctx context.Context, participantId string) (*Par
 		return nil, fmt.Errorf("failed to unmarshal participant: %w", err)
 	}
 	return &participant, nil
+}
+
+// GetVoteIdByRoundIdAndParticipantId retrieves a voteId from Redis by roundId and participantId.
+func (c *client) GetVoteIdByRoundIdAndParticipantId(ctx context.Context, roundId, participantId string) (*string, error) {
+	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s:votes", roundId)
+	voteIds, err := c.client.SMembers(ctx, key).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vote ids with key %s: %w", key, err)
+	}
+	for _, voteId := range voteIds {
+		vote, err := c.GetVote(ctx, voteId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get vote with voteId %s: %w", voteId, err)
+		}
+		if vote.ParticipantId == participantId {
+			return &voteId, nil
+		}
+	}
+	return nil, nil
 }
 
 // UpdateParticipant updates a participant in Redis.

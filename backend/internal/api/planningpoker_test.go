@@ -667,3 +667,285 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
 		})
 	}
 }
+
+func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
+	tests := []struct {
+		name          string
+		roundID       uuid.UUID
+		req           *api.SendVoteRequest
+		mockSetup     func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest)
+		expectedError string
+	}{
+		{
+			name:    "success - first time vote",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "5",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(nil, nil)
+				mockRedis.EXPECT().CreateVote(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				mockRedis.EXPECT().AddVoteToRound(gomock.Any(), roundID.String(), gomock.Any()).Return(nil)
+			},
+		},
+		{
+			name:    "success - multiple votes",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "8",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				voteId := uuid.New().String()
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(&voteId, nil)
+				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(&redis.Vote{
+					RoundId:       roundID.String(),
+					ParticipantId: req.ParticipantId.String(),
+					Value:         "5",
+					CreatedAt:     time.Now(),
+					UpdatedAt:     time.Now(),
+				}, nil)
+				mockRedis.EXPECT().UpdateVote(gomock.Any(), voteId, gomock.Any()).Return(nil)
+			},
+		},
+		{
+			name:    "failure - nil request body",
+			roundID: uuid.New(),
+			req:     nil,
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+			},
+			expectedError: "request body is required",
+		},
+		{
+			name:    "failure - round not found",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "5",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(nil, nil)
+			},
+			expectedError: "round not found",
+		},
+		{
+			name:    "failure - redis get round error",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "5",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(nil, errors.New("redis error"))
+			},
+			expectedError: "failed to get round from redis",
+		},
+		{
+			name:    "failure - round not in voting state",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "5",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "revealed",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+			},
+			expectedError: "round is not in voting state",
+		},
+		{
+			name:    "failure - participant not found",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "5",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(nil, nil)
+			},
+			expectedError: "participant not found",
+		},
+		{
+			name:    "failure - redis get participant error",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "5",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(nil, errors.New("redis error"))
+			},
+			expectedError: "failed to get participant from redis",
+		},
+		{
+			name:    "failure - redis get vote id error",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "5",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(nil, errors.New("redis error"))
+			},
+			expectedError: "failed to get vote id from redis",
+		},
+		{
+			name:    "failure - redis create vote error",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "5",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(nil, nil)
+				mockRedis.EXPECT().CreateVote(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("redis error"))
+			},
+			expectedError: "failed to create vote in redis",
+		},
+		{
+			name:    "failure - redis add vote to round error",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "5",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(nil, nil)
+				mockRedis.EXPECT().CreateVote(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				mockRedis.EXPECT().AddVoteToRound(gomock.Any(), roundID.String(), gomock.Any()).Return(errors.New("redis error"))
+			},
+			expectedError: "failed to add vote to round in redis",
+		},
+		{
+			name:    "failure - redis get vote error",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "8",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				voteId := uuid.New().String()
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(&voteId, nil)
+				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(nil, errors.New("redis error"))
+			},
+			expectedError: "failed to get vote from redis",
+		},
+		{
+			name:    "failure - redis update vote error",
+			roundID: uuid.New(),
+			req: &api.SendVoteRequest{
+				ParticipantId: uuid.New(),
+				Value:         "8",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+				voteId := uuid.New().String()
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+					SessionId: uuid.New().String(),
+					Status:    "voting",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(&voteId, nil)
+				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(&redis.Vote{
+					RoundId:       roundID.String(),
+					ParticipantId: req.ParticipantId.String(),
+					Value:         "5",
+					CreatedAt:     time.Now(),
+					UpdatedAt:     time.Now(),
+				}, nil)
+				mockRedis.EXPECT().UpdateVote(gomock.Any(), voteId, gomock.Any()).Return(errors.New("redis error"))
+			},
+			expectedError: "failed to update vote in redis",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			mockRedis := mock_redis.NewMockClient(ctrl)
+			server := api.NewServer(mockRedis)
+
+			// Create a new roundID for each test case to avoid conflicts
+			roundID := uuid.New()
+			if tt.roundID != uuid.Nil {
+				roundID = tt.roundID
+			}
+
+			tt.mockSetup(mockRedis, roundID, tt.req)
+
+			ctx := context.Background()
+			res, err := server.HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx, roundID, tt.req)
+
+			if tt.expectedError == "" {
+				assert.NoError(t, err, "Expected no error")
+				assert.NotNil(t, res, "Expected non-nil response on success")
+				assert.NotEmpty(t, res.VoteId, "Expected VoteId to be non-empty")
+			} else {
+				assert.Error(t, err, "Expected an error")
+				assert.Nil(t, res, "Expected nil response on error")
+				assert.Contains(t, err.Error(), tt.expectedError, "Expected error message to contain")
+			}
+		})
+	}
+}
