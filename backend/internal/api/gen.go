@@ -20,70 +20,105 @@ const (
 	TShirt    ScaleType = "t-shirt"
 )
 
-// CreateSessionRequest defines model for CreateSessionRequest.
+// CreateSessionRequest セッション作成リクエスト
 type CreateSessionRequest struct {
+	// CustomScale カスタムスケール（scaleTypeがcustomの場合のみ有効）
 	CustomScale *[]string `json:"customScale,omitempty"`
-	HostName    string    `json:"hostName"`
-	ScaleType   ScaleType `json:"scaleType"`
-	SessionName string    `json:"sessionName"`
+
+	// HostName ホスト名
+	HostName string `json:"hostName"`
+
+	// ScaleType スケールの種類
+	ScaleType ScaleType `json:"scaleType"`
+
+	// SessionName セッション名
+	SessionName string `json:"sessionName"`
 }
 
-// CreateSessionResponse defines model for CreateSessionResponse.
+// CreateSessionResponse セッション作成レスポンス
 type CreateSessionResponse struct {
-	HostId    openapi_types.UUID `json:"hostId"`
+	// HostId セッションのホストID
+	HostId openapi_types.UUID `json:"hostId"`
+
+	// SessionId 作成されたセッションのID
 	SessionId openapi_types.UUID `json:"sessionId"`
 }
 
-// EndSessionResponse defines model for EndSessionResponse.
+// EndSessionResponse セッション終了レスポンス
 type EndSessionResponse = map[string]interface{}
 
-// ErrorResponse defines model for ErrorResponse.
+// ErrorResponse エラーレスポンス
 type ErrorResponse struct {
+	// Message エラーメッセージ
 	Message string `json:"message"`
 }
 
-// GetSessionResponse defines model for GetSessionResponse.
+// GetSessionResponse セッション取得レスポンス
 type GetSessionResponse struct {
-	CreatedAt      time.Time           `json:"createdAt"`
+	// CreatedAt セッションの作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// CurrentRoundId 現在のラウンドID
 	CurrentRoundId *openapi_types.UUID `json:"currentRoundId,omitempty"`
-	CustomScale    []string            `json:"customScale"`
-	HostId         openapi_types.UUID  `json:"hostId"`
-	ScaleType      ScaleType           `json:"scaleType"`
-	SessionId      openapi_types.UUID  `json:"sessionId"`
-	SessionName    string              `json:"sessionName"`
-	Status         string              `json:"status"`
-	UpdatedAt      time.Time           `json:"updatedAt"`
+
+	// CustomScale カスタムスケール（scaleTypeがcustomの場合のみ有効）
+	CustomScale []string `json:"customScale"`
+
+	// HostId セッションのホストID
+	HostId openapi_types.UUID `json:"hostId"`
+
+	// ScaleType スケールの種類
+	ScaleType ScaleType `json:"scaleType"`
+
+	// SessionId セッションのID
+	SessionId openapi_types.UUID `json:"sessionId"`
+
+	// SessionName セッション名
+	SessionName string `json:"sessionName"`
+
+	// Status セッションの状態
+	Status string `json:"status"`
+
+	// UpdatedAt セッションの最終更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// JoinSessionRequest defines model for JoinSessionRequest.
+// JoinSessionRequest セッション参加リクエスト
 type JoinSessionRequest struct {
+	// Name 参加者の名前
 	Name string `json:"name"`
 }
 
-// JoinSessionResponse defines model for JoinSessionResponse.
+// JoinSessionResponse セッション参加レスポンス
 type JoinSessionResponse struct {
+	// ParticipantId 参加者のID
 	ParticipantId openapi_types.UUID `json:"participantId"`
 }
 
-// RevealRoundResponse defines model for RevealRoundResponse.
+// RevealRoundResponse ラウンド結果公開レスポンス
 type RevealRoundResponse = map[string]interface{}
 
-// ScaleType defines model for ScaleType.
+// ScaleType スケールの種類
 type ScaleType string
 
-// SendVoteRequest defines model for SendVoteRequest.
+// SendVoteRequest 投票送信リクエスト
 type SendVoteRequest struct {
+	// ParticipantId 投票者のID
 	ParticipantId openapi_types.UUID `json:"participantId"`
-	Value         string             `json:"value"`
+
+	// Value 投票値
+	Value string `json:"value"`
 }
 
-// SendVoteResponse defines model for SendVoteResponse.
+// SendVoteResponse 投票送信レスポンス
 type SendVoteResponse struct {
+	// VoteId 投票ID
 	VoteId openapi_types.UUID `json:"voteId"`
 }
 
-// StartRoundResponse defines model for StartRoundResponse.
+// StartRoundResponse ラウンド開始レスポンス
 type StartRoundResponse struct {
+	// RoundId 開始されたラウンドのID
 	RoundId openapi_types.UUID `json:"roundId"`
 }
 
@@ -119,6 +154,9 @@ type ServerInterface interface {
 	// ラウンドを開始する
 	// (POST /api/planning-poker/sessions/{sessionId}/rounds)
 	PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId openapi_types.UUID) error
+	// リアルタイム更新のための WebSocket エンドポイント
+	// (GET /api/planning-poker/ws)
+	GetApiPlanningPokerWs(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -231,6 +269,15 @@ func (w *ServerInterfaceWrapper) PostApiPlanningPokerSessionsSessionIdRounds(ctx
 	return err
 }
 
+// GetApiPlanningPokerWs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetApiPlanningPokerWs(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetApiPlanningPokerWs(ctx)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -266,5 +313,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/end", wrapper.PostApiPlanningPokerSessionsSessionIdEnd)
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/participants", wrapper.PostApiPlanningPokerSessionsSessionIdParticipants)
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/rounds", wrapper.PostApiPlanningPokerSessionsSessionIdRounds)
+	router.GET(baseURL+"/api/planning-poker/ws", wrapper.GetApiPlanningPokerWs)
 
 }

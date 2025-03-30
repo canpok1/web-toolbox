@@ -3,6 +3,33 @@ info:
   title: Planning Poker API
   version: v1
 paths:
+  /api/planning-poker/ws:
+    get:
+      summary: リアルタイム更新のための WebSocket エンドポイント
+      description: |
+        プランニングポーカーセッションに関するリアルタイム更新を受信するための WebSocket 接続を確立します。
+        サーバーは以下のイベントを含むメッセージを送信します:
+        - participantJoined: 新しい参加者がセッションに参加しました。
+        - roundStarted: 新しいラウンドが開始されました。
+        - voteSubmitted: 参加者が投票を送信しました。
+        - votesRevealed: ラウンドの投票が公開されました。
+        - sessionEnded: セッションが終了しました。
+      responses:
+        "101":
+          description: プロトコルの切り替え
+          headers:
+            Upgrade:
+              schema:
+                type: string
+              description: websocket
+            Connection:
+              schema:
+                type: string
+              description: Upgrade
+        "400":
+          description: 不正なリクエスト
+        "500":
+          description: サーバー内部エラー
   /api/planning-poker/sessions:
     post:
       summary: セッションを作成する
@@ -245,19 +272,23 @@ components:
   schemas:
     ErrorResponse:
       type: object
+      description: エラーレスポンス
       required:
         - message
       properties:
         message:
           type: string
+          description: エラーメッセージ
     ScaleType:
       type: string
+      description: スケールの種類
       enum:
         - fibonacci
         - t-shirt
         - custom
     CreateSessionRequest:
       type: object
+      description: セッション作成リクエスト
       required:
         - sessionName
         - scaleType
@@ -265,16 +296,21 @@ components:
       properties:
         sessionName:
           type: string
+          description: セッション名
         scaleType:
           $ref: "#/components/schemas/ScaleType"
+          description: スケールの種類
         customScale:
           type: array
           items:
             type: string
+          description: カスタムスケール（scaleTypeがcustomの場合のみ有効）
         hostName:
           type: string
+          description: ホスト名
     CreateSessionResponse:
       type: object
+      description: セッション作成レスポンス
       required:
         - sessionId
         - hostId
@@ -282,26 +318,33 @@ components:
         sessionId:
           type: string
           format: uuid
+          description: 作成されたセッションのID
         hostId:
           type: string
           format: uuid
+          description: セッションのホストID
     JoinSessionRequest:
       type: object
+      description: セッション参加リクエスト
       required:
         - name
       properties:
         name:
           type: string
+          description: 参加者の名前
     JoinSessionResponse:
       type: object
+      description: セッション参加レスポンス
       required:
         - participantId
       properties:
         participantId:
           type: string
           format: uuid
+          description: 参加者のID
     GetSessionResponse:
       type: object
+      description: セッション取得レスポンス
       required:
         - sessionId
         - sessionName
@@ -315,42 +358,56 @@ components:
         sessionId:
           type: string
           format: uuid
+          description: セッションのID
         sessionName:
           type: string
+          description: セッション名
         hostId:
           type: string
           format: uuid
+          description: セッションのホストID
         scaleType:
           $ref: "#/components/schemas/ScaleType"
+          description: スケールの種類
         customScale:
           type: array
           items:
             type: string
+          description: カスタムスケール（scaleTypeがcustomの場合のみ有効）
         currentRoundId:
           type: string
           format: uuid
+          description: 現在のラウンドID
         status:
           type: string
+          description: セッションの状態
         createdAt:
           type: string
           format: date-time
+          description: セッションの作成日時
         updatedAt:
           type: string
           format: date-time
+          description: セッションの最終更新日時
     EndSessionResponse:
       type: object
+      description: セッション終了レスポンス
     StartRoundResponse:
       type: object
+      description: ラウンド開始レスポンス
       required:
         - roundId
       properties:
         roundId:
           type: string
           format: uuid
+          description: 開始されたラウンドのID
     RevealRoundResponse:
       type: object
+      description: ラウンド結果公開レスポンス
     SendVoteRequest:
       type: object
+      description: 投票送信リクエスト
       required:
         - participantId
         - value
@@ -358,13 +415,97 @@ components:
         participantId:
           type: string
           format: uuid
+          description: 投票者のID
         value:
           type: string
+          description: 投票値
     SendVoteResponse:
       type: object
+      description: 投票送信レスポンス
       required:
         - voteId
       properties:
         voteId:
           type: string
           format: uuid
+          description: 投票ID
+    WebSocketMessage:
+      type: object
+      description: WebSocketメッセージ
+      properties:
+        event:
+          type: string
+          description: イベント名
+          enum:
+            - participantJoined
+            - roundStarted
+            - voteSubmitted
+            - votesRevealed
+            - sessionEnded
+        payload:
+          type: object
+          description: イベントのペイロード
+          oneOf:
+            - $ref: "#/components/schemas/ParticipantJoinedPayload"
+            - $ref: "#/components/schemas/RoundStartedPayload"
+            - $ref: "#/components/schemas/VoteSubmittedPayload"
+            - $ref: "#/components/schemas/VotesRevealedPayload"
+            - $ref: "#/components/schemas/SessionEndedPayload"
+    ParticipantJoinedPayload:
+      type: object
+      description: participantJoinedイベントのペイロード
+      properties:
+        participantId:
+          type: string
+          format: uuid
+          description: 参加者のID
+        name:
+          type: string
+          description: 参加者の名前
+    RoundStartedPayload:
+      type: object
+      description: roundStartedイベントのペイロード
+      properties:
+        roundId:
+          type: string
+          format: uuid
+          description: ラウンドのID
+    VoteSubmittedPayload:
+      type: object
+      description: voteSubmittedイベントのペイロード
+      properties:
+        participantId:
+          type: string
+          format: uuid
+          description: 投票した参加者のID
+    Vote:
+      type: object
+      description: 投票情報
+      properties:
+        participantId:
+          type: string
+          format: uuid
+          description: 参加者のID
+        value:
+          type: string
+          description: 投票値
+    VotesRevealedPayload:
+      type: object
+      description: votesRevealedイベントのペイロード
+      properties:
+        votes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Vote"
+          description: 投票結果のリスト
+        average:
+          type: number
+          format: float
+          description: 投票値の平均
+        median:
+          type: number
+          format: float
+          description: 投票値の中央値
+    SessionEndedPayload:
+      type: object
+      description: sessionEndedイベントのペイロード
