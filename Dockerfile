@@ -10,7 +10,8 @@ FROM node:22-bookworm AS frontend-builder
 WORKDIR /app
 COPY . .
 
-RUN cd frontend && npm ci && npm run build
+RUN cd frontend && npm ci
+RUN cd frontend && npm run build
 
 # === 実行用 ===
 FROM debian:bookworm-slim
