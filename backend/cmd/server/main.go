@@ -6,7 +6,9 @@ import (
 	"github.com/canpok1/web-toolbox/backend/internal/api"
 	"github.com/canpok1/web-toolbox/backend/internal/api/planningpoker"
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
+	"github.com/canpok1/web-toolbox/backend/internal/web"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -20,7 +22,13 @@ func main() {
 
 	server := api.NewServer(redisClient, webSocketHub)
 	e := echo.New()
+
+	// Middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
 	api.RegisterHandlers(e, server)
+	web.RegisterHandlers(e, "../frontend")
 
 	addr := "0.0.0.0:8080"
 	log.Printf("listen : %s\n", addr)
