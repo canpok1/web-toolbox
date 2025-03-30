@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/canpok1/web-toolbox/backend/internal/api/planningpoker"
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -13,12 +14,13 @@ import (
 
 type Server struct {
 	redis redis.Client
+	wsHub planningpoker.WebSocketHub
 }
 
 var _ ServerInterface = &Server{}
 
-func NewServer(redisClient redis.Client) *Server {
-	return &Server{redis: redisClient}
+func NewServer(redisClient redis.Client, wsHub planningpoker.WebSocketHub) *Server {
+	return &Server{redis: redisClient, wsHub: wsHub}
 }
 
 func (s *Server) PostApiPlanningPokerSessions(ctx echo.Context) error {
@@ -111,5 +113,5 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, s
 }
 
 func (s *Server) GetApiPlanningPokerWs(ctx echo.Context) error {
-	panic("unimplemented")
+	return s.wsHub.HandleWebSocket(ctx)
 }

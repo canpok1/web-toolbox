@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
+	mock_planningpoker "github.com/canpok1/web-toolbox/backend/internal/api/planningpoker/mock"
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
 	mock_redis "github.com/canpok1/web-toolbox/backend/internal/redis/mock"
 	"github.com/google/uuid"
@@ -89,7 +90,8 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockRedis := mock_redis.NewMockClient(ctrl)
-			server := api.NewServer(mockRedis)
+			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+			server := api.NewServer(mockRedis, mockWebSocketHub)
 
 			err := server.ValidatePostApiPlanningPokerSessions(tt.req)
 
@@ -142,7 +144,8 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockRedis := mock_redis.NewMockClient(ctrl)
-			server := api.NewServer(mockRedis)
+			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+			server := api.NewServer(mockRedis, mockWebSocketHub)
 
 			tt.mockSetup(mockRedis)
 
@@ -273,7 +276,8 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockRedis := mock_redis.NewMockClient(ctrl)
-			server := api.NewServer(mockRedis)
+			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+			server := api.NewServer(mockRedis, mockWebSocketHub)
 
 			// Create a new sessionID for each test case to avoid conflicts
 			sessionID := uuid.New()
@@ -360,7 +364,8 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockRedis := mock_redis.NewMockClient(ctrl)
-			server := api.NewServer(mockRedis)
+			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+			server := api.NewServer(mockRedis, mockWebSocketHub)
 
 			// Create a new sessionID for each test case to avoid conflicts
 			sessionID := uuid.New()
@@ -450,7 +455,8 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockRedis := mock_redis.NewMockClient(ctrl)
-			server := api.NewServer(mockRedis)
+			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+			server := api.NewServer(mockRedis, mockWebSocketHub)
 
 			// Create a new sessionID for each test case to avoid conflicts
 			sessionID := uuid.New()
@@ -560,7 +566,8 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockRedis := mock_redis.NewMockClient(ctrl)
-			server := api.NewServer(mockRedis)
+			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+			server := api.NewServer(mockRedis, mockWebSocketHub)
 
 			// Create a new sessionID for each test case to avoid conflicts
 			sessionID := uuid.New()
@@ -643,7 +650,8 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockRedis := mock_redis.NewMockClient(ctrl)
-			server := api.NewServer(mockRedis)
+			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+			server := api.NewServer(mockRedis, mockWebSocketHub)
 
 			// Create a new roundID for each test case to avoid conflicts
 			roundID := uuid.New()
@@ -924,7 +932,8 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockRedis := mock_redis.NewMockClient(ctrl)
-			server := api.NewServer(mockRedis)
+			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+			server := api.NewServer(mockRedis, mockWebSocketHub)
 
 			// Create a new roundID for each test case to avoid conflicts
 			roundID := uuid.New()

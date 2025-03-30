@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
+	"github.com/canpok1/web-toolbox/backend/internal/api/planningpoker"
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
 	"github.com/labstack/echo/v4"
 )
@@ -15,8 +16,9 @@ func main() {
 		log.Fatalf("Failed to connect to Redis: %s, error: %v", redisAddress, err)
 	}
 	defer redisClient.Close()
+	webSocketHub := planningpoker.NewWebSocketHub()
 
-	server := api.NewServer(redisClient)
+	server := api.NewServer(redisClient, webSocketHub)
 	e := echo.New()
 	api.RegisterHandlers(e, server)
 

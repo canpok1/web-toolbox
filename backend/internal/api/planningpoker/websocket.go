@@ -48,7 +48,7 @@ type VotesRevealedPayload struct {
 type SessionEndedPayload struct{}
 
 // WebSocketHubInterface defines the interface for managing WebSocket connections.
-type WebSocketHubInterface interface {
+type WebSocketHub interface {
 	Run()
 	HandleWebSocket(c echo.Context) error
 	BroadcastParticipantJoined(participantId, name string)
@@ -59,7 +59,7 @@ type WebSocketHubInterface interface {
 }
 
 // WebSocketHub manages WebSocket connections and message broadcasting.
-type WebSocketHub struct {
+type webSocketHub struct {
 	clients    map[*websocket.Conn]bool
 	broadcast  chan WebSocketMessage
 	register   chan *websocket.Conn
@@ -68,8 +68,8 @@ type WebSocketHub struct {
 }
 
 // NewWebSocketHub creates a new WebSocketHub.
-func NewWebSocketHub() *WebSocketHub {
-	return &WebSocketHub{
+func NewWebSocketHub() WebSocketHub {
+	return &webSocketHub{
 		clients:    make(map[*websocket.Conn]bool),
 		broadcast:  make(chan WebSocketMessage),
 		register:   make(chan *websocket.Conn),
@@ -78,7 +78,7 @@ func NewWebSocketHub() *WebSocketHub {
 }
 
 // Run starts the WebSocketHub's main loop.
-func (hub *WebSocketHub) Run() {
+func (hub *webSocketHub) Run() {
 	for {
 		select {
 		case connection := <-hub.register:
@@ -109,7 +109,7 @@ func (hub *WebSocketHub) Run() {
 }
 
 // HandleWebSocket handles WebSocket connections.
-func (hub *WebSocketHub) HandleWebSocket(c echo.Context) error {
+func (hub *webSocketHub) HandleWebSocket(c echo.Context) error {
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true // Allow all origins for simplicity
@@ -144,7 +144,7 @@ func (hub *WebSocketHub) HandleWebSocket(c echo.Context) error {
 }
 
 // BroadcastParticipantJoined broadcasts the participantJoined event.
-func (hub *WebSocketHub) BroadcastParticipantJoined(participantId, name string) {
+func (hub *webSocketHub) BroadcastParticipantJoined(participantId, name string) {
 	payload := ParticipantJoinedPayload{
 		ParticipantId: participantId,
 		Name:          name,
@@ -157,7 +157,7 @@ func (hub *WebSocketHub) BroadcastParticipantJoined(participantId, name string) 
 }
 
 // BroadcastRoundStarted broadcasts the roundStarted event.
-func (hub *WebSocketHub) BroadcastRoundStarted(roundId string) {
+func (hub *webSocketHub) BroadcastRoundStarted(roundId string) {
 	payload := RoundStartedPayload{
 		RoundId: roundId,
 	}
@@ -169,7 +169,7 @@ func (hub *WebSocketHub) BroadcastRoundStarted(roundId string) {
 }
 
 // BroadcastVoteSubmitted broadcasts the voteSubmitted event.
-func (hub *WebSocketHub) BroadcastVoteSubmitted(participantId string) {
+func (hub *webSocketHub) BroadcastVoteSubmitted(participantId string) {
 	payload := VoteSubmittedPayload{
 		ParticipantId: participantId,
 	}
@@ -181,7 +181,7 @@ func (hub *WebSocketHub) BroadcastVoteSubmitted(participantId string) {
 }
 
 // BroadcastVotesRevealed broadcasts the votesRevealed event.
-func (hub *WebSocketHub) BroadcastVotesRevealed(votes []Vote, average, median float64) {
+func (hub *webSocketHub) BroadcastVotesRevealed(votes []Vote, average, median float64) {
 	payload := VotesRevealedPayload{
 		Votes:   votes,
 		Average: average,
@@ -195,7 +195,7 @@ func (hub *WebSocketHub) BroadcastVotesRevealed(votes []Vote, average, median fl
 }
 
 // BroadcastSessionEnded broadcasts the sessionEnded event.
-func (hub *WebSocketHub) BroadcastSessionEnded() {
+func (hub *webSocketHub) BroadcastSessionEnded() {
 	payload := SessionEndedPayload{}
 	message := WebSocketMessage{
 		Event:   "sessionEnded",
