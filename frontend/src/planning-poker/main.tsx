@@ -7,7 +7,7 @@ if (rootElement) {
   const root = createRoot(rootElement);
   root.render(
     <StrictMode>
-      <h1>トップページ</h1>
+      <h1>プランニングポーカー</h1>
     </StrictMode>,
   );
 } else {
