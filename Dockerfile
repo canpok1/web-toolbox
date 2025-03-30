@@ -3,15 +3,15 @@ FROM golang:1.23-bookworm AS backend-builder
 WORKDIR /app
 COPY . .
 
-RUN cd backend && make build
+RUN make -C backend build
 
 # === ビルド用(フロントエンド) ===
 FROM node:22-bookworm AS frontend-builder
 WORKDIR /app
 COPY . .
 
-RUN cd frontend && npm ci
-RUN cd frontend && npm run build
+RUN make -C frontend setup
+RUN make -C frontend build
 
 # === 実行用 ===
 FROM debian:bookworm-slim
