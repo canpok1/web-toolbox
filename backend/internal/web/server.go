@@ -15,8 +15,6 @@ func RegisterHandlers(e *echo.Echo, staticDir string) {
 		return
 	}
 
-	log.Printf("static directory found: %s", staticDir)
-
 	// Serve static files from the "frontend" directory
 	e.Static("/", staticDir)
 

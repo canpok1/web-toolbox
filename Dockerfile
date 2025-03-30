@@ -10,8 +10,12 @@ FROM debian:bookworm-slim
 WORKDIR /app
 
 COPY --from=backend-builder /app/backend/build/release/server ./
+COPY --from=backend-builder /app/frontend/dist ./public
 
 ENV TZ=Asia/Tokyo
+ENV STATIC_DIR=/app/public
+ENV REDIS_ADDRESS=redis:6379
+ENV PORT=8080
 
 EXPOSE 8080
 
