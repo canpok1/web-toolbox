@@ -9,7 +9,7 @@ setup:
 
 .PHONY: run
 run:
-	go run ${SERVER_MAIN_FILE}
+	go run ${SERVER_MAIN_FILE} -static-dir ../frontend
 
 .PHONY: test
 test:

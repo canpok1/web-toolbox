@@ -15,10 +15,12 @@ import (
 
 func main() {
 	// Define command-line flags
-	staticDir := flag.String("static-dir", "../frontend", "Path to the static files directory")
+	staticDir := flag.String("static-dir", "", "Path to the static files directory")
 	flag.Parse()
 
-	// Check if the static directory exists
+	if *staticDir == "" {
+		log.Fatalf("Static directory path is empty, please set the -static-dir flag.")
+	}
 	if _, err := os.Stat(*staticDir); os.IsNotExist(err) {
 		log.Fatalf("Static directory not found: %s", *staticDir)
 	}
