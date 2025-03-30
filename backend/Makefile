@@ -1,6 +1,7 @@
 BUILD_OUTPUT_DIR=build/release
 SERVER_MAIN_FILE=cmd/server/main.go
 SERVER_BINARY=server
+ENV_FILE=.env
 
 .PHONY: setup
 setup:
@@ -9,7 +10,8 @@ setup:
 
 .PHONY: run
 run:
-	go run ${SERVER_MAIN_FILE}
+	export $$(cat ${ENV_FILE} | xargs) \
+	&& go run ${SERVER_MAIN_FILE}
 
 .PHONY: test
 test:

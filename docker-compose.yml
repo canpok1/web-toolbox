@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  web-toolbox-server:
+    image: ghcr.io/canpok1/web-toolbox/server:latest
+    restart: always
+    environment:
+      STATIC_DIR: /app/public
+      REDIS_ADDRESS: web-toolbox-redis:6379
+      PORT: 8080
+  web-toolbox-redis:
+    image: redis:7
