@@ -8,5 +8,14 @@ services:
       STATIC_DIR: /app/public
       REDIS_ADDRESS: web-toolbox-redis:6379
       PORT: 8080
+    depends_on:
+      web-toolbox-redis:
+        condition: service_healthy
   web-toolbox-redis:
     image: redis:7
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

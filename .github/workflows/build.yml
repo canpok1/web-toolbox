@@ -57,3 +57,24 @@ jobs:
         run: |
           make generate-code
           git diff --ignore-space-change --exit-code
+
+  deploy-web:
+    runs-on: ubuntu-latest
+    needs: [build, generate-check]
+    environment: production-web
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to web server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ vars.DEPLOY_DIR }}
+            git checkout main
+            git pull origin main
+            docker-compose pull
+            docker-compose up -d
+            docker system prune -f
