@@ -9,20 +9,20 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func RegisterHandlers(e *echo.Echo, publicDir string) {
-	if _, err := os.Stat(publicDir); os.IsNotExist(err) {
-		log.Printf("public directory not found: %s", publicDir)
+func RegisterHandlers(e *echo.Echo, staticDir string) {
+	if _, err := os.Stat(staticDir); os.IsNotExist(err) {
+		log.Printf("static directory not found: %s", staticDir)
 		return
 	}
 
-	log.Printf("public directory found: %s", publicDir)
+	log.Printf("static directory found: %s", staticDir)
 
 	// Serve static files from the "frontend" directory
-	e.Static("/", publicDir)
+	e.Static("/", staticDir)
 
 	// Handle SPA routing
 	e.GET("/planning-poker/*", func(c echo.Context) error {
-		indexFilePath := filepath.Join(publicDir, "planning-poker", "index.html")
+		indexFilePath := filepath.Join(staticDir, "planning-poker", "index.html")
 		if _, err := os.Stat(indexFilePath); os.IsNotExist(err) {
 			return c.String(http.StatusNotFound, "index.html not found")
 		}
