@@ -3,6 +3,33 @@ info:
   title: Planning Poker API
   version: v1
 paths:
+  /api/planning-poker/ws:
+    get:
+      summary: リアルタイム更新のための WebSocket エンドポイント
+      description: |
+        プランニングポーカーセッションに関するリアルタイム更新を受信するための WebSocket 接続を確立します。
+        サーバーは以下のイベントを含むメッセージを送信します:
+        - participantJoined: 新しい参加者がセッションに参加しました。
+        - roundStarted: 新しいラウンドが開始されました。
+        - voteSubmitted: 参加者が投票を送信しました。
+        - votesRevealed: ラウンドの投票が公開されました。
+        - sessionEnded: セッションが終了しました。
+      responses:
+        "101":
+          description: プロトコルの切り替え
+          headers:
+            Upgrade:
+              schema:
+                type: string
+              description: websocket
+            Connection:
+              schema:
+                type: string
+              description: Upgrade
+        "400":
+          description: 不正なリクエスト
+        "500":
+          description: サーバー内部エラー
   /api/planning-poker/sessions:
     post:
       summary: セッションを作成する
@@ -368,3 +395,65 @@ components:
         voteId:
           type: string
           format: uuid
+    WebSocketMessage:
+      type: object
+      properties:
+        event:
+          type: string
+          description: イベント名
+        payload:
+          type: object
+          description: イベントのペイロード
+    ParticipantJoinedPayload:
+      type: object
+      properties:
+        participantId:
+          type: string
+          format: uuid
+          description: 参加者のID
+        name:
+          type: string
+          description: 参加者の名前
+    RoundStartedPayload:
+      type: object
+      properties:
+        roundId:
+          type: string
+          format: uuid
+          description: ラウンドのID
+    VoteSubmittedPayload:
+      type: object
+      properties:
+        participantId:
+          type: string
+          format: uuid
+          description: 投票した参加者のID
+    Vote:
+      type: object
+      properties:
+        participantId:
+          type: string
+          format: uuid
+          description: 参加者のID
+        value:
+          type: string
+          description: 投票値
+    VotesRevealedPayload:
+      type: object
+      properties:
+        votes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Vote"
+          description: 投票結果のリスト
+        average:
+          type: number
+          format: float
+          description: 投票値の平均
+        median:
+          type: number
+          format: float
+          description: 投票値の中央値
+    SessionEndedPayload:
+      type: object
+      description: セッション終了のペイロード

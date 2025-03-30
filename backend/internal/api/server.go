@@ -15,6 +15,8 @@ type Server struct {
 	redis redis.Client
 }
 
+var _ ServerInterface = &Server{}
+
 func NewServer(redisClient redis.Client) *Server {
 	return &Server{redis: redisClient}
 }
@@ -106,4 +108,8 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, s
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, res)
+}
+
+func (s *Server) GetApiPlanningPokerWs(ctx echo.Context) error {
+	panic("unimplemented")
 }

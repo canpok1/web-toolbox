@@ -119,6 +119,9 @@ type ServerInterface interface {
 	// ラウンドを開始する
 	// (POST /api/planning-poker/sessions/{sessionId}/rounds)
 	PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId openapi_types.UUID) error
+	// リアルタイム更新のための WebSocket エンドポイント
+	// (GET /api/planning-poker/ws)
+	GetApiPlanningPokerWs(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -231,6 +234,15 @@ func (w *ServerInterfaceWrapper) PostApiPlanningPokerSessionsSessionIdRounds(ctx
 	return err
 }
 
+// GetApiPlanningPokerWs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetApiPlanningPokerWs(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetApiPlanningPokerWs(ctx)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -266,5 +278,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/end", wrapper.PostApiPlanningPokerSessionsSessionIdEnd)
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/participants", wrapper.PostApiPlanningPokerSessionsSessionIdParticipants)
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/rounds", wrapper.PostApiPlanningPokerSessionsSessionIdRounds)
+	router.GET(baseURL+"/api/planning-poker/ws", wrapper.GetApiPlanningPokerWs)
 
 }
