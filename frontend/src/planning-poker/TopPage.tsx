@@ -1,4 +1,5 @@
 import { LogIn, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function TopPage() {
     return (
@@ -7,14 +8,14 @@ function TopPage() {
                 <h1 className="text-3xl font-bold">プランニングポーカー</h1>
             </div>
             <div className="mb-5">
-                <a href="./sessions/create" className="btn min-w-5/6" aria-label="セッションを作成">
+                <Link to="./sessions/create" className="btn min-w-5/6" aria-label="セッションを作成">
                     <LogIn />セッションを作成
-                </a>
+                </Link>
             </div>
             <div className="justify-center">
-                <a href="./sessions/join" className="btn min-w-5/6" aria-label="セッションに参加">
+                <Link to="./sessions/join" className="btn min-w-5/6" aria-label="セッションに参加">
                     <Users />セッションに参加
-                </a>
+                </Link>
             </div>
         </div>
     )
