@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func RegisterHandlers(e *echo.Echo, staticDir string) {
@@ -15,12 +16,11 @@ func RegisterHandlers(e *echo.Echo, staticDir string) {
 		return
 	}
 
-	// Serve static files from the "frontend" directory
-	e.Static("/", staticDir)
+	e.Use(middleware.Static(staticDir))
 
 	// Handle SPA routing
-	e.GET("/planning-poker/*", func(c echo.Context) error {
-		indexFilePath := filepath.Join(staticDir, "planning-poker", "index.html")
+	e.GET("*", func(c echo.Context) error {
+		indexFilePath := filepath.Join(staticDir, "index.html")
 		if _, err := os.Stat(indexFilePath); os.IsNotExist(err) {
 			return c.String(http.StatusNotFound, "index.html not found")
 		}
