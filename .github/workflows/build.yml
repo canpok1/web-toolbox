@@ -10,8 +10,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "backend/go.mod"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: "frontend/package.json"
+
+      - name: Setup
+        run: make setup
+
+      - name: Code generate check
+        run: |
+          make -C backend generate-code
+          git diff --ignore-space-change --exit-code
+
+      - name: Run test
+        run: |
+          make test
+
   build:
     runs-on: ubuntu-latest
+    needs: [check]
 
     permissions:
       packages: write
@@ -36,31 +63,9 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}/server:latest
 
-  generate-check:
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: backend
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: "backend/go.mod"
-
-      - name: Setup
-        run: make setup
-
-      - name: Code generate check
-        run: |
-          make generate-code
-          git diff --ignore-space-change --exit-code
-
   deploy-web:
     runs-on: ubuntu-latest
-    needs: [build, generate-check]
+    needs: [build]
     environment: production-web
     if: github.ref == 'refs/heads/main'
     steps:
