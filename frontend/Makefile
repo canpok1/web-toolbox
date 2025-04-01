@@ -10,6 +10,10 @@ run:
 check:
 	npm run check
 
+.PHONY: format
+format:
+	npm run check:fix
+
 .PHONY: test
 test:
 	npm run test
