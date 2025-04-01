@@ -20,15 +20,15 @@ function CreateSessionPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-25 text-center">
+    <div className="mx-auto max-w-2xl py-25 text-center">
       <div className="mb-5">
-        <h1 className="text-3xl font-bold">プランニングポーカー</h1>
+        <h1 className="font-bold text-3xl">プランニングポーカー</h1>
       </div>
-      <div className="card max-w-2xl mx-auto shadow-sm mb-5">
-        <div className="card-body text-left bg-neutral-content">
+      <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
+        <div className="card-body bg-neutral-content text-left">
           <h2 className="card-title">セッションを作成</h2>
           <p className="mb-5">ホストとしてセッションを開始します。</p>
-          <label className="input w-full mx-auto">
+          <label className="input mx-auto w-full">
             <span className="名前">名前</span>
             <input
               type="text"
@@ -38,7 +38,7 @@ function CreateSessionPage() {
             />
           </label>
           <select
-            className="select w-full mx-auto"
+            className="select mx-auto w-full"
             value={scale}
             onChange={handleScaleChange}
           >

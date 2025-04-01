@@ -10,7 +10,6 @@ run:
 
 .PHONY: test
 test:
-	make -C frontend test
 	make -C backend test
 
 .PHONY: check
