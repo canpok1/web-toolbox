@@ -24,7 +24,10 @@
 			"nursery": {
 				"useSortedClasses": "warn"
 			}
-		}
+		},
+		"ignore": [
+			"index.css"
+		]
 	},
 	"javascript": {
 		"formatter": {
