@@ -1,16 +1,16 @@
 import { LogIn, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
-function TopPage() {
+function PlanningPokerTopPage() {
   return (
-    <div className="mx-auto max-w-2xl py-25 text-center">
+    <div className="mx-auto max-w-2xl px-5 py-25 text-center">
       <div className="mb-5">
         <h1 className="font-bold text-3xl">プランニングポーカー</h1>
       </div>
       <div className="mb-5">
         <Link
           to="./sessions/create"
-          className="btn min-w-5/6"
+          className="btn btn-neutral w-full"
           aria-label="セッションを作成"
         >
           <LogIn />
@@ -20,7 +20,7 @@ function TopPage() {
       <div className="justify-center">
         <Link
           to="./sessions/join"
-          className="btn min-w-5/6"
+          className="btn btn-neutral w-full"
           aria-label="セッションに参加"
         >
           <Users />
@@ -31,4 +31,4 @@ function TopPage() {
   );
 }
 
-export default TopPage;
+export default PlanningPokerTopPage;

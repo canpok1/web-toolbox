@@ -25,7 +25,8 @@
 				"google.geminicodeassist",
 				"bierner.markdown-mermaid",
 				"42Crunch.vscode-openapi",
-				"dsznajder.es7-react-js-snippets"
+				"dsznajder.es7-react-js-snippets",
+				"emeraldwalk.RunOnSave"
 			]
 		}
 	},

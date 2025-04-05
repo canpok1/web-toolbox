@@ -20,3 +20,7 @@ check:
 build:
 	make -C frontend build
 	make -C backend build
+
+.PHONY: format
+format:
+	make -C frontend format
