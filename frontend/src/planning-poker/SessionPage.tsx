@@ -12,6 +12,11 @@ function SessionPage() {
     { id: "aaaa", name: "Aさん", vote: 1 },
     { id: "bbbb", name: "Bさん", vote: 2 },
     { id: "cccc", name: "Cさん", vote: null },
+    { id: "dddd", name: "Dさん", vote: null },
+    { id: "eeee", name: "Eさん", vote: 3 },
+    { id: "ffff", name: "Fさん", vote: 1 },
+    { id: "gggg", name: "Gさん", vote: 1 },
+    { id: "hhhh", name: "Hさん", vote: 2 },
   ];
   const [round, setRound] = useState<Round | null>(null);
   const voteOptions = [
