@@ -1,20 +1,14 @@
 export type VotePanelProps = {
-  round: number;
   voteOptions: string[];
   votedOption: string | null;
   onClick: (option: string) => void;
 };
 
-function VotePanel({
-  round,
-  voteOptions,
-  votedOption,
-  onClick,
-}: VotePanelProps) {
+function VotePanel({ voteOptions, votedOption, onClick }: VotePanelProps) {
   return (
     <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
       <div className="card-body bg-neutral-content text-left">
-        <h2 className="card-title">ラウンド{round}：投票</h2>
+        <h2 className="card-title">投票</h2>
         <div className="grid grid-cols-3 gap-4">
           {voteOptions.map((option) => (
             <button
