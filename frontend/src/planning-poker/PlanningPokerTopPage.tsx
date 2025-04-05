@@ -3,14 +3,14 @@ import { Link } from "react-router-dom";
 
 function PlanningPokerTopPage() {
   return (
-    <div className="mx-auto max-w-2xl py-25 text-center">
+    <div className="mx-auto max-w-2xl py-25 px-5 text-center">
       <div className="mb-5">
         <h1 className="font-bold text-3xl">プランニングポーカー</h1>
       </div>
       <div className="mb-5">
         <Link
           to="./sessions/create"
-          className="btn min-w-5/6"
+          className="btn btn-primary w-full"
           aria-label="セッションを作成"
         >
           <LogIn />
@@ -20,7 +20,7 @@ function PlanningPokerTopPage() {
       <div className="justify-center">
         <Link
           to="./sessions/join"
-          className="btn min-w-5/6"
+          className="btn btn-primary w-full"
           aria-label="セッションに参加"
         >
           <Users />
