@@ -20,7 +20,7 @@ function CreateSessionPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl py-25 text-center">
+    <div className="mx-auto max-w-2xl py-25 px-5 text-center">
       <div className="mb-5">
         <h1 className="font-bold text-3xl">プランニングポーカー</h1>
       </div>
