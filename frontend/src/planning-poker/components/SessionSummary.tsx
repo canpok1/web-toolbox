@@ -1,8 +1,8 @@
-import type { Participant } from "../types/Participant";
+import type { SessionParticipant } from "../types/Participant";
 
 export type SessionSummaryProps = {
   sessionId: string;
-  participants: Participant[];
+  participants: SessionParticipant[];
 };
 
 function SessionSummary({ sessionId, participants }: SessionSummaryProps) {
