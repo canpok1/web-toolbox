@@ -28,30 +28,34 @@ function CreateSessionPage() {
         <div className="card-body bg-neutral-content text-left">
           <h2 className="card-title">セッションを作成</h2>
           <p className="mb-5">ホストとしてセッションを開始します。</p>
-          <label className="input mx-auto w-full">
-            <span className="名前">名前</span>
+          <label className="floating-label mx-auto mb-3 w-full">
+            <span>名前</span>
             <input
+              className="input w-full"
               type="text"
               placeholder="あなたの名前"
               value={userName}
               onChange={handleUserNameChange}
             />
           </label>
-          <select
-            className="select mx-auto w-full"
-            value={scale}
-            onChange={handleScaleChange}
-          >
-            <option value="fibonacci">
-              フィボナッチ（0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?）
-            </option>
-            <option value="t-shirt">
-              Tシャツサイズ(XS, S, M, L, XL, XXL, ?)
-            </option>
-            <option value="power-of-two">
-              2の累乗(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, ?)
-            </option>
-          </select>
+          <label className="floating-label">
+            <span>見積スケール</span>
+            <select
+              className="select mx-auto mb-3 w-full"
+              value={scale}
+              onChange={handleScaleChange}
+            >
+              <option value="fibonacci">
+                フィボナッチ（0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?）
+              </option>
+              <option value="t-shirt">
+                Tシャツサイズ(XS, S, M, L, XL, XXL, ?)
+              </option>
+              <option value="power-of-two">
+                2の累乗(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, ?)
+              </option>
+            </select>
+          </label>
           <button
             type="button"
             className="btn btn-primary w-full"
