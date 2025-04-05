@@ -3,9 +3,10 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import CreateSessionPage from "./planning-poker/CreateSessionPage";
 import JoinSessionPage from "./planning-poker/JoinSessionPage";
+import PlanningPokerTopPage from "./planning-poker/PlanningPokerTopPage";
 import SessionPage from "./planning-poker/SessionPage";
-import TopPage from "./planning-poker/TopPage";
 import "./index.css";
+import TopPage from "./TopPage";
 
 const rootElement = document.getElementById("root");
 
@@ -15,13 +16,8 @@ if (rootElement) {
     <StrictMode>
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <h1 className="font-bold text-3xl underline">トップページ</h1>
-            }
-          />
-          <Route path="/planning-poker" element={<TopPage />} />
+          <Route path="/" element={<TopPage />} />
+          <Route path="/planning-poker" element={<PlanningPokerTopPage />} />
           <Route
             path="/planning-poker/sessions/create"
             element={<CreateSessionPage />}

@@ -1,7 +1,7 @@
 import { LogIn, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
-function TopPage() {
+function PlanningPokerTopPage() {
   return (
     <div className="mx-auto max-w-2xl py-25 text-center">
       <div className="mb-5">
@@ -31,4 +31,4 @@ function TopPage() {
   );
 }
 
-export default TopPage;
+export default PlanningPokerTopPage;
