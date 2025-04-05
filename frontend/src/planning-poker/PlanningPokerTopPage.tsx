@@ -10,7 +10,7 @@ function PlanningPokerTopPage() {
       <div className="mb-5">
         <Link
           to="./sessions/create"
-          className="btn btn-primary w-full"
+          className="btn btn-neutral w-full"
           aria-label="セッションを作成"
         >
           <LogIn />
@@ -20,7 +20,7 @@ function PlanningPokerTopPage() {
       <div className="justify-center">
         <Link
           to="./sessions/join"
-          className="btn btn-primary w-full"
+          className="btn btn-neutral w-full"
           aria-label="セッションに参加"
         >
           <Users />
