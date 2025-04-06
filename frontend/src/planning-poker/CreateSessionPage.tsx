@@ -1,22 +1,44 @@
 import { LogIn } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ApiClient } from "../api/ApiClient";
 
 function CreateSessionPage() {
   const [userName, setUserName] = useState<string>("");
-  const [scale, setScale] = useState<string>("");
+  const [scale, setScale] = useState<"fibonacci" | "t-shirt" | "power-of-two">(
+    "fibonacci",
+  );
+  const navigate = useNavigate();
+
+  const client = new ApiClient();
 
   const handleUserNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUserName(event.target.value);
   };
 
   const handleScaleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setScale(event.target.value);
+    if (
+      event.target.value === "fibonacci" ||
+      event.target.value === "t-shirt" ||
+      event.target.value === "power-of-two"
+    ) {
+      setScale(event.target.value);
+    }
   };
 
-  const handleSubmit = () => {
-    console.log("clicked button, userName:%s, scale:%s", userName, scale);
+  const handleSubmit = async () => {
+    try {
+      console.log("clicked button, userName:%s, scale:%s", userName, scale);
+      const resp = await client.createSession({
+        sessionName: "xxx",
+        hostName: userName,
+        scaleType: "fibonacci",
+      });
+      navigate(`/planning-poker/sessions/${resp.sessionId}?id=${resp.hostId}`);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
