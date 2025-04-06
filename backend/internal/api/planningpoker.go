@@ -48,16 +48,18 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate host uuid: %v", err)
 	}
+	hostIdValue := hostId.String()
 
 	sessionId, err := uuid.NewUUID()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate session uuid: %v", err)
 	}
+	sessionIdValue := sessionId.String()
 
 	// セッション情報の保存
 	session := redis.Session{
 		SessionName: body.SessionName,
-		HostId:      hostId.String(),
+		HostId:      hostIdValue,
 		ScaleType:   string(body.ScaleType),
 		CustomScale: []string{},
 		Status:      "waiting",
@@ -69,12 +71,12 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 	}
 
 	ctx := context.Background()
-	if err = s.redis.CreateSession(ctx, sessionId.String(), session); err != nil {
+	if err = s.redis.CreateSession(ctx, sessionIdValue, session); err != nil {
 		return nil, fmt.Errorf("failed to save session to redis: %v", err)
 	}
 
-	err = s.redis.CreateParticipant(ctx, hostId.String(), redis.Participant{
-		SessionId: sessionId.String(),
+	err = s.redis.CreateParticipant(ctx, hostIdValue, redis.Participant{
+		SessionId: sessionIdValue,
 		Name:      body.HostName,
 		IsHost:    true,
 		CreatedAt: time.Now(),
@@ -84,7 +86,7 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 		return nil, fmt.Errorf("failed to save participant to redis: %v", err)
 	}
 
-	err = s.redis.AddParticipantToSession(ctx, sessionId.String(), hostId.String())
+	err = s.redis.AddParticipantToSession(ctx, sessionIdValue, hostIdValue)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add participant list to redis: %v", err)
 	}
