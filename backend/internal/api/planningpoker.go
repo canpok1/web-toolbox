@@ -129,7 +129,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 		return nil, fmt.Errorf("failed to get session from redis (sessionID: %s): %v", sessionID.String(), err)
 	}
 	if session == nil {
-		return nil, fmt.Errorf("session not found (sessionID: %s)", sessionID.String())
+		return nil, fmt.Errorf("session is not found (sessionID: %s)", sessionID.String())
 	}
 
 	// 参加者登録
