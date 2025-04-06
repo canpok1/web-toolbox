@@ -3,9 +3,12 @@ setup:
 	make -C frontend setup
 	make -C backend setup
 
-.PHONY: run
-run:
-	make -C frontend build
+.PHONY: run-front
+run-front:
+	make -C frontend run
+
+.PHONY: run-back
+run-back:
 	make -C backend run
 
 .PHONY: test
