@@ -1,10 +1,19 @@
 import { Users } from "lucide-react";
 import { type ChangeEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ApiClient } from "../api/ApiClient";
+import Alert from "./components/Alert";
+import { ExtractErrorMessage } from "./utils/error";
 
 function JoinSessionPage() {
   const [sessionId, setSessionId] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
+
+  const navigate = useNavigate();
+
+  const client = new ApiClient();
+  const shouldSubmit = sessionId !== "" && userName !== "";
 
   const handleSessionIdChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSessionId(event.target.value);
@@ -14,12 +23,23 @@ function JoinSessionPage() {
     setUserName(event.target.value);
   };
 
-  const handleSubmit = () => {
-    console.log(
-      "clicked button, sessionId:%s, userName:%s",
-      sessionId,
-      userName,
-    );
+  const handleSubmit = async () => {
+    try {
+      console.log(
+        "clicked button, sessionId:%s, userName:%s",
+        sessionId,
+        userName,
+      );
+      const resp = await client.joinSession(sessionId, {
+        name: userName,
+      });
+      navigate(
+        `/planning-poker/sessions/${sessionId}?id=${resp.participantId}`,
+      );
+    } catch (error) {
+      console.error(error);
+      setErrorMessages([ExtractErrorMessage(error)]);
+    }
   };
 
   return (
@@ -31,6 +51,7 @@ function JoinSessionPage() {
         <div className="card-body bg-neutral-content text-left">
           <h2 className="card-title">セッションに参加</h2>
           <p className="mb-5">既存のセッションに参加します。</p>
+          <Alert messages={errorMessages} className="mb-3" />
           <label className="floating-label mx-auto mb-3 w-full">
             <span>セッションID</span>
             <input
@@ -56,6 +77,7 @@ function JoinSessionPage() {
             className="btn btn-primary w-full"
             aria-label="セッションに参加"
             onClick={handleSubmit}
+            disabled={!shouldSubmit}
           >
             <Users />
             セッションに参加

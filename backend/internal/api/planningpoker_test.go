@@ -290,6 +290,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 				Name: "Test User",
 			},
 			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{}, nil)
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), sessionID.String(), gomock.Any()).Return(nil)
 			},
@@ -302,12 +303,35 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 			expectedError: "request body is required (sessionID:",
 		},
 		{
+			name:      "failure - get session error",
+			sessionID: uuid.New(),
+			req: &api.JoinSessionRequest{
+				Name: "Test User",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, errors.New("get session error"))
+			},
+			expectedError: "failed to get session",
+		},
+		{
+			name:      "failure - session not found error",
+			sessionID: uuid.New(),
+			req: &api.JoinSessionRequest{
+				Name: "Test User",
+			},
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, nil)
+			},
+			expectedError: "session is not found",
+		},
+		{
 			name:      "failure - create participant error",
 			sessionID: uuid.New(),
 			req: &api.JoinSessionRequest{
 				Name: "Test User",
 			},
 			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{}, nil)
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("create participant error"))
 			},
 			expectedError: "failed to create participant",
@@ -319,6 +343,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 				Name: "Test User",
 			},
 			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{}, nil)
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), sessionID.String(), gomock.Any()).Return(errors.New("add participant to session error"))
 			},

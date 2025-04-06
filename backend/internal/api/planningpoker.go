@@ -122,6 +122,17 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 	}
 
 	ctx := context.Background()
+
+	// セッションの存在チェック
+	session, err := s.redis.GetSession(ctx, sessionID.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session from redis (sessionID: %s): %v", sessionID.String(), err)
+	}
+	if session == nil {
+		return nil, fmt.Errorf("session is not found (sessionID: %s)", sessionID.String())
+	}
+
+	// 参加者登録
 	participant := redis.Participant{
 		SessionId: sessionID.String(),
 		Name:      body.Name,
