@@ -22,7 +22,7 @@ export class ApiClient {
       },
     );
     if (error) {
-      throw new Error(error.message);
+      throw new Error(`${error.status}: ${error.message}`);
     }
     return data;
   }
