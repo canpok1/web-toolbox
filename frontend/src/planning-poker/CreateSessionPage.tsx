@@ -15,6 +15,7 @@ function CreateSessionPage() {
   const navigate = useNavigate();
 
   const client = new ApiClient();
+  const shouldSubmit = sessionName !== "" && userName !== "";
 
   const handleSessionNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSessionName(event.target.value);
@@ -101,6 +102,7 @@ function CreateSessionPage() {
             className="btn btn-primary w-full"
             aria-label="セッションを作成"
             onClick={handleSubmit}
+            disabled={!shouldSubmit}
           >
             <LogIn />
             セッションを作成
