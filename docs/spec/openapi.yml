@@ -346,49 +346,11 @@ components:
       type: object
       description: セッション取得レスポンス
       required:
-        - sessionId
-        - sessionName
-        - hostId
-        - scaleType
-        - customScale
-        - status
-        - createdAt
-        - updatedAt
+        - session
       properties:
-        sessionId:
-          type: string
-          format: uuid
-          description: セッションのID
-        sessionName:
-          type: string
-          description: セッション名
-        hostId:
-          type: string
-          format: uuid
-          description: セッションのホストID
-        scaleType:
-          $ref: "#/components/schemas/ScaleType"
-          description: スケールの種類
-        customScale:
-          type: array
-          items:
-            type: string
-          description: カスタムスケール（scaleTypeがcustomの場合のみ有効）
-        currentRoundId:
-          type: string
-          format: uuid
-          description: 現在のラウンドID
-        status:
-          type: string
-          description: セッションの状態
-        createdAt:
-          type: string
-          format: date-time
-          description: セッションの作成日時
-        updatedAt:
-          type: string
-          format: date-time
-          description: セッションの最終更新日時
+        session:
+          $ref: "#/components/schemas/Session"
+          description: セッション情報
     EndSessionResponse:
       type: object
       description: セッション終了レスポンス
@@ -429,6 +391,72 @@ components:
           type: string
           format: uuid
           description: 投票ID
+    SessionParticipant:
+      type: object
+      description: セッション参加者
+      required:
+        - participantId
+        - name
+      properties:
+        participantId:
+          type: string
+          description: 参加者のID
+        name:
+          type: string
+          description: 参加者の名前
+    Session:
+      type: object
+      description: セッション情報
+      required:
+        - sessionId
+        - sessionName
+        - hostId
+        - scaleType
+        - customScale
+        - status
+        - participants
+        - createdAt
+        - updatedAt
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+          description: セッションのID
+        sessionName:
+          type: string
+          description: セッション名
+        hostId:
+          type: string
+          format: uuid
+          description: セッションのホストID
+        scaleType:
+          $ref: "#/components/schemas/ScaleType"
+          description: スケールの種類
+        customScale:
+          type: array
+          items:
+            type: string
+          description: カスタムスケール（scaleTypeがcustomの場合のみ有効）
+        currentRoundId:
+          type: string
+          format: uuid
+          description: 現在のラウンドID
+        status:
+          type: string
+          description: セッションの状態
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionParticipant"
+          description: 参加者リスト
+        createdAt:
+          type: string
+          format: date-time
+          description: セッションの作成日時
+        updatedAt:
+          type: string
+          format: date-time
+          description: セッションの最終更新日時
     WebSocketMessage:
       type: object
       description: WebSocketメッセージ

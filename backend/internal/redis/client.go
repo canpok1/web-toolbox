@@ -33,11 +33,12 @@ type Client interface {
 
 // client is a wrapper around the redislib.Client.
 type client struct {
-	client *redislib.Client
+	client            *redislib.Client
+	defaultExpiration time.Duration
 }
 
 // NewClient creates a new Redis client.
-func NewClient(addr, password string, db int) (Client, error) {
+func NewClient(addr, password string, db int, defaultExpiration time.Duration) (Client, error) {
 	rdb := redislib.NewClient(&redislib.Options{
 		Addr:     addr,
 		Password: password,
@@ -52,7 +53,7 @@ func NewClient(addr, password string, db int) (Client, error) {
 		return nil, fmt.Errorf("failed to connect to Redis at %s: %w", addr, err)
 	}
 
-	return &client{client: rdb}, nil
+	return &client{client: rdb, defaultExpiration: defaultExpiration}, nil
 }
 
 // Close closes the Redis connection.
@@ -83,7 +84,7 @@ func (c *client) CreateSession(ctx context.Context, sessionId string, session Se
 		return fmt.Errorf("failed to marshal session: %w", err)
 	}
 	key := fmt.Sprintf("web-toolbox:planning-poker:session:%s", sessionId)
-	return c.client.Set(ctx, key, data, 0).Err()
+	return c.client.Set(ctx, key, data, c.defaultExpiration).Err()
 }
 
 // GetSession retrieves a session from Redis.
@@ -111,7 +112,7 @@ func (c *client) UpdateSession(ctx context.Context, sessionId string, session Se
 		return fmt.Errorf("failed to marshal session: %w", err)
 	}
 	key := fmt.Sprintf("web-toolbox:planning-poker:session:%s", sessionId)
-	return c.client.Set(ctx, key, data, 0).Err()
+	return c.client.Set(ctx, key, data, c.defaultExpiration).Err()
 }
 
 // --- Round ---
@@ -133,7 +134,7 @@ func (c *client) CreateRound(ctx context.Context, roundId string, round Round) e
 		return fmt.Errorf("failed to marshal round: %w", err)
 	}
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s", roundId)
-	return c.client.Set(ctx, key, data, 0).Err()
+	return c.client.Set(ctx, key, data, c.defaultExpiration).Err()
 }
 
 // GetRound retrieves a round from Redis.
@@ -161,7 +162,7 @@ func (c *client) UpdateRound(ctx context.Context, roundId string, round Round) e
 		return fmt.Errorf("failed to marshal round: %w", err)
 	}
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s", roundId)
-	return c.client.Set(ctx, key, data, 0).Err()
+	return c.client.Set(ctx, key, data, c.defaultExpiration).Err()
 }
 
 // --- Participant ---
@@ -184,7 +185,7 @@ func (c *client) CreateParticipant(ctx context.Context, participantId string, pa
 		return fmt.Errorf("failed to marshal participant: %w", err)
 	}
 	key := fmt.Sprintf("web-toolbox:planning-poker:participant:%s", participantId)
-	return c.client.Set(ctx, key, data, 0).Err()
+	return c.client.Set(ctx, key, data, c.defaultExpiration).Err()
 }
 
 // GetParticipant retrieves a participant from Redis.
@@ -231,7 +232,7 @@ func (c *client) UpdateParticipant(ctx context.Context, participantId string, pa
 		return fmt.Errorf("failed to marshal participant: %w", err)
 	}
 	key := fmt.Sprintf("web-toolbox:planning-poker:participant:%s", participantId)
-	return c.client.Set(ctx, key, data, 0).Err()
+	return c.client.Set(ctx, key, data, c.defaultExpiration).Err()
 }
 
 // --- Vote ---
@@ -254,7 +255,7 @@ func (c *client) CreateVote(ctx context.Context, voteId string, vote Vote) error
 		return fmt.Errorf("failed to marshal vote: %w", err)
 	}
 	key := fmt.Sprintf("web-toolbox:planning-poker:vote:%s", voteId)
-	return c.client.Set(ctx, key, data, 0).Err()
+	return c.client.Set(ctx, key, data, c.defaultExpiration).Err()
 }
 
 // GetVote retrieves a vote from Redis.
@@ -282,7 +283,7 @@ func (c *client) UpdateVote(ctx context.Context, voteId string, vote Vote) error
 		return fmt.Errorf("failed to marshal vote: %w", err)
 	}
 	key := fmt.Sprintf("web-toolbox:planning-poker:vote:%s", voteId)
-	return c.client.Set(ctx, key, data, 0).Err()
+	return c.client.Set(ctx, key, data, c.defaultExpiration).Err()
 }
 
 // --- Session Participants ---

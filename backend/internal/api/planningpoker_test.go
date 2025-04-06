@@ -303,19 +303,87 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 }
 
 func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
-	tests := []struct {
-		name          string
-		sessionID     uuid.UUID
-		mockSetup     func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID)
-		expectedError string
-	}{
-		{
-			name:      "success",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
+
+	t.Run("異常系", func(t *testing.T) {
+		tests := []struct {
+			name                  string
+			sessionID             uuid.UUID
+			getSessionReturnValue *redis.Session
+			getSessionReturnError error
+			expectedError         string
+		}{
+			{
+				name:                  "セッションがnil",
+				sessionID:             uuid.New(),
+				getSessionReturnValue: nil,
+				getSessionReturnError: nil,
+				expectedError:         "session not found",
+			},
+			{
+				name:                  "セッション取得失敗",
+				sessionID:             uuid.New(),
+				getSessionReturnValue: nil,
+				getSessionReturnError: errors.New("redis error"),
+				expectedError:         "failed to get session from redis",
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				ctrl := gomock.NewController(t)
+				defer ctrl.Finish()
+
+				mockRedis := mock_redis.NewMockClient(ctrl)
+				mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+				server := api.NewServer(mockRedis, mockWebSocketHub)
+
+				mockRedis.EXPECT().GetSession(gomock.Any(), tt.sessionID.String()).Return(tt.getSessionReturnValue, tt.getSessionReturnError)
+
+				res, err := server.HandleGetApiPlanningPokerSessionsSessionId(tt.sessionID)
+
+				assert.Error(t, err, "Expected an error")
+				assert.Nil(t, res, "Expected nil response on error")
+				assert.Contains(t, err.Error(), tt.expectedError, "Expected error message to contain")
+			})
+		}
+	})
+
+	t.Run("正常系", func(t *testing.T) {
+		dummyUUID := uuid.New()
+		tests := []struct {
+			name           string
+			sessionID      uuid.UUID
+			hostID         string
+			participantIDs []string
+		}{
+			{
+				name:           "参加者はホストのみ",
+				sessionID:      dummyUUID,
+				hostID:         "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+				participantIDs: []string{"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"},
+			},
+			{
+				name:      "参加者はホスト以外にも複数",
+				sessionID: dummyUUID,
+				hostID:    "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+				participantIDs: []string{
+					"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+					"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+					"cccccccc-cccc-cccc-cccc-cccccccccccc"},
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				ctrl := gomock.NewController(t)
+				defer ctrl.Finish()
+				mockRedis := mock_redis.NewMockClient(ctrl)
+				mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+				server := api.NewServer(mockRedis, mockWebSocketHub)
+
+				mockRedis.EXPECT().GetSession(gomock.Any(), tt.sessionID.String()).Return(&redis.Session{
 					SessionName:    "Test Session",
-					HostId:         uuid.New().String(),
+					HostId:         tt.hostID,
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
 					CurrentRoundId: "",
@@ -323,71 +391,21 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 					CreatedAt:      time.Now(),
 					UpdatedAt:      time.Now(),
 				}, nil)
-			},
-		},
-		{
-			name:      "success with current round",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
-					SessionName:    "Test Session",
-					HostId:         uuid.New().String(),
-					ScaleType:      "fibonacci",
-					CustomScale:    []string{},
-					CurrentRoundId: uuid.New().String(),
-					Status:         "waiting",
-					CreatedAt:      time.Now(),
-					UpdatedAt:      time.Now(),
-				}, nil)
-			},
-		},
-		{
-			name:      "failure - session not found",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, nil)
-			},
-			expectedError: "session not found (sessionID:",
-		},
-		{
-			name:      "failure - redis error",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, errors.New("redis error"))
-			},
-			expectedError: "failed to get session from redis",
-		},
-	}
+				mockRedis.EXPECT().GetParticipantsInSession(gomock.Any(), tt.sessionID.String()).Return(tt.participantIDs, nil)
+				for _, participantID := range tt.participantIDs {
+					mockRedis.EXPECT().GetParticipant(gomock.Any(), participantID).Return(&redis.Participant{}, nil)
+				}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			mockRedis := mock_redis.NewMockClient(ctrl)
-			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
-			server := api.NewServer(mockRedis, mockWebSocketHub)
+				res, err := server.HandleGetApiPlanningPokerSessionsSessionId(tt.sessionID)
 
-			// Create a new sessionID for each test case to avoid conflicts
-			sessionID := uuid.New()
-			if tt.sessionID != uuid.Nil {
-				sessionID = tt.sessionID
-			}
-
-			tt.mockSetup(mockRedis, sessionID)
-
-			res, err := server.HandleGetApiPlanningPokerSessionsSessionId(sessionID)
-
-			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
 				assert.NotNil(t, res, "Expected non-nil response on success")
-				assert.Equal(t, sessionID, res.SessionId)
-			} else {
-				assert.Error(t, err, "Expected an error")
-				assert.Nil(t, res, "Expected nil response on error")
-				assert.Contains(t, err.Error(), tt.expectedError, "Expected error message to contain")
-			}
-		})
-	}
+				assert.Equal(t, tt.sessionID, res.Session.SessionId)
+				assert.Equal(t, len(tt.participantIDs), len(res.Session.Participants))
+			})
+		}
+	})
+
 }
 
 func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {

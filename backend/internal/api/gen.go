@@ -55,32 +55,8 @@ type ErrorResponse struct {
 
 // GetSessionResponse セッション取得レスポンス
 type GetSessionResponse struct {
-	// CreatedAt セッションの作成日時
-	CreatedAt time.Time `json:"createdAt"`
-
-	// CurrentRoundId 現在のラウンドID
-	CurrentRoundId *openapi_types.UUID `json:"currentRoundId,omitempty"`
-
-	// CustomScale カスタムスケール（scaleTypeがcustomの場合のみ有効）
-	CustomScale []string `json:"customScale"`
-
-	// HostId セッションのホストID
-	HostId openapi_types.UUID `json:"hostId"`
-
-	// ScaleType スケールの種類
-	ScaleType ScaleType `json:"scaleType"`
-
-	// SessionId セッションのID
-	SessionId openapi_types.UUID `json:"sessionId"`
-
-	// SessionName セッション名
-	SessionName string `json:"sessionName"`
-
-	// Status セッションの状態
-	Status string `json:"status"`
-
-	// UpdatedAt セッションの最終更新日時
-	UpdatedAt time.Time `json:"updatedAt"`
+	// Session セッション情報
+	Session Session `json:"session"`
 }
 
 // JoinSessionRequest セッション参加リクエスト
@@ -114,6 +90,48 @@ type SendVoteRequest struct {
 type SendVoteResponse struct {
 	// VoteId 投票ID
 	VoteId openapi_types.UUID `json:"voteId"`
+}
+
+// Session セッション情報
+type Session struct {
+	// CreatedAt セッションの作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// CurrentRoundId 現在のラウンドID
+	CurrentRoundId *openapi_types.UUID `json:"currentRoundId,omitempty"`
+
+	// CustomScale カスタムスケール（scaleTypeがcustomの場合のみ有効）
+	CustomScale []string `json:"customScale"`
+
+	// HostId セッションのホストID
+	HostId openapi_types.UUID `json:"hostId"`
+
+	// Participants 参加者リスト
+	Participants []SessionParticipant `json:"participants"`
+
+	// ScaleType スケールの種類
+	ScaleType ScaleType `json:"scaleType"`
+
+	// SessionId セッションのID
+	SessionId openapi_types.UUID `json:"sessionId"`
+
+	// SessionName セッション名
+	SessionName string `json:"sessionName"`
+
+	// Status セッションの状態
+	Status string `json:"status"`
+
+	// UpdatedAt セッションの最終更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// SessionParticipant セッション参加者
+type SessionParticipant struct {
+	// Name 参加者の名前
+	Name string `json:"name"`
+
+	// ParticipantId 参加者のID
+	ParticipantId string `json:"participantId"`
 }
 
 // StartRoundResponse ラウンド開始レスポンス

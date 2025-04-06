@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
 	"github.com/canpok1/web-toolbox/backend/internal/api/planningpoker"
@@ -27,7 +28,7 @@ func main() {
 	}
 	log.Printf("Static directory found: path=%s", staticDir)
 
-	redisClient, err := redis.NewClient(redisAddress, "", 0)
+	redisClient, err := redis.NewClient(redisAddress, "", 0, 24*time.Hour)
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis: address=%s, error=%v", redisAddress, err)
 	}
