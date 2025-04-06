@@ -11,12 +11,14 @@
     "build": "tsc -b && vite build",
     "check": "tsc --noEmit && biome check ./src",
     "check:fix": "biome check --write --unsafe ./src",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "generate": "npx openapi-typescript ../docs/spec/openapi.yml -o src/api/types/api.gen.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.17",
     "daisyui": "^5.0.9",
     "lucide-react": "^0.486.0",
+    "openapi-fetch": "^0.13.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.4.1",
@@ -30,6 +32,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react-swc": "^3.8.0",
     "globals": "^15.15.0",
+    "openapi-typescript": "^7.6.1",
     "typescript": "~5.7.2",
     "vite": "^6.2.0"
   }
