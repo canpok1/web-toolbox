@@ -253,17 +253,38 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID uuid.UUID)
 		return nil, fmt.Errorf("session not found (sessionID: %s)", sessionID)
 	}
 
+	participantIDs, err := s.redis.GetParticipantsInSession(ctx, sessionID.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get participants in session (sessionID: %s)", sessionID)
+	}
+
+	participants := []SessionParticipant{}
+	for _, participantID := range participantIDs {
+		participant, err := s.redis.GetParticipant(ctx, participantID)
+		if err != nil {
+			log.Printf("failed to get participant from redis: sessionID=%s, participantID=%s, err=%v", sessionID, participantID, err)
+			return nil, fmt.Errorf("failed to get participant from redis: sessionID=%s, participantID=%s, err=%w", sessionID, participantID, err)
+		}
+		participants = append(participants, SessionParticipant{
+			Name:          participant.Name,
+			ParticipantId: participantID,
+		})
+	}
+
 	// Convert the redis.Session to GetSessionResponse
 	res := GetSessionResponse{
-		SessionId:      sessionID,
-		SessionName:    session.SessionName,
-		HostId:         uuid.MustParse(session.HostId),
-		ScaleType:      ScaleType(session.ScaleType),
-		Status:         session.Status,
-		CustomScale:    session.CustomScale,
-		CurrentRoundId: nil,
-		CreatedAt:      session.CreatedAt,
-		UpdatedAt:      session.UpdatedAt,
+		Session: Session{
+			SessionId:      sessionID,
+			SessionName:    session.SessionName,
+			HostId:         uuid.MustParse(session.HostId),
+			ScaleType:      ScaleType(session.ScaleType),
+			Status:         session.Status,
+			CustomScale:    session.CustomScale,
+			CurrentRoundId: nil,
+			Participants:   participants,
+			CreatedAt:      session.CreatedAt,
+			UpdatedAt:      session.UpdatedAt,
+		},
 	}
 	if session.CurrentRoundId != "" {
 		currendRoundId, err := uuid.Parse(session.CurrentRoundId)
@@ -271,7 +292,7 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID uuid.UUID)
 			log.Printf("failed to parse CurrentRoundId: %v", err)
 			return nil, fmt.Errorf("failed to parse CurrentRoundId: %w", err)
 		}
-		res.CurrentRoundId = &currendRoundId
+		res.Session.CurrentRoundId = &currendRoundId
 	}
 
 	return &res, nil
