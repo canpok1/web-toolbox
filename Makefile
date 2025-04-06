@@ -24,3 +24,8 @@ build:
 .PHONY: format
 format:
 	make -C frontend format
+
+.PHONY: generate
+generate:
+	make -C frontend generate
+	make -C backend generate

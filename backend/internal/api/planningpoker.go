@@ -11,9 +11,10 @@ import (
 )
 
 var validScaleTypeMap = map[ScaleType]struct{}{
-	Fibonacci: {},
-	TShirt:    {},
-	Custom:    {},
+	Fibonacci:  {},
+	TShirt:     {},
+	PowerOfTwo: {},
+	Custom:     {},
 }
 
 func (s *Server) ValidatePostApiPlanningPokerSessions(body *CreateSessionRequest) error {

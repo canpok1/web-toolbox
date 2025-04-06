@@ -17,3 +17,7 @@ format:
 .PHONY: build
 build:
 	npm run build
+
+.PHONY: generate
+generate:
+	npm run generate

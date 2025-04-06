@@ -1,22 +1,52 @@
 import { LogIn } from "lucide-react";
-import type React from "react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { type ChangeEvent, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ApiClient } from "../api/ApiClient";
+import Alert from "./components/Alert";
+import { isScaleType } from "./types/ScaleType";
+import { ExtractErrorMessage } from "./utils/error";
 
 function CreateSessionPage() {
+  const [sessionName, setSessionName] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
-  const [scale, setScale] = useState<string>("");
+  const [scale, setScale] = useState<string>("fibonacci");
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
-  const handleUserNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const navigate = useNavigate();
+
+  const client = new ApiClient();
+  const shouldSubmit = sessionName !== "" && userName !== "";
+
+  const handleSessionNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSessionName(event.target.value);
+  };
+
+  const handleUserNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setUserName(event.target.value);
   };
 
-  const handleScaleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleScaleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setScale(event.target.value);
   };
 
-  const handleSubmit = () => {
-    console.log("clicked button, userName:%s, scale:%s", userName, scale);
+  const handleSubmit = async () => {
+    try {
+      if (!isScaleType(scale)) {
+        console.error("invalid scale: %s", scale);
+        return;
+      }
+
+      console.log("clicked button, userName:%s, scale:%s", userName, scale);
+      const resp = await client.createSession({
+        sessionName: sessionName,
+        hostName: userName,
+        scaleType: scale,
+      });
+      navigate(`/planning-poker/sessions/${resp.sessionId}?id=${resp.hostId}`);
+    } catch (error) {
+      console.error(error);
+      setErrorMessages([ExtractErrorMessage(error)]);
+    }
   };
 
   return (
@@ -28,8 +58,19 @@ function CreateSessionPage() {
         <div className="card-body bg-neutral-content text-left">
           <h2 className="card-title">セッションを作成</h2>
           <p className="mb-5">ホストとしてセッションを開始します。</p>
+          <Alert messages={errorMessages} className="mb-3" />
           <label className="floating-label mx-auto mb-3 w-full">
-            <span>名前</span>
+            <span>セッション名</span>
+            <input
+              className="input w-full"
+              type="text"
+              placeholder="セッション名"
+              value={sessionName}
+              onChange={handleSessionNameChange}
+            />
+          </label>
+          <label className="floating-label mx-auto mb-3 w-full">
+            <span>あなたの名前</span>
             <input
               className="input w-full"
               type="text"
@@ -61,6 +102,7 @@ function CreateSessionPage() {
             className="btn btn-primary w-full"
             aria-label="セッションを作成"
             onClick={handleSubmit}
+            disabled={!shouldSubmit}
           >
             <LogIn />
             セッションを作成
