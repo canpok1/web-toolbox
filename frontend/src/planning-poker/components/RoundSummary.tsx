@@ -12,7 +12,7 @@ function RoundSummary({ participants, revealed }: RoundSummaryProps) {
     <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
       <div className="card-body bg-neutral-content text-left">
         <h2 className="card-title">{title}</h2>
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-3 gap-4 md:grid-cols-3 lg:grid-cols-6">
           {participants.map((p) => (
             <VoteResult key={p.id} participant={p} revealed={revealed} />
           ))}
