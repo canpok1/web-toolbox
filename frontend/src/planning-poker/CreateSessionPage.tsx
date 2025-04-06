@@ -2,11 +2,15 @@ import { LogIn } from "lucide-react";
 import { type ChangeEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ApiClient } from "../api/ApiClient";
+import Alert from "./components/Alert";
+import { ExtractErrorMessage } from "./utils/error";
 
 function CreateSessionPage() {
   const [sessionName, setSessionName] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [scale, setScale] = useState<string>("fibonacci");
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
+
   const navigate = useNavigate();
 
   const client = new ApiClient();
@@ -43,6 +47,7 @@ function CreateSessionPage() {
       navigate(`/planning-poker/sessions/${resp.sessionId}?id=${resp.hostId}`);
     } catch (error) {
       console.error(error);
+      setErrorMessages([ExtractErrorMessage(error)]);
     }
   };
 
@@ -55,6 +60,7 @@ function CreateSessionPage() {
         <div className="card-body bg-neutral-content text-left">
           <h2 className="card-title">セッションを作成</h2>
           <p className="mb-5">ホストとしてセッションを開始します。</p>
+          <Alert messages={errorMessages} className="mb-3" />
           <label className="floating-label mx-auto mb-3 w-full">
             <span>セッション名</span>
             <input
