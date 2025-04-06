@@ -285,6 +285,7 @@ components:
       enum:
         - fibonacci
         - t-shirt
+        - power-of-two
         - custom
     CreateSessionRequest:
       type: object
