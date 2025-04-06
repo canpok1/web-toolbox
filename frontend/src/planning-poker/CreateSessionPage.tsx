@@ -3,6 +3,7 @@ import { type ChangeEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ApiClient } from "../api/ApiClient";
 import Alert from "./components/Alert";
+import { isScaleType } from "./types/ScaleType";
 import { ExtractErrorMessage } from "./utils/error";
 
 function CreateSessionPage() {
@@ -29,11 +30,7 @@ function CreateSessionPage() {
 
   const handleSubmit = async () => {
     try {
-      if (
-        scale !== "fibonacci" &&
-        scale !== "t-shirt" &&
-        scale !== "power-of-two"
-      ) {
+      if (!isScaleType(scale)) {
         console.error("invalid scale: %s", scale);
         return;
       }
