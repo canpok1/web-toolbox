@@ -14,7 +14,7 @@ function VotePanel({ voteOptions, votedOption, onClick }: VotePanelProps) {
             <button
               key={option}
               type="button"
-              className={`btn ${option === votedOption ? "btn-active btn-accent" : "btn-outline"}`}
+              className={`btn btn-lg ${option === votedOption ? "btn-active btn-accent" : "btn-outline"}`}
               onClick={() => onClick(option)}
             >
               {option}
