@@ -15,9 +15,10 @@ import (
 
 // Defines values for ScaleType.
 const (
-	Custom    ScaleType = "custom"
-	Fibonacci ScaleType = "fibonacci"
-	TShirt    ScaleType = "t-shirt"
+	Custom     ScaleType = "custom"
+	Fibonacci  ScaleType = "fibonacci"
+	PowerOfTwo ScaleType = "power-of-two"
+	TShirt     ScaleType = "t-shirt"
 )
 
 // CreateSessionRequest セッション作成リクエスト

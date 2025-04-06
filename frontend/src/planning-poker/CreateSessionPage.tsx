@@ -1,39 +1,44 @@
 import { LogIn } from "lucide-react";
-import type React from "react";
-import { useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ApiClient } from "../api/ApiClient";
 
 function CreateSessionPage() {
+  const [sessionName, setSessionName] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
-  const [scale, setScale] = useState<"fibonacci" | "t-shirt" | "power-of-two">(
-    "fibonacci",
-  );
+  const [scale, setScale] = useState<string>("fibonacci");
   const navigate = useNavigate();
 
   const client = new ApiClient();
 
-  const handleUserNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSessionNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSessionName(event.target.value);
+  };
+
+  const handleUserNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setUserName(event.target.value);
   };
 
-  const handleScaleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    if (
-      event.target.value === "fibonacci" ||
-      event.target.value === "t-shirt" ||
-      event.target.value === "power-of-two"
-    ) {
-      setScale(event.target.value);
-    }
+  const handleScaleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setScale(event.target.value);
   };
 
   const handleSubmit = async () => {
     try {
+      if (
+        scale !== "fibonacci" &&
+        scale !== "t-shirt" &&
+        scale !== "power-of-two"
+      ) {
+        console.error("invalid scale: %s", scale);
+        return;
+      }
+
       console.log("clicked button, userName:%s, scale:%s", userName, scale);
       const resp = await client.createSession({
-        sessionName: "xxx",
+        sessionName: sessionName,
         hostName: userName,
-        scaleType: "fibonacci",
+        scaleType: scale,
       });
       navigate(`/planning-poker/sessions/${resp.sessionId}?id=${resp.hostId}`);
     } catch (error) {
@@ -51,7 +56,17 @@ function CreateSessionPage() {
           <h2 className="card-title">セッションを作成</h2>
           <p className="mb-5">ホストとしてセッションを開始します。</p>
           <label className="floating-label mx-auto mb-3 w-full">
-            <span>名前</span>
+            <span>セッション名</span>
+            <input
+              className="input w-full"
+              type="text"
+              placeholder="セッション名"
+              value={sessionName}
+              onChange={handleSessionNameChange}
+            />
+          </label>
+          <label className="floating-label mx-auto mb-3 w-full">
+            <span>あなたの名前</span>
             <input
               className="input w-full"
               type="text"

@@ -27,5 +27,5 @@ clean:
 	rm -f ${BUILD_OUTPUT_DIR}/${SERVER_BINARY}
 
 .PHONY: generate
-generate-code:
+generate:
 	go generate ./...
