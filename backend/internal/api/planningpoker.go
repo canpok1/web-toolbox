@@ -262,7 +262,6 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID uuid.UUID)
 	for _, participantID := range participantIDs {
 		participant, err := s.redis.GetParticipant(ctx, participantID)
 		if err != nil {
-			log.Printf("failed to get participant from redis: sessionID=%s, participantID=%s, err=%v", sessionID, participantID, err)
 			return nil, fmt.Errorf("failed to get participant from redis: sessionID=%s, participantID=%s, err=%w", sessionID, participantID, err)
 		}
 		participants = append(participants, SessionParticipant{
