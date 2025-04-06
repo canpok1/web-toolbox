@@ -106,63 +106,118 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 }
 
 func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
-	tests := []struct {
-		name          string
-		req           *api.CreateSessionRequest
-		mockSetup     func(mockRedis *mock_redis.MockClient)
-		expectedError string
-	}{
-		{
-			name: "success",
-			req: &api.CreateSessionRequest{
-				SessionName: "Test Session",
-				HostName:    "Test Host",
-				ScaleType:   api.Custom,
-				CustomScale: &[]string{"1", "2", "3"},
-			},
-			mockSetup: func(mockRedis *mock_redis.MockClient) {
-				mockRedis.EXPECT().CreateSession(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-			},
-		},
-		{
-			name: "failure - redis error",
-			req: &api.CreateSessionRequest{
-				SessionName: "Test Session",
-				HostName:    "Test Host",
-				ScaleType:   api.Custom,
-				CustomScale: &[]string{"1", "2", "3"},
-			},
-			mockSetup: func(mockRedis *mock_redis.MockClient) {
-				mockRedis.EXPECT().CreateSession(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("redis error"))
-			},
-			expectedError: "failed to save session to redis",
-		},
-	}
+	t.Run("異常系", func(t *testing.T) {
+		type MockSetting struct {
+			createSessionResult           error
+			createParticipantResult       error
+			addParticipantToSessionResult error
+		}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			mockRedis := mock_redis.NewMockClient(ctrl)
-			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
-			server := api.NewServer(mockRedis, mockWebSocketHub)
+		tests := []struct {
+			name          string
+			req           *api.CreateSessionRequest
+			mockSetting   MockSetting
+			expectedError string
+		}{
+			{
+				name: "セッション作成失敗",
+				req: &api.CreateSessionRequest{
+					SessionName: "Test Session",
+					HostName:    "Test Host",
+					ScaleType:   api.Custom,
+					CustomScale: &[]string{"1", "2", "3"},
+				},
+				mockSetting: MockSetting{
+					createSessionResult: errors.New("redis error"),
+				},
+				expectedError: "failed to save session to redis",
+			},
+			{
+				name: "参加者作成失敗",
+				req: &api.CreateSessionRequest{
+					SessionName: "Test Session",
+					HostName:    "Test Host",
+					ScaleType:   api.Custom,
+					CustomScale: &[]string{"1", "2", "3"},
+				},
+				mockSetting: MockSetting{
+					createParticipantResult: errors.New("redis error"),
+				},
+				expectedError: "failed to save participant to redis",
+			},
+			{
+				name: "参加者リストへの追加失敗",
+				req: &api.CreateSessionRequest{
+					SessionName: "Test Session",
+					HostName:    "Test Host",
+					ScaleType:   api.Custom,
+					CustomScale: &[]string{"1", "2", "3"},
+				},
+				mockSetting: MockSetting{
+					addParticipantToSessionResult: errors.New("redis error"),
+				},
+				expectedError: "failed to add participant list to redis",
+			},
+		}
 
-			tt.mockSetup(mockRedis)
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				ctrl := gomock.NewController(t)
+				defer ctrl.Finish()
+				mockRedis := mock_redis.NewMockClient(ctrl)
+				mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+				server := api.NewServer(mockRedis, mockWebSocketHub)
 
-			res, err := server.HandlePostApiPlanningPokerSessions(tt.req)
+				mockRedis.EXPECT().CreateSession(gomock.Any(), gomock.Any(), gomock.Any()).Return(tt.mockSetting.createSessionResult).AnyTimes()
+				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(tt.mockSetting.createParticipantResult).AnyTimes()
+				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), gomock.Any(), gomock.Any()).Return(tt.mockSetting.addParticipantToSessionResult).AnyTimes()
 
-			if tt.expectedError != "" {
+				res, err := server.HandlePostApiPlanningPokerSessions(tt.req)
+
 				assert.Error(t, err, "Expected an error")
 				assert.Nil(t, res, "Expected nil response on error")
 				assert.Contains(t, err.Error(), tt.expectedError, "Expected error message to contain: "+tt.expectedError)
-			} else {
+			})
+		}
+	})
+
+	t.Run("正常系", func(t *testing.T) {
+		tests := []struct {
+			name string
+			req  *api.CreateSessionRequest
+		}{
+			{
+				name: "success",
+				req: &api.CreateSessionRequest{
+					SessionName: "Test Session",
+					HostName:    "Test Host",
+					ScaleType:   api.Custom,
+					CustomScale: &[]string{"1", "2", "3"},
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				ctrl := gomock.NewController(t)
+				defer ctrl.Finish()
+				mockRedis := mock_redis.NewMockClient(ctrl)
+				mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+				server := api.NewServer(mockRedis, mockWebSocketHub)
+
+				mockRedis.EXPECT().CreateSession(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+
+				res, err := server.HandlePostApiPlanningPokerSessions(tt.req)
+
 				assert.NoError(t, err, "Expected no error")
 				assert.NotNil(t, res, "Expected non-nil response on success")
 				assert.NotEmpty(t, res.SessionId, "Expected SessionId to be non-empty")
 				assert.NotEmpty(t, res.HostId, "Expected HostId to be non-empty")
-			}
-		})
-	}
+			})
+		}
+	})
 }
 
 func TestValidatePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {

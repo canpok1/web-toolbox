@@ -73,6 +73,22 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 		return nil, fmt.Errorf("failed to save session to redis: %v", err)
 	}
 
+	err = s.redis.CreateParticipant(ctx, hostId.String(), redis.Participant{
+		SessionId: sessionId.String(),
+		Name:      body.HostName,
+		IsHost:    true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to save participant to redis: %v", err)
+	}
+
+	err = s.redis.AddParticipantToSession(ctx, sessionId.String(), hostId.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to add participant list to redis: %v", err)
+	}
+
 	// レスポンスの作成
 	res := CreateSessionResponse{
 		HostId:    hostId,
