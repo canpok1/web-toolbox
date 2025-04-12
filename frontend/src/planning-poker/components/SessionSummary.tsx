@@ -1,10 +1,13 @@
-import { Check, ChevronDown, ChevronUp, Copy } from "lucide-react"; // Chevron アイコンを追加
+import { Check, ChevronDown, ChevronUp, Copy } from "lucide-react";
 import { useState } from "react";
 import type { Session } from "../types/Session";
+import Alert from "./Alert";
 
 function SessionSummary({ session }: { session: Session }) {
   const [isCopied, setIsCopied] = useState(false);
-  const [isInviteSectionOpen, setIsInviteSectionOpen] = useState(false); // 開閉状態を管理するstate
+  const [isInviteSectionOpen, setIsInviteSectionOpen] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
+
   const names = session.participants.map((p) => p.name);
   const joinPageUrl = new URL(
     `/planning-poker/sessions/join?id=${session.id}`,
@@ -13,18 +16,25 @@ function SessionSummary({ session }: { session: Session }) {
   const joinUrlString = joinPageUrl.toString();
 
   const handleCopyClick = async () => {
+    setCopyError(null);
+    setIsCopied(false);
     try {
       await navigator.clipboard.writeText(joinUrlString);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
       console.error("クリップボードへのコピーに失敗しました:", err);
+      setCopyError("クリップボードへのコピーに失敗しました。");
+      setTimeout(() => setCopyError(null), 3000);
     }
   };
 
-  // 開閉状態を切り替える関数
   const toggleInviteSection = () => {
     setIsInviteSectionOpen(!isInviteSectionOpen);
+    if (isInviteSectionOpen) {
+      setCopyError(null);
+      setIsCopied(false);
+    }
   };
 
   return (
@@ -50,18 +60,24 @@ function SessionSummary({ session }: { session: Session }) {
 
           {/* 開閉されるコンテンツ */}
           {isInviteSectionOpen && (
-            <div id="invite-section" className="mt-2 flex items-center gap-2">
-              <p className="flex-grow break-all text-sm"> {joinUrlString}</p>
-              <button
-                type="button"
-                className={`btn btn-sm shrink-0 ${isCopied ? "btn-success" : "btn-ghost"}`}
-                onClick={handleCopyClick}
-                aria-label="参加ページのURLをコピー"
-                disabled={isCopied}
-              >
-                {isCopied ? <Check size={16} /> : <Copy size={16} />}
-                {isCopied ? "コピー完了" : "コピー"}
-              </button>
+            <div id="invite-section" className="mt-2 space-y-2">
+              {" "}
+              {/* space-y-2 を追加 */}
+              {/* エラーメッセージ表示 */}
+              <Alert messages={copyError ? [copyError] : []} />
+              <div className="flex items-center gap-2">
+                <p className="flex-grow break-all text-sm"> {joinUrlString}</p>
+                <button
+                  type="button"
+                  className={`btn btn-sm shrink-0 ${isCopied ? "btn-success" : "btn-ghost"}`}
+                  onClick={handleCopyClick}
+                  aria-label="参加ページのURLをコピー"
+                  disabled={isCopied} // コピー成功時のみ無効化（エラー時は再試行可能に）
+                >
+                  {isCopied ? <Check size={16} /> : <Copy size={16} />}
+                  {isCopied ? "コピー完了" : "コピー"}
+                </button>
+              </div>
             </div>
           )}
         </div>
