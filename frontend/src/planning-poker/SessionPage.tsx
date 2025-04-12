@@ -1,13 +1,25 @@
 import { CheckCircle2, Play, StopCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import RoundSummary from "./components/RoundSummary";
 import SessionSummary from "./components/SessionSummary";
 import VotePanel from "./components/VotePanel";
+import useSession from "./hooks/useSession";
 import type { RoundParticipant } from "./types/Participant";
 import type { Round } from "./types/Round";
 
 function SessionPage() {
-  const sessionId = "xxxxxxxxxx";
+  const { sessionId } = useParams<{ sessionId: string }>();
+  const { session, fetch } = useSession();
+
+  useEffect(() => {
+    if (sessionId) {
+      (async () => {
+        await fetch(sessionId);
+      })();
+    }
+  }, [fetch, sessionId]);
+
   const participants: RoundParticipant[] = [
     { id: "aaaa", name: "Aさん", vote: 1 },
     { id: "bbbb", name: "Bさん", vote: 2 },
@@ -58,7 +70,7 @@ function SessionPage() {
     <section className="mx-auto max-w-2xl px-5 py-25 text-center">
       <div className="mx-auto w-full">
         <h1 className="mb-5 font-bold text-3xl">プランニングポーカー</h1>
-        <SessionSummary sessionId={sessionId} participants={participants} />
+        {session && <SessionSummary session={session} />}
 
         <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
           <div className="card-body bg-neutral-content text-left">
