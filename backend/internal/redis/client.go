@@ -291,7 +291,13 @@ func (c *client) UpdateVote(ctx context.Context, voteId string, vote Vote) error
 // AddParticipantToSession adds a participant to a session's participant list.
 func (c *client) AddParticipantToSession(ctx context.Context, sessionId, participantId string) error {
 	key := fmt.Sprintf("web-toolbox:planning-poker:session:%s:participants", sessionId)
-	return c.client.SAdd(ctx, key, participantId).Err()
+	if err := c.client.SAdd(ctx, key, participantId).Err(); err != nil {
+		return err
+	}
+	if err := setExpireIfNotSet(ctx, c.client, key, c.defaultExpiration); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetParticipantsInSession retrieves all participants in a session.
@@ -305,11 +311,40 @@ func (c *client) GetParticipantsInSession(ctx context.Context, sessionId string)
 // AddVoteToRound adds a vote to a round's vote list.
 func (c *client) AddVoteToRound(ctx context.Context, roundId, voteId string) error {
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s:votes", roundId)
-	return c.client.SAdd(ctx, key, voteId).Err()
+	if err := c.client.SAdd(ctx, key, voteId).Err(); err != nil {
+		return err
+	}
+	if err := setExpireIfNotSet(ctx, c.client, key, c.defaultExpiration); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetVotesInRound retrieves all votes in a round.
 func (c *client) GetVotesInRound(ctx context.Context, roundId string) ([]string, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s:votes", roundId)
 	return c.client.SMembers(ctx, key).Result()
+}
+
+func setExpireIfNotSet(ctx context.Context, client *redislib.Client, key string, expiration time.Duration) error {
+	ttlResult, err := client.TTL(ctx, key).Result()
+	if err != nil {
+		return fmt.Errorf("failed to get TTL for key %s: %w", key, err)
+	}
+
+	if ttlResult > 0 {
+		// キーに有効期限が設定済みの場合
+		return nil
+	}
+	if ttlResult == -2 {
+		// キーが存在しない場合
+		return nil
+	}
+
+	// キーは存在するが、有効期限が設定されていない場合
+	setCmd := client.Expire(ctx, key, expiration)
+	if err := setCmd.Err(); err != nil {
+		return fmt.Errorf("failed to set TTL for key %s: %w", key, err)
+	}
+	return nil
 }
