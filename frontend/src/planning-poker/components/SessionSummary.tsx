@@ -1,4 +1,5 @@
 import { Check, ChevronDown, ChevronUp, Copy } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import type { Session } from "../types/Session";
 import Alert from "./Alert";
@@ -50,7 +51,7 @@ function SessionSummary({ session }: { session: Session }) {
             aria-expanded={isInviteSectionOpen}
             aria-controls="invite-section"
           >
-            <span>参加用URLを表示</span>
+            <span>参加用URL/QRコードを表示</span>
             {isInviteSectionOpen ? (
               <ChevronUp size={18} />
             ) : (
@@ -58,13 +59,10 @@ function SessionSummary({ session }: { session: Session }) {
             )}
           </button>
 
-          {/* 開閉されるコンテンツ */}
           {isInviteSectionOpen && (
-            <div id="invite-section" className="mt-2 space-y-2">
-              {" "}
-              {/* space-y-2 を追加 */}
-              {/* エラーメッセージ表示 */}
+            <div id="invite-section" className="mt-2 space-y-4">
               <Alert messages={copyError ? [copyError] : []} />
+
               <div className="flex items-center gap-2">
                 <p className="flex-grow break-all text-sm"> {joinUrlString}</p>
                 <button
@@ -72,11 +70,15 @@ function SessionSummary({ session }: { session: Session }) {
                   className={`btn btn-sm shrink-0 ${isCopied ? "btn-success" : "btn-ghost"}`}
                   onClick={handleCopyClick}
                   aria-label="参加ページのURLをコピー"
-                  disabled={isCopied} // コピー成功時のみ無効化（エラー時は再試行可能に）
+                  disabled={isCopied}
                 >
                   {isCopied ? <Check size={16} /> : <Copy size={16} />}
                   {isCopied ? "コピー完了" : "コピー"}
                 </button>
+              </div>
+
+              <div className="flex justify-center">
+                <QRCodeSVG value={joinUrlString} />
               </div>
             </div>
           )}
