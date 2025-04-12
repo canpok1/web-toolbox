@@ -1,19 +1,22 @@
 import { Users } from "lucide-react";
 import { type ChangeEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ApiClient } from "../api/ApiClient";
 import Alert from "./components/Alert";
 import { ExtractErrorMessage } from "./utils/error";
 
 function JoinSessionPage() {
-  const [sessionId, setSessionId] = useState<string>("");
+  const [searchParams] = useSearchParams();
+  const initialSessionId = searchParams.get("id") ?? "";
+
+  const [sessionId, setSessionId] = useState<string>(initialSessionId);
   const [userName, setUserName] = useState<string>("");
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
   const navigate = useNavigate();
 
   const client = new ApiClient();
-  const shouldSubmit = sessionId !== "" && userName !== "";
+  const shouldSubmit = sessionId.trim() !== "" && userName.trim() !== "";
 
   const handleSessionIdChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSessionId(event.target.value);
@@ -24,6 +27,8 @@ function JoinSessionPage() {
   };
 
   const handleSubmit = async () => {
+    setErrorMessages([]);
+
     try {
       console.log(
         "clicked button, sessionId:%s, userName:%s",
