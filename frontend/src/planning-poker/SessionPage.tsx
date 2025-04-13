@@ -26,10 +26,10 @@ function SessionPage() {
   }, [fetchSession, sessionId]);
 
   useEffect(() => {
-    const id = session?.currentRoundId;
-    if (id) {
+    const roundId = session?.currentRoundId;
+    if (roundId) {
       (async () => {
-        await fetchRound(id);
+        await fetchRound(roundId);
       })();
     }
   }, [session, fetchRound]);
