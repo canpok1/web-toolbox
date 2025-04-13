@@ -4,13 +4,14 @@ import HostPanel, { type HostPanelEvent } from "./components/HostPanel";
 import RoundSummary from "./components/RoundSummary";
 import SessionSummary from "./components/SessionSummary";
 import VotePanel from "./components/VotePanel";
+import useRound from "./hooks/useRound";
 import useSession from "./hooks/useSession";
 import type { RoundParticipant } from "./types/Participant";
-import type { Round } from "./types/Round";
 
 function SessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const { session, fetch } = useSession();
+  const { session, fetch: fetchSession } = useSession();
+  const { round, fetch: fetchRound } = useRound();
 
   const [searchParams] = useSearchParams();
   const participandId = searchParams.get("id") ?? "";
@@ -19,10 +20,19 @@ function SessionPage() {
   useEffect(() => {
     if (sessionId) {
       (async () => {
-        await fetch(sessionId);
+        await fetchSession(sessionId);
       })();
     }
-  }, [fetch, sessionId]);
+  }, [fetchSession, sessionId]);
+
+  useEffect(() => {
+    const id = session?.currentRoundId;
+    if (id) {
+      (async () => {
+        await fetchRound(id);
+      })();
+    }
+  }, [session, fetchRound]);
 
   const participants: RoundParticipant[] = [
     { id: "aaaa", name: "Aさん", vote: 1 },
@@ -34,7 +44,6 @@ function SessionPage() {
     { id: "gggg", name: "Gさん", vote: 1 },
     { id: "hhhh", name: "Hさん", vote: 2 },
   ];
-  const [round, setRound] = useState<Round | null>(null);
   const voteOptions = [
     "0",
     "1",
@@ -64,9 +73,8 @@ function SessionPage() {
 
         {showHostPanel && (
           <HostPanel
-            sessionId={session.id}
-            roundId={session.currentRoundId}
-            roundStatus={undefined}
+            session={session}
+            round={round}
             onClick={(event: HostPanelEvent): void => {
               console.log("clicked HostPanel, event:", event);
             }}

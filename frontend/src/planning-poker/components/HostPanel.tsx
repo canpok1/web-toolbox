@@ -1,28 +1,34 @@
 import { CheckCircle2, Play, StopCircle } from "lucide-react";
 import { ApiClient } from "../../api/ApiClient";
-import type { RoundStatus } from "../types/Round";
+import type { Round } from "../types/Round";
+import type { Session } from "../types/Session";
 
 export type HostPanelEvent = "startRound" | "revealVotes" | "endSession";
 
 export type HostPanelProps = {
-  sessionId: string;
-  roundId: string | undefined;
-  roundStatus: RoundStatus | undefined;
+  session: Session | null;
+  round: Round | null;
   onClick: (event: HostPanelEvent) => void;
   onError: (event: HostPanelEvent, error: unknown) => void;
 };
 
 export default function HostPanel({
-  sessionId,
-  roundId,
-  roundStatus,
+  session,
+  round,
   onClick,
   onError,
 }: HostPanelProps) {
+  const showStartRoundButton = !round || round.status === "revealed";
+  const showRevealVoteButton = round?.status === "voting";
+  const showEndSessionButton = !round || round.status === "revealed";
+
   const handleStartRound = async () => {
     try {
+      if (!session) {
+        return;
+      }
       const client = new ApiClient();
-      await client.startRound(sessionId);
+      await client.startRound(session.id);
       onClick("startRound");
     } catch (error) {
       onError("startRound", error);
@@ -31,11 +37,12 @@ export default function HostPanel({
 
   const handleRevealVotes = async () => {
     try {
-      if (roundId) {
-        const client = new ApiClient();
-        await client.revealRound(roundId);
-        onClick("revealVotes");
+      if (!round) {
+        return;
       }
+      const client = new ApiClient();
+      await client.revealRound(round.roundId);
+      onClick("revealVotes");
     } catch (error) {
       onError("revealVotes", error);
     }
@@ -43,8 +50,11 @@ export default function HostPanel({
 
   const handleEndSession = async () => {
     try {
+      if (!session) {
+        return;
+      }
       const client = new ApiClient();
-      await client.endSession(sessionId);
+      await client.endSession(session.id);
       onClick("endSession");
     } catch (error) {
       onError("endSession", error);
@@ -54,7 +64,7 @@ export default function HostPanel({
   return (
     <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
       <div className="card-body bg-neutral-content text-left">
-        {roundStatus !== "voting" && (
+        {showStartRoundButton && (
           <button
             type="button"
             className="btn btn-primary w-full"
@@ -65,7 +75,7 @@ export default function HostPanel({
             投票を開始
           </button>
         )}
-        {roundStatus === "voting" && roundId && (
+        {showRevealVoteButton && (
           <button
             type="button"
             className="btn btn-primary w-full"
@@ -76,7 +86,7 @@ export default function HostPanel({
             投票を公開
           </button>
         )}
-        {roundStatus !== "voting" && (
+        {showEndSessionButton && (
           <button
             type="button"
             className="btn btn-error w-full"
