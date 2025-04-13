@@ -11,6 +11,7 @@ import (
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
 	mock_redis "github.com/canpok1/web-toolbox/backend/internal/redis/mock"
 	"github.com/google/uuid"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -691,6 +692,275 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 	}
 }
 
+func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
+	ctx := context.Background()
+	now := time.Now()
+
+	t.Run("正常系", func(t *testing.T) {
+		validSessionID := uuid.New()
+		validRoundID := uuid.New()
+		validParticipantID1 := uuid.New()
+		validParticipantID2 := uuid.New()
+		voteID1 := uuid.New().String()
+		voteID2 := uuid.New().String()
+
+		tests := []struct {
+			name             string
+			roundID          openapi_types.UUID
+			mockSetup        func(mockRedis *mock_redis.MockClient)
+			expectedResponse *api.GetRoundResponse
+			expectedError    string
+		}{
+			{
+				name:    "成功 - ステータス voting",
+				roundID: openapi_types.UUID(validRoundID),
+				mockSetup: func(mockRedis *mock_redis.MockClient) {
+					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
+						SessionId: validSessionID.String(),
+						Status:    string(api.Voting), // "voting"
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{}, nil)
+				},
+				expectedResponse: &api.GetRoundResponse{
+					Round: api.Round{
+						RoundId:   openapi_types.UUID(validRoundID),
+						SessionId: openapi_types.UUID(validSessionID),
+						Status:    api.Voting,
+						CreatedAt: now,
+						UpdatedAt: now,
+						Votes:     []api.Vote{},
+					},
+				},
+			},
+			{
+				name:    "成功 - ステータス revealed, 投票あり",
+				roundID: openapi_types.UUID(validRoundID),
+				mockSetup: func(mockRedis *mock_redis.MockClient) {
+					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
+						SessionId: validSessionID.String(),
+						Status:    string(api.Revealed), // "revealed"
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{voteID1, voteID2}, nil)
+					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: validParticipantID1.String(),
+						Value:         "5",
+						CreatedAt:     now,
+						UpdatedAt:     now,
+					}, nil)
+					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: validParticipantID2.String(),
+						Value:         "8",
+						CreatedAt:     now,
+						UpdatedAt:     now,
+					}, nil)
+				},
+				expectedResponse: &api.GetRoundResponse{
+					Round: api.Round{
+						RoundId:   openapi_types.UUID(validRoundID),
+						SessionId: openapi_types.UUID(validSessionID),
+						Status:    api.Revealed,
+						CreatedAt: now,
+						UpdatedAt: now,
+						Votes: []api.Vote{
+							{ParticipantId: openapi_types.UUID(validParticipantID1), Value: PtrString("5")},
+							{ParticipantId: openapi_types.UUID(validParticipantID2), Value: PtrString("8")},
+						},
+					},
+				},
+			},
+			{
+				name:    "成功 - ステータス revealed, 投票なし",
+				roundID: openapi_types.UUID(validRoundID),
+				mockSetup: func(mockRedis *mock_redis.MockClient) {
+					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
+						SessionId: validSessionID.String(),
+						Status:    string(api.Revealed),
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{}, nil) // 空のリストを返す
+				},
+				expectedResponse: &api.GetRoundResponse{
+					Round: api.Round{
+						RoundId:   openapi_types.UUID(validRoundID),
+						SessionId: openapi_types.UUID(validSessionID),
+						Status:    api.Revealed,
+						CreatedAt: now,
+						UpdatedAt: now,
+						Votes:     []api.Vote{}, // 空のスライスが返る
+					},
+				},
+			},
+			{
+				name:    "成功 - ステータス revealed, GetVotesInRound エラー (ログ出力のみ)",
+				roundID: openapi_types.UUID(validRoundID),
+				mockSetup: func(mockRedis *mock_redis.MockClient) {
+					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
+						SessionId: validSessionID.String(),
+						Status:    string(api.Revealed),
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return(nil, errors.New("redis error")) // エラーを返す
+				},
+				expectedResponse: &api.GetRoundResponse{
+					Round: api.Round{
+						RoundId:   openapi_types.UUID(validRoundID),
+						SessionId: openapi_types.UUID(validSessionID),
+						Status:    api.Revealed,
+						CreatedAt: now,
+						UpdatedAt: now,
+						Votes:     []api.Vote{},
+					},
+				},
+			},
+			{
+				name:    "成功 - ステータス revealed, 一部の GetVote エラー/nil/パースエラー (スキップされる)",
+				roundID: openapi_types.UUID(validRoundID),
+				mockSetup: func(mockRedis *mock_redis.MockClient) {
+					invalidParticipantID := "invalid-uuid"
+					voteID3 := uuid.New().String()
+					voteID4 := uuid.New().String()
+					voteID5 := uuid.New().String()
+
+					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
+						SessionId: validSessionID.String(),
+						Status:    string(api.Revealed),
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{voteID1, voteID2, voteID3, voteID4, voteID5}, nil)
+
+					// 正常な投票
+					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: validParticipantID1.String(),
+						Value:         "5",
+					}, nil)
+					// GetVote エラー
+					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(nil, errors.New("get vote error"))
+					// GetVote nil
+					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(nil, nil)
+					// ParticipantId パースエラー
+					mockRedis.EXPECT().GetVote(ctx, voteID4).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: invalidParticipantID, // 不正なUUID
+						Value:         "13",
+					}, nil)
+					// 正常な投票 (エラーの後でも処理される)
+					mockRedis.EXPECT().GetVote(ctx, voteID5).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: validParticipantID2.String(),
+						Value:         "21",
+					}, nil)
+				},
+				expectedResponse: &api.GetRoundResponse{
+					Round: api.Round{
+						RoundId:   openapi_types.UUID(validRoundID),
+						SessionId: openapi_types.UUID(validSessionID),
+						Status:    api.Revealed,
+						CreatedAt: now,
+						UpdatedAt: now,
+						Votes: []api.Vote{ // エラー/nil/パースエラーの投票は含まれない
+							{ParticipantId: openapi_types.UUID(validParticipantID1), Value: PtrString("5")},
+							{ParticipantId: openapi_types.UUID(validParticipantID2), Value: PtrString("21")},
+						},
+					},
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				ctrl := gomock.NewController(t)
+				defer ctrl.Finish()
+				mockRedis := mock_redis.NewMockClient(ctrl)
+				mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+				server := api.NewServer(mockRedis, mockWebSocketHub)
+
+				tt.mockSetup(mockRedis)
+
+				res, err := server.HandleGetApiPlanningPokerRoundsRoundId(ctx, tt.roundID)
+
+				if tt.expectedError == "" {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expectedResponse, res)
+				} else {
+					assert.Error(t, err)
+					assert.Nil(t, res)
+					assert.Contains(t, err.Error(), tt.expectedError)
+				}
+			})
+		}
+	})
+
+	t.Run("異常系", func(t *testing.T) {
+		invalidRoundID := uuid.New()
+		validRoundID := uuid.New()
+
+		tests := []struct {
+			name          string
+			roundID       openapi_types.UUID
+			mockSetup     func(mockRedis *mock_redis.MockClient)
+			expectedError string
+		}{
+			{
+				name:    "失敗 - GetRound エラー",
+				roundID: openapi_types.UUID(invalidRoundID),
+				mockSetup: func(mockRedis *mock_redis.MockClient) {
+					mockRedis.EXPECT().GetRound(ctx, invalidRoundID.String()).Return(nil, errors.New("redis connection error"))
+				},
+				expectedError: "failed to get round from redis", // エラーメッセージは抽象化される想定
+			},
+			{
+				name:    "失敗 - Round Not Found",
+				roundID: openapi_types.UUID(invalidRoundID),
+				mockSetup: func(mockRedis *mock_redis.MockClient) {
+					mockRedis.EXPECT().GetRound(ctx, invalidRoundID.String()).Return(nil, nil) // nil, nil を返す
+				},
+				expectedError: "round not found",
+			},
+			{
+				name:    "失敗 - SessionId パースエラー",
+				roundID: openapi_types.UUID(validRoundID),
+				mockSetup: func(mockRedis *mock_redis.MockClient) {
+					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
+						SessionId: "invalid-session-id-format", // 不正な形式
+						Status:    string(api.Voting),
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+				},
+				expectedError: "invalid session ID format",
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				ctrl := gomock.NewController(t)
+				defer ctrl.Finish()
+				mockRedis := mock_redis.NewMockClient(ctrl)
+				mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
+				server := api.NewServer(mockRedis, mockWebSocketHub)
+
+				tt.mockSetup(mockRedis)
+
+				res, err := server.HandleGetApiPlanningPokerRoundsRoundId(ctx, tt.roundID)
+
+				assert.Error(t, err)
+				assert.Nil(t, res)
+				assert.Contains(t, err.Error(), tt.expectedError)
+			})
+		}
+	})
+}
+
 func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -1055,4 +1325,9 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 			}
 		})
 	}
+}
+
+// PtrString は string のポインタを返すヘルパー関数です。
+func PtrString(s string) *string {
+	return &s
 }
