@@ -196,6 +196,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/planning-poker/rounds/{roundId}:
+    get:
+      summary: ラウンド情報を取得する
+      parameters:
+        - in: path
+          name: roundId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ラウンドID
+      responses:
+        "200":
+          description: ラウンド情報取得成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetRoundResponse"
+        "404":
+          description: ラウンドが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/planning-poker/rounds/{roundId}/reveal:
     post:
       summary: ラウンドを終了する
@@ -365,6 +395,15 @@ components:
           type: string
           format: uuid
           description: 開始されたラウンドのID
+    GetRoundResponse:
+      type: object
+      description: ラウンド情報取得レスポンス
+      required:
+        - round
+      properties:
+        round:
+          $ref: "#/components/schemas/Round"
+          description: ラウンド情報
     RevealRoundResponse:
       type: object
       description: ラウンド結果公開レスポンス
@@ -458,6 +497,60 @@ components:
           type: string
           format: date-time
           description: セッションの最終更新日時
+    Round:
+      type: object
+      description: ラウンド情報
+      required:
+        - roundId
+        - sessionId
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        roundId:
+          type: string
+          format: uuid
+          description: ラウンドのID
+        sessionId:
+          type: string
+          format: uuid
+          description: このラウンドが属するセッションのID
+        status:
+          type: string
+          description: ラウンドの状態
+          enum:
+            - voting
+            - revealed
+        votes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Vote"
+          description: 投票結果のリスト
+        createdAt:
+          type: string
+          format: date-time
+          description: ラウンドの作成日時
+        updatedAt:
+          type: string
+          format: date-time
+          description: ラウンドの最終更新日時
+    Vote:
+      type: object
+      description: 投票情報
+      properties:
+        participantId:
+          type: string
+          format: uuid
+          description: 参加者のID
+        isVoted:
+          type: boolean
+          description: 投票済みか？
+        value:
+          type: string
+          description: 投票値
+      required:
+        - participantId
+        - voted
     WebSocketMessage:
       type: object
       description: WebSocketメッセージ
@@ -507,17 +600,6 @@ components:
           type: string
           format: uuid
           description: 投票した参加者のID
-    Vote:
-      type: object
-      description: 投票情報
-      properties:
-        participantId:
-          type: string
-          format: uuid
-          description: 参加者のID
-        value:
-          type: string
-          description: 投票値
     VotesRevealedPayload:
       type: object
       description: votesRevealedイベントのペイロード
