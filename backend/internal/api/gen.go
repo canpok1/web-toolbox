@@ -179,13 +179,10 @@ type StartRoundResponse struct {
 
 // Vote 投票情報
 type Vote struct {
-	// IsVoted 投票済みか？
-	IsVoted bool `json:"isVoted"`
-
 	// ParticipantId 参加者のID
 	ParticipantId openapi_types.UUID `json:"participantId"`
 
-	// Value 投票値
+	// Value 投票値（ラウンドのstatusがrevealedの場合のみ）
 	Value *string `json:"value,omitempty"`
 }
 

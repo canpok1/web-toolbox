@@ -731,9 +731,7 @@ export interface components {
              * @description 参加者のID
              */
             participantId: string;
-            /** @description 投票済みか？ */
-            isVoted: boolean;
-            /** @description 投票値 */
+            /** @description 投票値（ラウンドのstatusがrevealedの場合のみ） */
             value?: string;
         };
         /** @description WebSocketメッセージ */

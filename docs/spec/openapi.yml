@@ -542,15 +542,11 @@ components:
           type: string
           format: uuid
           description: 参加者のID
-        isVoted:
-          type: boolean
-          description: 投票済みか？
         value:
           type: string
-          description: 投票値
+          description: 投票値（ラウンドのstatusがrevealedの場合のみ）
       required:
         - participantId
-        - isVoted
     WebSocketMessage:
       type: object
       description: WebSocketメッセージ
