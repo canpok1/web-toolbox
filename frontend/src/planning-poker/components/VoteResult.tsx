@@ -19,13 +19,13 @@ function VoteResult({ participant, revealed }: VoteResultProps) {
       <div className="stats h-full w-full shadow">
         <div className="stat place-items-center">
           <div className="stat-title">{participant.name}</div>
-          {participant.vote === null && (
+          {!participant.isVoted && (
             <CircleSlash className="text-error" aria-label="未投票" />
           )}
-          {participant.vote !== null && revealed && (
+          {participant.isVoted && revealed && (
             <div className="stat-value">{participant.vote}</div>
           )}
-          {participant.vote !== null && !revealed && (
+          {participant.isVoted && !revealed && (
             <CircleCheckBig
               className="text-success-content"
               aria-label="投票済"
