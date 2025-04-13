@@ -30,7 +30,7 @@ function VotePanel({
       });
       onAfterVote(option);
     } catch (error) {
-      setErrorMessages([ExtractErrorMessage(error)]);
+      setErrorMessages(["投票に失敗しました。もう一度お試しください。"]);
       console.error("failed to vote:", error);
     }
   };
