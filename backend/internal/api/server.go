@@ -60,8 +60,8 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Cont
 	return ctx.JSON(http.StatusCreated, res)
 }
 
-func (s *Server) GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId types.UUID) error {
-	res, err := s.HandleGetApiPlanningPokerRoundsRoundId(context.Background(), roundId)
+func (s *Server) GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId types.UUID, params GetApiPlanningPokerRoundsRoundIdParams) error {
+	res, err := s.HandleGetApiPlanningPokerRoundsRoundId(context.Background(), roundId, params.ParticipantId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})

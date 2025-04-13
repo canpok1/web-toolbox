@@ -182,8 +182,14 @@ type Vote struct {
 	// ParticipantId 参加者のID
 	ParticipantId openapi_types.UUID `json:"participantId"`
 
-	// Value 投票値（ラウンドのstatusがrevealedの場合のみ）
+	// Value 投票値（参加者自身もしくはラウンドのstatusがrevealedの場合のみ）
 	Value *string `json:"value,omitempty"`
+}
+
+// GetApiPlanningPokerRoundsRoundIdParams defines parameters for GetApiPlanningPokerRoundsRoundId.
+type GetApiPlanningPokerRoundsRoundIdParams struct {
+	// ParticipantId 取得したい投票情報の参加者ID。指定しない場合は、revealed状態であれば全参加者の投票情報を返す。
+	ParticipantId *openapi_types.UUID `form:"participantId,omitempty" json:"participantId,omitempty"`
 }
 
 // PostApiPlanningPokerRoundsRoundIdVotesJSONRequestBody defines body for PostApiPlanningPokerRoundsRoundIdVotes for application/json ContentType.
@@ -199,7 +205,7 @@ type PostApiPlanningPokerSessionsSessionIdParticipantsJSONRequestBody = JoinSess
 type ServerInterface interface {
 	// ラウンド情報を取得する
 	// (GET /api/planning-poker/rounds/{roundId})
-	GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId openapi_types.UUID) error
+	GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId openapi_types.UUID, params GetApiPlanningPokerRoundsRoundIdParams) error
 	// ラウンドを終了する
 	// (POST /api/planning-poker/rounds/{roundId}/reveal)
 	PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId openapi_types.UUID) error
@@ -242,8 +248,17 @@ func (w *ServerInterfaceWrapper) GetApiPlanningPokerRoundsRoundId(ctx echo.Conte
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter roundId: %s", err))
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetApiPlanningPokerRoundsRoundIdParams
+	// ------------- Optional query parameter "participantId" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "participantId", ctx.QueryParams(), &params.ParticipantId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter participantId: %s", err))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetApiPlanningPokerRoundsRoundId(ctx, roundId)
+	err = w.Handler.GetApiPlanningPokerRoundsRoundId(ctx, roundId, params)
 	return err
 }
 

@@ -384,7 +384,10 @@ export interface paths {
         /** ラウンド情報を取得する */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description 取得したい投票情報の参加者ID。指定しない場合は、revealed状態であれば全参加者の投票情報を返す。 */
+                    participantId?: string;
+                };
                 header?: never;
                 path: {
                     /** @description ラウンドID */
@@ -731,7 +734,7 @@ export interface components {
              * @description 参加者のID
              */
             participantId: string;
-            /** @description 投票値（ラウンドのstatusがrevealedの場合のみ） */
+            /** @description 投票値（参加者自身もしくはラウンドのstatusがrevealedの場合のみ） */
             value?: string;
         };
         /** @description WebSocketメッセージ */
