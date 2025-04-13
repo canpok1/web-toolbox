@@ -10,6 +10,7 @@ import (
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/oapi-codegen/runtime/types"
 )
 
 type Server struct {
@@ -57,6 +58,11 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Cont
 	}
 
 	return ctx.JSON(http.StatusCreated, res)
+}
+
+func (s *Server) GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId types.UUID) error {
+	// TODO ラウンド取得APIを実装
+	panic("unimplemented")
 }
 
 func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId uuid.UUID) error {
