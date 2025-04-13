@@ -18,6 +18,7 @@ export default function HostPanel({
   onClick,
   onError,
 }: HostPanelProps) {
+  const hasEnableSession = session && session.status !== "finished";
   const showStartRoundButton = !round || round.status === "revealed";
   const showRevealVoteButton = round?.status === "voting";
   const showEndSessionButton = !round || round.status === "revealed";
@@ -28,7 +29,7 @@ export default function HostPanel({
         return;
       }
       const client = new ApiClient();
-      await client.startRound(session.id);
+      await client.startRound(session.sessionId);
       onClick("startRound");
     } catch (error) {
       onError("startRound", error);
@@ -54,7 +55,7 @@ export default function HostPanel({
         return;
       }
       const client = new ApiClient();
-      await client.endSession(session.id);
+      await client.endSession(session.sessionId);
       onClick("endSession");
     } catch (error) {
       onError("endSession", error);
@@ -63,41 +64,48 @@ export default function HostPanel({
 
   return (
     <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
-      <div className="card-body bg-neutral-content text-left">
-        {showStartRoundButton && (
-          <button
-            type="button"
-            className="btn btn-primary w-full"
-            aria-label="投票を開始"
-            onClick={handleStartRound}
-          >
-            <Play />
-            投票を開始
-          </button>
-        )}
-        {showRevealVoteButton && (
-          <button
-            type="button"
-            className="btn btn-primary w-full"
-            aria-label="投票を公開"
-            onClick={handleRevealVotes}
-          >
-            <CheckCircle2 />
-            投票を公開
-          </button>
-        )}
-        {showEndSessionButton && (
-          <button
-            type="button"
-            className="btn btn-error w-full"
-            aria-label="セッションを終了"
-            onClick={handleEndSession}
-          >
-            <StopCircle />
-            セッションを終了
-          </button>
-        )}
-      </div>
+      {hasEnableSession && (
+        <div className="card-body bg-neutral-content text-left">
+          {showStartRoundButton && (
+            <button
+              type="button"
+              className="btn btn-primary w-full"
+              aria-label="投票を開始"
+              onClick={handleStartRound}
+            >
+              <Play />
+              投票を開始
+            </button>
+          )}
+          {showRevealVoteButton && (
+            <button
+              type="button"
+              className="btn btn-primary w-full"
+              aria-label="投票を公開"
+              onClick={handleRevealVotes}
+            >
+              <CheckCircle2 />
+              投票を公開
+            </button>
+          )}
+          {showEndSessionButton && (
+            <button
+              type="button"
+              className="btn btn-error w-full"
+              aria-label="セッションを終了"
+              onClick={handleEndSession}
+            >
+              <StopCircle />
+              セッションを終了
+            </button>
+          )}
+        </div>
+      )}
+      {!hasEnableSession && (
+        <div className="card-body bg-neutral-content text-left">
+          <p>セッション終了済み</p>
+        </div>
+      )}
     </div>
   );
 }
