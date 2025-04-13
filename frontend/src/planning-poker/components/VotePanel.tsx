@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ApiClient } from "../../api/ApiClient";
-import { ExtractErrorMessage } from "../utils/error";
 import Alert from "./Alert";
 
 export type VotePanelProps = {
