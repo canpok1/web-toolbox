@@ -550,7 +550,7 @@ components:
           description: 投票値
       required:
         - participantId
-        - voted
+        - isVoted
     WebSocketMessage:
       type: object
       description: WebSocketメッセージ
