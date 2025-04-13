@@ -92,6 +92,27 @@ export class ApiClient {
     return data;
   }
 
+  async fetchRound(
+    roundId: string,
+  ): Promise<
+    paths["/api/planning-poker/rounds/{roundId}"]["get"]["responses"][200]["content"]["application/json"]
+  > {
+    const { data, error } = await this.client.GET(
+      "/api/planning-poker/rounds/{roundId}",
+      {
+        params: {
+          path: {
+            roundId,
+          },
+        },
+      },
+    );
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data;
+  }
+
   async startRound(
     sessionId: string,
   ): Promise<

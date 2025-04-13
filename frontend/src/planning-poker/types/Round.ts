@@ -1,5 +1,6 @@
 export interface Round {
-  id: string;
+  roundId: string;
+  sessionId: string;
   status: RoundStatus;
 }
 
