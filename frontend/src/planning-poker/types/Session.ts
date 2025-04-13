@@ -9,7 +9,11 @@ export interface Session {
   status: SessionStatus;
 }
 
-export const SessionStatusValues = ["lobby", "inProgress", "finished"] as const;
+export const SessionStatusValues = [
+  "waiting",
+  "inProgress",
+  "finished",
+] as const;
 export type SessionStatus = (typeof SessionStatusValues)[number];
 
 export function isSessionStatus(value: string): value is SessionStatus {

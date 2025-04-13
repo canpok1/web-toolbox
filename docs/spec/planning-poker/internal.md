@@ -31,7 +31,7 @@ Redisには以下のデータ構造で情報を格納します。
     *   `scaleType` (String): 見積もりスケールのタイプ (例: "fibonacci", "tshirt", "custom")
     *   `customScale` (String, JSON Array): カスタムスケールの場合のスケール値の配列 (例: `["1", "2", "3", "5"]`)
     *   `currentRoundId` (String): 現在のラウンドのroundId
-    *   `status` (String): セッションのステータス ("lobby", "inProgress", "finished")
+    *   `status` (String): セッションのステータス ("waiting", "inProgress", "finished")
     *   `createdAt` (String): 作成日時 (ISO 8601形式)
     *   `updatedAt` (String): 更新日時 (ISO 8601形式)
 
