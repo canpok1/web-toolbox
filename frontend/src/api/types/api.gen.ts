@@ -577,8 +577,6 @@ export interface components {
         ScaleType: "fibonacci" | "t-shirt" | "power-of-two" | "custom";
         /** @description セッション作成リクエスト */
         CreateSessionRequest: {
-            /** @description セッション名 */
-            sessionName: string;
             /** @description スケールの種類 */
             scaleType: components["schemas"]["ScaleType"];
             /** @description カスタムスケール（scaleTypeがcustomの場合のみ有効） */
@@ -666,8 +664,6 @@ export interface components {
              * @description セッションのID
              */
             sessionId: string;
-            /** @description セッション名 */
-            sessionName: string;
             /**
              * Format: uuid
              * @description セッションのホストID

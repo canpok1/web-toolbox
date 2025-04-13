@@ -41,7 +41,6 @@ function SessionSummary({ session }: { session: Session }) {
   return (
     <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
       <div className="card-body bg-neutral-content text-left">
-        <h2 className="card-title">セッション名: {session.sessionName}</h2>
         <p className="mt-4">参加者: {names.join(", ")}</p>
         <div>
           <button

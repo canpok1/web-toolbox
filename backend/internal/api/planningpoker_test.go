@@ -25,7 +25,6 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 		{
 			name: "success",
 			req: &api.CreateSessionRequest{
-				SessionName: "Test Session",
 				HostName:    "Test Host",
 				ScaleType:   api.Custom,
 				CustomScale: &[]string{"1", "2", "3"},
@@ -35,7 +34,6 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 		{
 			name: "failure - invalid scale type",
 			req: &api.CreateSessionRequest{
-				SessionName: "Test Session",
 				HostName:    "Test Host",
 				ScaleType:   "invalid",
 				CustomScale: &[]string{"1", "2", "3"},
@@ -43,18 +41,8 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 			expectedError: "invalid scaleType: invalid",
 		},
 		{
-			name: "failure - missing session name",
-			req: &api.CreateSessionRequest{
-				HostName:    "Test Host",
-				ScaleType:   api.Fibonacci,
-				CustomScale: &[]string{"1", "2", "3"},
-			},
-			expectedError: "sessionName is required",
-		},
-		{
 			name: "failure - missing host name",
 			req: &api.CreateSessionRequest{
-				SessionName: "Test Session",
 				ScaleType:   api.Fibonacci,
 				CustomScale: &[]string{"1", "2", "3"},
 			},
@@ -63,7 +51,6 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 		{
 			name: "failure - missing scale type",
 			req: &api.CreateSessionRequest{
-				SessionName: "Test Session",
 				HostName:    "Test Host",
 				CustomScale: &[]string{"1", "2", "3"},
 			},
@@ -72,7 +59,6 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 		{
 			name: "failure - missing custom scale",
 			req: &api.CreateSessionRequest{
-				SessionName: "Test Session",
 				HostName:    "Test Host",
 				ScaleType:   api.Custom,
 				CustomScale: &[]string{},
@@ -123,7 +109,6 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 			{
 				name: "セッション作成失敗",
 				req: &api.CreateSessionRequest{
-					SessionName: "Test Session",
 					HostName:    "Test Host",
 					ScaleType:   api.Custom,
 					CustomScale: &[]string{"1", "2", "3"},
@@ -136,7 +121,6 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 			{
 				name: "参加者作成失敗",
 				req: &api.CreateSessionRequest{
-					SessionName: "Test Session",
 					HostName:    "Test Host",
 					ScaleType:   api.Custom,
 					CustomScale: &[]string{"1", "2", "3"},
@@ -149,7 +133,6 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 			{
 				name: "参加者リストへの追加失敗",
 				req: &api.CreateSessionRequest{
-					SessionName: "Test Session",
 					HostName:    "Test Host",
 					ScaleType:   api.Custom,
 					CustomScale: &[]string{"1", "2", "3"},
@@ -190,7 +173,6 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 			{
 				name: "success",
 				req: &api.CreateSessionRequest{
-					SessionName: "Test Session",
 					HostName:    "Test Host",
 					ScaleType:   api.Custom,
 					CustomScale: &[]string{"1", "2", "3"},
@@ -463,7 +445,6 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 				server := api.NewServer(mockRedis, mockWebSocketHub)
 
 				mockRedis.EXPECT().GetSession(gomock.Any(), tt.sessionID.String()).Return(&redis.Session{
-					SessionName:    "Test Session",
 					HostId:         tt.hostID,
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -501,7 +482,6 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 			sessionID: uuid.New(),
 			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
 				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
-					SessionName:    "Test Session",
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -534,7 +514,6 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 			sessionID: uuid.New(),
 			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
 				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
-					SessionName:    "Test Session",
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -592,7 +571,6 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 			sessionID: uuid.New(),
 			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
 				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
-					SessionName:    "Test Session",
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -626,7 +604,6 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 			sessionID: uuid.New(),
 			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
 				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
-					SessionName:    "Test Session",
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -644,7 +621,6 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 			sessionID: uuid.New(),
 			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
 				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
-					SessionName:    "Test Session",
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},

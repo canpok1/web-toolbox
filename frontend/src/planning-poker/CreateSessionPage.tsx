@@ -7,7 +7,6 @@ import { isScaleType } from "./types/ScaleType";
 import { ExtractErrorMessage } from "./utils/error";
 
 function CreateSessionPage() {
-  const [sessionName, setSessionName] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [scale, setScale] = useState<string>("fibonacci");
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
@@ -15,11 +14,7 @@ function CreateSessionPage() {
   const navigate = useNavigate();
 
   const client = new ApiClient();
-  const shouldSubmit = sessionName !== "" && userName !== "";
-
-  const handleSessionNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSessionName(event.target.value);
-  };
+  const shouldSubmit = userName !== "";
 
   const handleUserNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setUserName(event.target.value);
@@ -38,7 +33,6 @@ function CreateSessionPage() {
 
       console.log("clicked button, userName:%s, scale:%s", userName, scale);
       const resp = await client.createSession({
-        sessionName: sessionName,
         hostName: userName,
         scaleType: scale,
       });
@@ -59,16 +53,6 @@ function CreateSessionPage() {
           <h2 className="card-title">セッションを作成</h2>
           <p className="mb-5">ホストとしてセッションを開始します。</p>
           <Alert messages={errorMessages} className="mb-3" />
-          <label className="floating-label mx-auto mb-3 w-full">
-            <span>セッション名</span>
-            <input
-              className="input w-full"
-              type="text"
-              placeholder="セッション名"
-              value={sessionName}
-              onChange={handleSessionNameChange}
-            />
-          </label>
           <label className="floating-label mx-auto mb-3 w-full">
             <span>あなたの名前</span>
             <input

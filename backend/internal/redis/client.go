@@ -65,7 +65,6 @@ func (c *client) Close() error {
 
 // Session represents a planning poker session.
 type Session struct {
-	SessionName    string    `json:"sessionName"`
 	HostId         string    `json:"hostId"`
 	ScaleType      string    `json:"scaleType"`
 	CustomScale    []string  `json:"customScale"`
