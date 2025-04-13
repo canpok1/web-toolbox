@@ -14,15 +14,18 @@ function useSession(): ReturnValue {
     const apiClient = new ApiClient();
     const response = await apiClient.fetchSession(sessionId);
     if (response.session) {
+      const participants = response.session.participants.map((participant) => {
+        return {
+          id: participant.participantId,
+          name: participant.name,
+        };
+      });
       setSession({
         id: response.session.sessionId,
         name: response.session.sessionName,
-        participants: response.session.participants.map((participant) => {
-          return {
-            id: participant.participantId,
-            name: participant.name,
-          };
-        }),
+        participants,
+        currentRoundId: response.session.currentRoundId,
+        hostId: response.session.hostId,
       });
     }
   }, []);
