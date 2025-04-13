@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
+import FibonacciVotePanel from "./components/FibonacciVotePanel";
 import HostPanel, { type HostPanelEvent } from "./components/HostPanel";
 import RoundSummary from "./components/RoundSummary";
 import SessionSummary from "./components/SessionSummary";
-import VotePanel from "./components/VotePanel";
 import useRound from "./hooks/useRound";
 import useSession from "./hooks/useSession";
 import type { RoundParticipant } from "./types/Participant";
@@ -23,16 +23,26 @@ function SessionPage() {
         await fetchSession(sessionId);
       })();
     }
-  }, [fetchSession, sessionId]);
+  }, [sessionId, fetchSession]);
 
   useEffect(() => {
     const roundId = session?.currentRoundId;
     if (roundId) {
       (async () => {
-        await fetchRound(roundId);
+        await fetchRound(roundId, participandId);
       })();
     }
-  }, [session, fetchRound]);
+  }, [session, participandId, fetchRound]);
+
+  useEffect(() => {
+    const myVote = round?.votes.find(
+      (vote) => vote.participantId === participandId,
+    );
+    if (!myVote) {
+      return;
+    }
+    setVoteOption(myVote.vote);
+  }, [round, participandId]);
 
   const participants: RoundParticipant[] = [
     { id: "aaaa", name: "Aさん", vote: 1 },
@@ -44,25 +54,11 @@ function SessionPage() {
     { id: "gggg", name: "Gさん", vote: 1 },
     { id: "hhhh", name: "Hさん", vote: 2 },
   ];
-  const voteOptions = [
-    "0",
-    "1",
-    "2",
-    "3",
-    "5",
-    "8",
-    "13",
-    "21",
-    "34",
-    "55",
-    "89",
-    "?",
-  ];
+
   const [voteOption, setVoteOption] = useState<string | null>(null);
 
   const handleVote = (option: string) => {
     setVoteOption(option);
-    console.log(`voted: ${option}`);
   };
 
   return (
@@ -85,10 +81,9 @@ function SessionPage() {
         )}
 
         {round?.status === "voting" && (
-          <VotePanel
+          <FibonacciVotePanel
             roundId={round.roundId}
             participantId={participandId}
-            voteOptions={voteOptions}
             votedOption={voteOption}
             onAfterVote={handleVote}
           />

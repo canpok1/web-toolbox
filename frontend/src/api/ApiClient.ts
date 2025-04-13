@@ -94,6 +94,7 @@ export class ApiClient {
 
   async fetchRound(
     roundId: string,
+    participantId?: string,
   ): Promise<
     paths["/api/planning-poker/rounds/{roundId}"]["get"]["responses"][200]["content"]["application/json"]
   > {
@@ -103,6 +104,9 @@ export class ApiClient {
         params: {
           path: {
             roundId,
+          },
+          query: {
+            participantId,
           },
         },
       },
