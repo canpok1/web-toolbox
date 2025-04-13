@@ -21,9 +21,6 @@ func (s *Server) ValidatePostApiPlanningPokerSessions(body *CreateSessionRequest
 	if body == nil {
 		return fmt.Errorf("request body is required")
 	}
-	if body.SessionName == "" {
-		return fmt.Errorf("sessionName is required")
-	}
 	if body.HostName == "" {
 		return fmt.Errorf("hostName is required")
 	}
@@ -59,7 +56,6 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 
 	// セッション情報の保存
 	session := redis.Session{
-		SessionName: body.SessionName,
 		HostId:      hostIdValue,
 		ScaleType:   string(body.ScaleType),
 		CustomScale: []string{},
@@ -380,7 +376,6 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID uuid.UUID)
 	res := GetSessionResponse{
 		Session: Session{
 			SessionId:      sessionID,
-			SessionName:    session.SessionName,
 			HostId:         uuid.MustParse(session.HostId),
 			ScaleType:      ScaleType(session.ScaleType),
 			Status:         session.Status,

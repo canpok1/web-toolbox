@@ -328,13 +328,9 @@ components:
       type: object
       description: セッション作成リクエスト
       required:
-        - sessionName
         - scaleType
         - hostName
       properties:
-        sessionName:
-          type: string
-          description: セッション名
         scaleType:
           $ref: "#/components/schemas/ScaleType"
           description: スケールの種類
@@ -456,7 +452,6 @@ components:
       description: セッション情報
       required:
         - sessionId
-        - sessionName
         - hostId
         - scaleType
         - customScale
@@ -469,9 +464,6 @@ components:
           type: string
           format: uuid
           description: セッションのID
-        sessionName:
-          type: string
-          description: セッション名
         hostId:
           type: string
           format: uuid

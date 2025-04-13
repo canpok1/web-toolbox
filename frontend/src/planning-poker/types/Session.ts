@@ -2,7 +2,6 @@ import type { SessionParticipant } from "./Participant";
 
 export interface Session {
   sessionId: string;
-  sessionName: string;
   participants: SessionParticipant[];
   currentRoundId?: string;
   hostId: string;

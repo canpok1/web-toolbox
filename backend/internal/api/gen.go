@@ -37,9 +37,6 @@ type CreateSessionRequest struct {
 
 	// ScaleType スケールの種類
 	ScaleType ScaleType `json:"scaleType"`
-
-	// SessionName セッション名
-	SessionName string `json:"sessionName"`
 }
 
 // CreateSessionResponse セッション作成レスポンス
@@ -151,9 +148,6 @@ type Session struct {
 
 	// SessionId セッションのID
 	SessionId openapi_types.UUID `json:"sessionId"`
-
-	// SessionName セッション名
-	SessionName string `json:"sessionName"`
 
 	// Status セッションの状態
 	Status string `json:"status"`

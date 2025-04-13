@@ -81,7 +81,6 @@ export default function useSession(
 
     return {
       sessionId: response.session.sessionId,
-      sessionName: response.session.sessionName,
       participants,
       currentRoundId: response.session.currentRoundId,
       hostId: response.session.hostId,
