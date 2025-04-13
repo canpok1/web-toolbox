@@ -1,4 +1,7 @@
 export interface Round {
-  id: string;
-  status: "voting" | "revealed";
+  roundId: string;
+  sessionId: string;
+  status: RoundStatus;
 }
+
+export type RoundStatus = "voting" | "revealed";

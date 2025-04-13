@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { ApiClient } from "../../api/ApiClient";
-import type { Session } from "../types/Session";
+import { type Session, isSessionStatus } from "../types/Session";
 
 export type ReturnValue = {
   session: Session | null;
@@ -14,15 +14,25 @@ function useSession(): ReturnValue {
     const apiClient = new ApiClient();
     const response = await apiClient.fetchSession(sessionId);
     if (response.session) {
+      if (!isSessionStatus(response.session.status)) {
+        throw new Error(
+          `Invalid session status, status=${response.session.status}`,
+        );
+      }
+
+      const participants = response.session.participants.map((participant) => {
+        return {
+          id: participant.participantId,
+          name: participant.name,
+        };
+      });
       setSession({
-        id: response.session.sessionId,
-        name: response.session.sessionName,
-        participants: response.session.participants.map((participant) => {
-          return {
-            id: participant.participantId,
-            name: participant.name,
-          };
-        }),
+        sessionId: response.session.sessionId,
+        sessionName: response.session.sessionName,
+        participants,
+        currentRoundId: response.session.currentRoundId,
+        hostId: response.session.hostId,
+        status: response.session.status,
       });
     }
   }, []);

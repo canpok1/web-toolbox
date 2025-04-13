@@ -11,7 +11,7 @@ function SessionSummary({ session }: { session: Session }) {
 
   const names = session.participants.map((p) => p.name);
   const joinPageUrl = new URL(
-    `/planning-poker/sessions/join?id=${session.id}`,
+    `/planning-poker/sessions/join?id=${session.sessionId}`,
     window.location.origin,
   );
   const joinUrlString = joinPageUrl.toString();
@@ -41,7 +41,7 @@ function SessionSummary({ session }: { session: Session }) {
   return (
     <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
       <div className="card-body bg-neutral-content text-left">
-        <h2 className="card-title">セッション名: {session.name}</h2>
+        <h2 className="card-title">セッション名: {session.sessionName}</h2>
         <p className="mt-4">参加者: {names.join(", ")}</p>
         <div>
           <button
