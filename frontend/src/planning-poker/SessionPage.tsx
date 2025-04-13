@@ -86,9 +86,11 @@ function SessionPage() {
 
         {round?.status === "voting" && (
           <VotePanel
+            roundId={round.roundId}
+            participantId={participandId}
             voteOptions={voteOptions}
-            onClick={handleVote}
             votedOption={voteOption}
+            onAfterVote={handleVote}
           />
         )}
 
