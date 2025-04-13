@@ -13,6 +13,12 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for RoundStatus.
+const (
+	Revealed RoundStatus = "revealed"
+	Voting   RoundStatus = "voting"
+)
+
 // Defines values for ScaleType.
 const (
 	Custom     ScaleType = "custom"
@@ -54,6 +60,12 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// GetRoundResponse ラウンド情報取得レスポンス
+type GetRoundResponse struct {
+	// Round ラウンド情報
+	Round Round `json:"round"`
+}
+
 // GetSessionResponse セッション取得レスポンス
 type GetSessionResponse struct {
 	// Session セッション情報
@@ -74,6 +86,30 @@ type JoinSessionResponse struct {
 
 // RevealRoundResponse ラウンド結果公開レスポンス
 type RevealRoundResponse = map[string]interface{}
+
+// Round ラウンド情報
+type Round struct {
+	// CreatedAt ラウンドの作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// RoundId ラウンドのID
+	RoundId openapi_types.UUID `json:"roundId"`
+
+	// SessionId このラウンドが属するセッションのID
+	SessionId openapi_types.UUID `json:"sessionId"`
+
+	// Status ラウンドの状態
+	Status RoundStatus `json:"status"`
+
+	// UpdatedAt ラウンドの最終更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// Votes 投票結果のリスト
+	Votes []Vote `json:"votes"`
+}
+
+// RoundStatus ラウンドの状態
+type RoundStatus string
 
 // ScaleType スケールの種類
 type ScaleType string
@@ -141,6 +177,15 @@ type StartRoundResponse struct {
 	RoundId openapi_types.UUID `json:"roundId"`
 }
 
+// Vote 投票情報
+type Vote struct {
+	// ParticipantId 参加者のID
+	ParticipantId openapi_types.UUID `json:"participantId"`
+
+	// Value 投票値（ラウンドのstatusがrevealedの場合のみ）
+	Value *string `json:"value,omitempty"`
+}
+
 // PostApiPlanningPokerRoundsRoundIdVotesJSONRequestBody defines body for PostApiPlanningPokerRoundsRoundIdVotes for application/json ContentType.
 type PostApiPlanningPokerRoundsRoundIdVotesJSONRequestBody = SendVoteRequest
 
@@ -152,6 +197,9 @@ type PostApiPlanningPokerSessionsSessionIdParticipantsJSONRequestBody = JoinSess
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// ラウンド情報を取得する
+	// (GET /api/planning-poker/rounds/{roundId})
+	GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId openapi_types.UUID) error
 	// ラウンドを終了する
 	// (POST /api/planning-poker/rounds/{roundId}/reveal)
 	PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId openapi_types.UUID) error
@@ -181,6 +229,22 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// GetApiPlanningPokerRoundsRoundId converts echo context to params.
+func (w *ServerInterfaceWrapper) GetApiPlanningPokerRoundsRoundId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "roundId" -------------
+	var roundId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "roundId", ctx.Param("roundId"), &roundId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter roundId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetApiPlanningPokerRoundsRoundId(ctx, roundId)
+	return err
 }
 
 // PostApiPlanningPokerRoundsRoundIdReveal converts echo context to params.
@@ -325,6 +389,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/api/planning-poker/rounds/:roundId", wrapper.GetApiPlanningPokerRoundsRoundId)
 	router.POST(baseURL+"/api/planning-poker/rounds/:roundId/reveal", wrapper.PostApiPlanningPokerRoundsRoundIdReveal)
 	router.POST(baseURL+"/api/planning-poker/rounds/:roundId/votes", wrapper.PostApiPlanningPokerRoundsRoundIdVotes)
 	router.POST(baseURL+"/api/planning-poker/sessions", wrapper.PostApiPlanningPokerSessions)

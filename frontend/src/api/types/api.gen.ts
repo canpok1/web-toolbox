@@ -374,6 +374,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/planning-poker/rounds/{roundId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** ラウンド情報を取得する */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description ラウンドID */
+                    roundId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description ラウンド情報取得成功 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetRoundResponse"];
+                    };
+                };
+                /** @description ラウンドが見つからない */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description サーバーエラー */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/planning-poker/rounds/{roundId}/reveal": {
         parameters: {
             query?: never;
@@ -567,6 +624,11 @@ export interface components {
              */
             roundId: string;
         };
+        /** @description ラウンド情報取得レスポンス */
+        GetRoundResponse: {
+            /** @description ラウンド情報 */
+            round: components["schemas"]["Round"];
+        };
         /** @description ラウンド結果公開レスポンス */
         RevealRoundResponse: Record<string, never>;
         /** @description 投票送信リクエスト */
@@ -632,6 +694,46 @@ export interface components {
              */
             updatedAt: string;
         };
+        /** @description ラウンド情報 */
+        Round: {
+            /**
+             * Format: uuid
+             * @description ラウンドのID
+             */
+            roundId: string;
+            /**
+             * Format: uuid
+             * @description このラウンドが属するセッションのID
+             */
+            sessionId: string;
+            /**
+             * @description ラウンドの状態
+             * @enum {string}
+             */
+            status: "voting" | "revealed";
+            /** @description 投票結果のリスト */
+            votes: components["schemas"]["Vote"][];
+            /**
+             * Format: date-time
+             * @description ラウンドの作成日時
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description ラウンドの最終更新日時
+             */
+            updatedAt: string;
+        };
+        /** @description 投票情報 */
+        Vote: {
+            /**
+             * Format: uuid
+             * @description 参加者のID
+             */
+            participantId: string;
+            /** @description 投票値（ラウンドのstatusがrevealedの場合のみ） */
+            value?: string;
+        };
         /** @description WebSocketメッセージ */
         WebSocketMessage: {
             /**
@@ -667,16 +769,6 @@ export interface components {
              * @description 投票した参加者のID
              */
             participantId?: string;
-        };
-        /** @description 投票情報 */
-        Vote: {
-            /**
-             * Format: uuid
-             * @description 参加者のID
-             */
-            participantId?: string;
-            /** @description 投票値 */
-            value?: string;
         };
         /** @description votesRevealedイベントのペイロード */
         VotesRevealedPayload: {
