@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import FibonacciVotePanel from "./components/FibonacciVotePanel";
 import HostPanel, { type HostPanelEvent } from "./components/HostPanel";
@@ -22,6 +22,9 @@ function SessionPage() {
     RoundParticipant[]
   >([]);
 
+  const intervalIdRef = useRef<NodeJS.Timeout | null>(null); // setIntervalのIDを保持
+
+  // セッション情報を更新
   useEffect(() => {
     if (sessionId) {
       (async () => {
@@ -30,6 +33,7 @@ function SessionPage() {
     }
   }, [sessionId, fetchSession]);
 
+  // ラウンド情報を更新
   useEffect(() => {
     const roundId = session?.currentRoundId;
     if (roundId) {
@@ -39,16 +43,15 @@ function SessionPage() {
     }
   }, [session, participandId, fetchRound]);
 
+  // 自分の投票情報を更新
   useEffect(() => {
     const myVote = round?.votes.find(
       (vote) => vote.participantId === participandId,
     );
-    if (!myVote) {
-      return;
-    }
-    setVoteOption(myVote.vote);
+    setVoteOption(myVote?.vote ?? null);
   }, [round, participandId]);
 
+  // ラウンド参加者情報を更新
   useEffect(() => {
     if (!session || !round) {
       return;
@@ -72,6 +75,30 @@ function SessionPage() {
 
     setRoundParticipants(participants);
   }, [session, round]);
+
+  // 定期更新
+  useEffect(() => {
+    intervalIdRef.current = setInterval(update, 5000);
+    return () => {
+      if (intervalIdRef.current) {
+        console.log(
+          "useEffect cleanup: インターバルをクリアします",
+          intervalIdRef.current,
+        );
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
+      }
+    };
+  }, []);
+
+  const update = async () => {
+    if (sessionId) {
+      await fetchSession(sessionId);
+    }
+    if (round?.roundId) {
+      await fetchRound(round.roundId, participandId);
+    }
+  };
 
   const handleVote = (option: string) => {
     setVoteOption(option);
