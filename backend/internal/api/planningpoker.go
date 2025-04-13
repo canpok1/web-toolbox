@@ -152,6 +152,11 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 	return &res, nil
 }
 
+func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, roundId uuid.UUID) (*GetRoundResponse, error) {
+	// TODO 実装
+	return nil, nil
+}
+
 func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx context.Context, roundId uuid.UUID) (*RevealRoundResponse, error) {
 	// Retrieve the round from Redis
 	round, err := s.redis.GetRound(ctx, roundId.String())

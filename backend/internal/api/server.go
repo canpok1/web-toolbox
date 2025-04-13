@@ -61,8 +61,12 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Cont
 }
 
 func (s *Server) GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId types.UUID) error {
-	// TODO ラウンド取得APIを実装
-	panic("unimplemented")
+	res, err := s.HandleGetApiPlanningPokerRoundsRoundId(context.Background(), roundId)
+	if err != nil {
+		log.Printf("failed to handle request: %v", err)
+		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{Message: err.Error()})
+	}
+	return ctx.JSON(http.StatusOK, res)
 }
 
 func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId uuid.UUID) error {
