@@ -1,6 +1,6 @@
-import { CheckCircle2, Play, StopCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
+import HostPanel, { type HostPanelEvent } from "./components/HostPanel";
 import RoundSummary from "./components/RoundSummary";
 import SessionSummary from "./components/SessionSummary";
 import VotePanel from "./components/VotePanel";
@@ -11,6 +11,10 @@ import type { Round } from "./types/Round";
 function SessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const { session, fetch } = useSession();
+
+  const [searchParams] = useSearchParams();
+  const participandId = searchParams.get("id") ?? "";
+  const showHostPanel = session && participandId === session?.hostId;
 
   useEffect(() => {
     if (sessionId) {
@@ -47,20 +51,6 @@ function SessionPage() {
   ];
   const [voteOption, setVoteOption] = useState<string | null>(null);
 
-  const handleStartRound = () => {
-    setRound({
-      id: "xxxxx",
-      status: "voting",
-    });
-  };
-
-  const handleRevealVotes = () => {
-    setRound({
-      id: "xxxxx",
-      status: "revealed",
-    });
-  };
-
   const handleVote = (option: string) => {
     setVoteOption(option);
     console.log(`voted: ${option}`);
@@ -72,42 +62,19 @@ function SessionPage() {
         <h1 className="mb-5 font-bold text-3xl">プランニングポーカー</h1>
         {session && <SessionSummary session={session} />}
 
-        <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
-          <div className="card-body bg-neutral-content text-left">
-            {round?.status !== "voting" && (
-              <button
-                type="button"
-                className="btn btn-primary w-full"
-                aria-label="ラウンドを開始"
-                onClick={handleStartRound}
-              >
-                <Play />
-                開始
-              </button>
-            )}
-            {round?.status === "voting" && (
-              <button
-                type="button"
-                className="btn btn-primary w-full"
-                aria-label="投票を公開"
-                onClick={handleRevealVotes}
-              >
-                <CheckCircle2 />
-                投票を公開
-              </button>
-            )}
-            {round?.status !== "voting" && (
-              <button
-                type="button"
-                className="btn btn-error w-full"
-                aria-label="セッションを終了"
-              >
-                <StopCircle />
-                セッションを終了
-              </button>
-            )}
-          </div>
-        </div>
+        {showHostPanel && (
+          <HostPanel
+            sessionId={session.id}
+            roundId={session.currentRoundId}
+            roundStatus={undefined}
+            onClick={(event: HostPanelEvent): void => {
+              console.log("clicked HostPanel, event:", event);
+            }}
+            onError={(event: HostPanelEvent, error: unknown): void => {
+              console.log("error on HostPanel, event:", event, "error:", error);
+            }}
+          />
+        )}
 
         {round?.status === "voting" && (
           <VotePanel
