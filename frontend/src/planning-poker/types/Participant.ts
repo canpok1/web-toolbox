@@ -4,5 +4,6 @@ export interface SessionParticipant {
 }
 
 export interface RoundParticipant extends SessionParticipant {
+  isVoted: boolean;
   vote: string | number | null;
 }

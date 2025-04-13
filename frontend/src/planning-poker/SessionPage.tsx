@@ -17,6 +17,11 @@ function SessionPage() {
   const participandId = searchParams.get("id") ?? "";
   const showHostPanel = session && participandId === session?.hostId;
 
+  const [voteOption, setVoteOption] = useState<string | null>(null);
+  const [roundParticipants, setRoundParticipants] = useState<
+    RoundParticipant[]
+  >([]);
+
   useEffect(() => {
     if (sessionId) {
       (async () => {
@@ -44,18 +49,29 @@ function SessionPage() {
     setVoteOption(myVote.vote);
   }, [round, participandId]);
 
-  const participants: RoundParticipant[] = [
-    { id: "aaaa", name: "Aさん", vote: 1 },
-    { id: "bbbb", name: "Bさん", vote: 2 },
-    { id: "cccc", name: "Cさん", vote: null },
-    { id: "dddd", name: "Dさん", vote: null },
-    { id: "eeee", name: "Eさん", vote: 3 },
-    { id: "ffff", name: "Fさん", vote: 1 },
-    { id: "gggg", name: "Gさん", vote: 1 },
-    { id: "hhhh", name: "Hさん", vote: 2 },
-  ];
+  useEffect(() => {
+    if (!session || !round) {
+      return;
+    }
+    const participants: RoundParticipant[] = [];
+    for (const participant of session.participants) {
+      const isVoted = round.votes.some(
+        (vote) => vote.participantId === participant.id,
+      );
+      const vote =
+        round.votes.find((vote) => vote.participantId === participant.id)
+          ?.vote ?? null;
 
-  const [voteOption, setVoteOption] = useState<string | null>(null);
+      participants.push({
+        id: participant.id,
+        name: participant.name,
+        isVoted,
+        vote,
+      });
+    }
+
+    setRoundParticipants(participants);
+  }, [session, round]);
 
   const handleVote = (option: string) => {
     setVoteOption(option);
@@ -91,7 +107,7 @@ function SessionPage() {
 
         {round && (
           <RoundSummary
-            participants={participants}
+            participants={roundParticipants}
             revealed={round?.status === "revealed"}
           />
         )}
