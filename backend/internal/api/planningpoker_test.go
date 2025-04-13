@@ -707,6 +707,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 		tests := []struct {
 			name             string
 			roundID          openapi_types.UUID
+			participantID    *openapi_types.UUID
 			mockSetup        func(mockRedis *mock_redis.MockClient)
 			expectedResponse *api.GetRoundResponse
 			expectedError    string
@@ -731,6 +732,47 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes:     []api.Vote{},
+					},
+				},
+			},
+			{
+				name:          "成功 - ステータス voting, 投票あり, 参加者指定あり",
+				roundID:       openapi_types.UUID(validRoundID),
+				participantID: &validParticipantID1,
+				mockSetup: func(mockRedis *mock_redis.MockClient) {
+					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
+						SessionId: validSessionID.String(),
+						Status:    string(api.Voting), // "voting"
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{voteID1, voteID2}, nil)
+					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: validParticipantID1.String(),
+						Value:         "5",
+						CreatedAt:     now,
+						UpdatedAt:     now,
+					}, nil)
+					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: validParticipantID2.String(),
+						Value:         "8",
+						CreatedAt:     now,
+						UpdatedAt:     now,
+					}, nil)
+				},
+				expectedResponse: &api.GetRoundResponse{
+					Round: api.Round{
+						RoundId:   openapi_types.UUID(validRoundID),
+						SessionId: openapi_types.UUID(validSessionID),
+						Status:    api.Voting,
+						CreatedAt: now,
+						UpdatedAt: now,
+						Votes: []api.Vote{
+							{ParticipantId: openapi_types.UUID(validParticipantID1), Value: PtrString("5")},
+							{ParticipantId: openapi_types.UUID(validParticipantID2)},
+						},
 					},
 				},
 			},
@@ -886,7 +928,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 
 				tt.mockSetup(mockRedis)
 
-				res, err := server.HandleGetApiPlanningPokerRoundsRoundId(ctx, tt.roundID)
+				res, err := server.HandleGetApiPlanningPokerRoundsRoundId(ctx, tt.roundID, tt.participantID)
 
 				if tt.expectedError == "" {
 					assert.NoError(t, err)
@@ -907,6 +949,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 		tests := []struct {
 			name          string
 			roundID       openapi_types.UUID
+			participantID *openapi_types.UUID
 			mockSetup     func(mockRedis *mock_redis.MockClient)
 			expectedError string
 		}{
@@ -951,7 +994,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 
 				tt.mockSetup(mockRedis)
 
-				res, err := server.HandleGetApiPlanningPokerRoundsRoundId(ctx, tt.roundID)
+				res, err := server.HandleGetApiPlanningPokerRoundsRoundId(ctx, tt.roundID, tt.participantID)
 
 				assert.Error(t, err)
 				assert.Nil(t, res)

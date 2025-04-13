@@ -152,7 +152,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 	return &res, nil
 }
 
-func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, roundId uuid.UUID) (*GetRoundResponse, error) {
+func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, roundId uuid.UUID, participantId *uuid.UUID) (*GetRoundResponse, error) {
 	redisRound, err := s.redis.GetRound(ctx, roundId.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get round from redis: roundID=%s, err=%v", roundId, err)
@@ -204,8 +204,8 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 			apiVote := Vote{
 				ParticipantId: participantUUID,
 			}
-			// 公開時のみ投票結果をセット
-			if apiRound.Status == Revealed {
+			// 公開時か自身のもののみ投票結果をセット
+			if apiRound.Status == Revealed || (participantId != nil && *participantId == participantUUID) {
 				apiVote.Value = &redisVote.Value
 			}
 			apiVotes = append(apiVotes, apiVote)
