@@ -153,8 +153,79 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 }
 
 func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, roundId uuid.UUID) (*GetRoundResponse, error) {
-	// TODO 実装
-	return nil, nil
+	redisRound, err := s.redis.GetRound(ctx, roundId.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get round from redis: roundID=%s, err=%v", roundId, err)
+	}
+	if redisRound == nil {
+		return nil, fmt.Errorf("round not found: roundID=%s", roundId)
+	}
+
+	apiRound := Round{
+		RoundId:   roundId,
+		Status:    RoundStatus(redisRound.Status),
+		CreatedAt: redisRound.CreatedAt,
+		UpdatedAt: redisRound.UpdatedAt,
+		Votes:     nil,
+	}
+
+	sessionUUID, err := uuid.Parse(redisRound.SessionId)
+	if err != nil {
+		return nil, fmt.Errorf("invalid session ID format")
+	}
+	apiRound.SessionId = sessionUUID
+
+	voteIDs, err := s.redis.GetVotesInRound(ctx, roundId.String())
+	if err != nil {
+		// 投票リスト取得エラーはログに残すが、ラウンド情報自体は返す（投票情報なしで）
+		log.Printf("failed to get votes in round, returning round data without votes: roundID=%s, err=%v", roundId, err)
+		// エラーを返さずに処理を続行
+	}
+
+	if len(voteIDs) > 0 {
+		apiVotes := make([]Vote, 0, len(voteIDs))
+		for _, voteID := range voteIDs {
+			redisVote, err := s.redis.GetVote(ctx, voteID)
+			if err != nil {
+				log.Printf("failed to get vote details, skipping vote: roundID=%s, voteID=%s, err=%v", roundId, voteID, err)
+				continue // 個別の投票取得エラーはスキップ
+			}
+			if redisVote == nil {
+				log.Printf("vote not found, but ID was listed in round, skipping vote: roundID=%s, voteID=%s", roundId, voteID)
+				continue // データ不整合の可能性、スキップ
+			}
+
+			participantUUID, err := uuid.Parse(redisVote.ParticipantId)
+			if err != nil {
+				log.Printf("failed to parse participantId for vote, skipping vote: roundID=%s, voteID=%s, participantID=%s, err=%v", roundId, voteID, redisVote.ParticipantId, err)
+				continue // ParticipantId の形式不正、スキップ
+			}
+
+			apiVote := Vote{
+				ParticipantId: participantUUID,
+			}
+			// 公開時のみ投票結果をセット
+			if apiRound.Status == Revealed {
+				apiVote.Value = &redisVote.Value
+			}
+			apiVotes = append(apiVotes, apiVote)
+		}
+		if len(apiVotes) > 0 {
+			apiRound.Votes = &apiVotes
+		} else {
+			emptyVotes := make([]Vote, 0)
+			apiRound.Votes = &emptyVotes
+		}
+	} else {
+		emptyVotes := make([]Vote, 0)
+		apiRound.Votes = &emptyVotes
+	}
+
+	res := GetRoundResponse{
+		Round: apiRound,
+	}
+
+	return &res, nil
 }
 
 func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx context.Context, roundId uuid.UUID) (*RevealRoundResponse, error) {
