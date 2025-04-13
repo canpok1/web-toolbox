@@ -211,14 +211,14 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 			apiVotes = append(apiVotes, apiVote)
 		}
 		if len(apiVotes) > 0 {
-			apiRound.Votes = &apiVotes
+			apiRound.Votes = apiVotes
 		} else {
 			emptyVotes := make([]Vote, 0)
-			apiRound.Votes = &emptyVotes
+			apiRound.Votes = emptyVotes
 		}
 	} else {
 		emptyVotes := make([]Vote, 0)
-		apiRound.Votes = &emptyVotes
+		apiRound.Votes = emptyVotes
 	}
 
 	res := GetRoundResponse{

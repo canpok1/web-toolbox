@@ -105,7 +105,7 @@ type Round struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 
 	// Votes 投票結果のリスト
-	Votes *[]Vote `json:"votes,omitempty"`
+	Votes []Vote `json:"votes"`
 }
 
 // RoundStatus ラウンドの状態

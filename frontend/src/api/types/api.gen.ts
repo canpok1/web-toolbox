@@ -712,7 +712,7 @@ export interface components {
              */
             status: "voting" | "revealed";
             /** @description 投票結果のリスト */
-            votes?: components["schemas"]["Vote"][];
+            votes: components["schemas"]["Vote"][];
             /**
              * Format: date-time
              * @description ラウンドの作成日時

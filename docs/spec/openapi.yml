@@ -504,6 +504,7 @@ components:
         - roundId
         - sessionId
         - status
+        - votes
         - createdAt
         - updatedAt
       properties:
