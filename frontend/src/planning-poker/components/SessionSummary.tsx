@@ -32,13 +32,13 @@ function SessionSummary({
     `/planning-poker/sessions/join?id=${session.sessionId}`,
     window.location.origin,
   );
-  const joinUrlString = joinPageUrl.toString();
+  const joinPageUrlString = joinPageUrl.toString();
 
   const handleCopyClick = async () => {
     setCopyError(null);
     setIsCopied(false);
     try {
-      await navigator.clipboard.writeText(joinUrlString);
+      await navigator.clipboard.writeText(joinPageUrlString);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
@@ -86,7 +86,9 @@ function SessionSummary({
               <Alert messages={copyError ? [copyError] : []} />
 
               <div className="flex items-center gap-2">
-                <p className="flex-grow break-all text-sm"> {joinUrlString}</p>
+                <p className="flex-grow break-all text-sm">
+                  {joinPageUrlString}
+                </p>
                 <button
                   type="button"
                   className={`btn btn-sm shrink-0 ${isCopied ? "btn-success" : "btn-ghost"}`}
@@ -100,7 +102,7 @@ function SessionSummary({
               </div>
 
               <div className="flex justify-center">
-                <QRCodeSVG value={joinUrlString} />
+                <QRCodeSVG value={joinPageUrlString} />
               </div>
             </div>
           )}
