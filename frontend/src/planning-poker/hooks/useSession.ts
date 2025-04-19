@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiClient } from "../../api/ApiClient";
-import type { RoundParticipant } from "../types/Participant";
 import type { Round } from "../types/Round";
 import { type Session, isSessionStatus } from "../types/Session";
 import type { Vote } from "../types/Vote";
@@ -108,31 +107,14 @@ export default function useSession(
     const votes = round.votes.map((vote) => {
       return {
         participantId: vote.participantId,
+        participantName: vote.participantName,
         vote: vote.value ?? null,
       };
     });
-    const participants: RoundParticipant[] = session.participants.map(
-      (participant) => {
-        const isVoted = round.votes.some(
-          (vote) => vote.participantId === participant.id,
-        );
-        const vote = round.votes.find(
-          (vote) => vote.participantId === participant.id,
-        );
-
-        return {
-          id: participant.id,
-          name: participant.name,
-          isVoted,
-          vote: vote?.value ?? null,
-        };
-      },
-    );
 
     return {
       ...response.round,
       votes,
-      participants,
     };
   };
 
