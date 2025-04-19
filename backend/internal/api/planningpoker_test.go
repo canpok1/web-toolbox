@@ -3,6 +3,7 @@ package api_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -689,7 +690,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 			expectedError    string
 		}{
 			{
-				name:    "成功 - ステータス voting",
+				name:    "成功 - ステータス voting, 投票なし, 参加者指定なし",
 				roundID: openapi_types.UUID(validRoundID),
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
 					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
@@ -737,6 +738,20 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1.String()).Return(&redis.Participant{
+						SessionId: validSessionID.String(),
+						Name:      "Alice",
+						IsHost:    true,
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2.String()).Return(&redis.Participant{
+						SessionId: validSessionID.String(),
+						Name:      "Bob",
+						IsHost:    false,
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
@@ -746,8 +761,8 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{
-							{ParticipantId: openapi_types.UUID(validParticipantID1), Value: PtrString("5")},
-							{ParticipantId: openapi_types.UUID(validParticipantID2)},
+							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: openapi_types.UUID(validParticipantID2), ParticipantName: "Bob"},
 						},
 					},
 				},
@@ -777,6 +792,20 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1.String()).Return(&redis.Participant{
+						SessionId: validSessionID.String(),
+						Name:      "Alice",
+						IsHost:    true,
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2.String()).Return(&redis.Participant{
+						SessionId: validSessionID.String(),
+						Name:      "Bob",
+						IsHost:    false,
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
@@ -786,8 +815,8 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{
-							{ParticipantId: openapi_types.UUID(validParticipantID1), Value: PtrString("5")},
-							{ParticipantId: openapi_types.UUID(validParticipantID2), Value: PtrString("8")},
+							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: openapi_types.UUID(validParticipantID2), ParticipantName: "Bob", Value: PtrString("8")},
 						},
 					},
 				},
@@ -877,6 +906,20 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						ParticipantId: validParticipantID2.String(),
 						Value:         "21",
 					}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1.String()).Return(&redis.Participant{
+						SessionId: validSessionID.String(),
+						Name:      "Alice",
+						IsHost:    true,
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2.String()).Return(&redis.Participant{
+						SessionId: validSessionID.String(),
+						Name:      "Bob",
+						IsHost:    false,
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
@@ -886,8 +929,61 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{ // エラー/nil/パースエラーの投票は含まれない
-							{ParticipantId: openapi_types.UUID(validParticipantID1), Value: PtrString("5")},
-							{ParticipantId: openapi_types.UUID(validParticipantID2), Value: PtrString("21")},
+							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: openapi_types.UUID(validParticipantID2), ParticipantName: "Bob", Value: PtrString("21")},
+						},
+					},
+				},
+			},
+			{
+				name:    "成功 - ステータス revealed, 一部の GetParticipant エラー (スキップされる)",
+				roundID: openapi_types.UUID(validRoundID),
+				mockSetup: func(mockRedis *mock_redis.MockClient) {
+					voteID3 := uuid.New().String()
+					validParticipantID3 := uuid.New()
+
+					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
+						SessionId: validSessionID.String(),
+						Status:    string(api.Revealed),
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{voteID1, voteID2, voteID3}, nil)
+
+					// 正常な投票
+					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: validParticipantID1.String(),
+						Value:         "5",
+					}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1.String()).Return(&redis.Participant{Name: "Alice"}, nil)
+
+					// GetParticipant エラー
+					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: validParticipantID2.String(),
+						Value:         "8",
+					}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2.String()).Return(nil, errors.New("get participant error"))
+
+					// GetParticipant nil (Not Found)
+					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: validParticipantID3.String(),
+						Value:         "13",
+					}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID3.String()).Return(nil, fmt.Errorf("participant %s not found", validParticipantID3.String())) // redis.GetParticipantの実装に合わせる
+
+				},
+				expectedResponse: &api.GetRoundResponse{
+					Round: api.Round{
+						RoundId:   openapi_types.UUID(validRoundID),
+						SessionId: openapi_types.UUID(validSessionID),
+						Status:    api.Revealed,
+						CreatedAt: now,
+						UpdatedAt: now,
+						Votes: []api.Vote{ // GetParticipantでエラー/nilになった投票は含まれない
+							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
 						},
 					},
 				},
