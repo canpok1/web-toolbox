@@ -3,7 +3,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import Alert from "./components/Alert";
 import FibonacciVotePanel from "./components/FibonacciVotePanel";
 import HostPanel, { type HostPanelEvent } from "./components/HostPanel";
-import RoundSummary from "./components/RoundSummary";
+import RoundSummaryPanel from "./components/RoundSummaryPanel";
 import SessionSummary from "./components/SessionSummary";
 import useSession from "./hooks/useSession";
 import { ExtractErrorMessage } from "./utils/error";
@@ -78,10 +78,11 @@ function SessionPage() {
         )}
 
         {round && (
-          <RoundSummary
+          <RoundSummaryPanel
             participants={session?.participants ?? []}
             votes={round.votes}
             revealed={round?.status === "revealed"}
+            summary={round.summary}
           />
         )}
       </div>

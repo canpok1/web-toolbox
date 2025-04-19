@@ -678,8 +678,10 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 		validRoundID := uuid.New()
 		validParticipantID1 := uuid.New()
 		validParticipantID2 := uuid.New()
+		validParticipantID3 := uuid.New()
 		voteID1 := uuid.New().String()
 		voteID2 := uuid.New().String()
+		voteID3 := uuid.New().String()
 
 		tests := []struct {
 			name             string
@@ -777,7 +779,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{voteID1, voteID2}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{voteID1, voteID2, voteID3}, nil)
 					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
 						RoundId:       validRoundID.String(),
 						ParticipantId: validParticipantID1.String(),
@@ -789,6 +791,13 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						RoundId:       validRoundID.String(),
 						ParticipantId: validParticipantID2.String(),
 						Value:         "8",
+						CreatedAt:     now,
+						UpdatedAt:     now,
+					}, nil)
+					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(&redis.Vote{
+						RoundId:       validRoundID.String(),
+						ParticipantId: validParticipantID3.String(),
+						Value:         "2",
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
@@ -806,6 +815,13 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID3.String()).Return(&redis.Participant{
+						SessionId: validSessionID.String(),
+						Name:      "Charlie",
+						IsHost:    false,
+						CreatedAt: now,
+						UpdatedAt: now,
+					}, nil)
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
@@ -817,6 +833,13 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						Votes: []api.Vote{
 							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
 							{ParticipantId: openapi_types.UUID(validParticipantID2), ParticipantName: "Bob", Value: PtrString("8")},
+							{ParticipantId: openapi_types.UUID(validParticipantID3), ParticipantName: "Charlie", Value: PtrString("2")},
+						},
+						Summary: &api.RoundSummary{
+							Average: 5.0,
+							Median:  5.0,
+							Max:     8.0,
+							Min:     2.0,
 						},
 					},
 				},
@@ -932,6 +955,12 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
 							{ParticipantId: openapi_types.UUID(validParticipantID2), ParticipantName: "Bob", Value: PtrString("21")},
 						},
+						Summary: &api.RoundSummary{
+							Average: 13.0,
+							Median:  13.0,
+							Max:     21.0,
+							Min:     5.0,
+						},
 					},
 				},
 			},
@@ -984,6 +1013,12 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						UpdatedAt: now,
 						Votes: []api.Vote{ // GetParticipantでエラー/nilになった投票は含まれない
 							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
+						},
+						Summary: &api.RoundSummary{
+							Average: 5.0,
+							Median:  5.0,
+							Max:     5.0,
+							Min:     5.0,
 						},
 					},
 				},

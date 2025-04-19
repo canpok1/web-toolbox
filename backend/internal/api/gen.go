@@ -98,6 +98,9 @@ type Round struct {
 	// Status ラウンドの状態
 	Status RoundStatus `json:"status"`
 
+	// Summary 投票結果の要約
+	Summary *RoundSummary `json:"summary,omitempty"`
+
 	// UpdatedAt ラウンドの最終更新日時
 	UpdatedAt time.Time `json:"updatedAt"`
 
@@ -107,6 +110,21 @@ type Round struct {
 
 // RoundStatus ラウンドの状態
 type RoundStatus string
+
+// RoundSummary 投票結果の要約
+type RoundSummary struct {
+	// Average 投票値の平均（未投票、不明除く）
+	Average float32 `json:"average"`
+
+	// Max 投票値の最大値（未投票、不明除く）
+	Max float32 `json:"max"`
+
+	// Median 投票値の中央値（未投票、不明除く）
+	Median float32 `json:"median"`
+
+	// Min 投票値の最小値（未投票、不明除く）
+	Min float32 `json:"min"`
+}
 
 // ScaleType スケールの種類
 type ScaleType string

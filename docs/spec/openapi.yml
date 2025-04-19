@@ -526,6 +526,8 @@ components:
           items:
             $ref: "#/components/schemas/Vote"
           description: 投票結果のリスト
+        summary:
+          $ref: "#/components/schemas/RoundSummary"
         createdAt:
           type: string
           format: date-time
@@ -551,6 +553,31 @@ components:
       required:
         - participantId
         - participantName
+    RoundSummary:
+      type: object
+      description: 投票結果の要約
+      required:
+        - average
+        - median
+        - max
+        - min
+      properties:
+        average:
+          type: number
+          format: float
+          description: 投票値の平均（未投票、不明除く）
+        median:
+          type: number
+          format: float
+          description: 投票値の中央値（未投票、不明除く）
+        max:
+          type: number
+          format: float
+          description: 投票値の最大値（未投票、不明除く）
+        min:
+          type: number
+          format: float
+          description: 投票値の最小値（未投票、不明除く）
     WebSocketMessage:
       type: object
       description: WebSocketメッセージ
