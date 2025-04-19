@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
+	"strconv"
 	"time"
 
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
@@ -170,6 +172,7 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 		CreatedAt: redisRound.CreatedAt,
 		UpdatedAt: redisRound.UpdatedAt,
 		Votes:     []Vote{},
+		// Summary は後で設定
 	}
 
 	voteIDs, err := s.redis.GetVotesInRound(ctx, roundId.String())
@@ -178,6 +181,8 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 		log.Printf("failed to get votes in round, returning round data without votes: roundID=%s, err=%v", roundId, err)
 		// エラーを返さずに処理を続行。apiRound.Votes は空のまま
 	}
+
+	numericVotes := []float32{} // 数値として扱える投票値を格納するスライス
 
 	if len(voteIDs) > 0 {
 		apiVotes := make([]Vote, 0, len(voteIDs))
@@ -199,13 +204,14 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 			}
 
 			redisParticipant, err := s.redis.GetParticipant(ctx, redisVote.ParticipantId)
+			// GetParticipant でエラーが発生した場合や見つからなかった場合は、その投票を除外する
 			if err != nil {
-				log.Printf("failed to get participant details for vote, skipping participant name: roundID=%s, voteID=%s, participantID=%s, err=%v", roundId, voteID, redisVote.ParticipantId, err)
-				continue // 参加者情報が取れない場合は投票情報を含めない
+				log.Printf("failed to get participant details for vote, skipping vote: roundID=%s, voteID=%s, participantID=%s, err=%v", roundId, voteID, redisVote.ParticipantId, err)
+				continue
 			}
 			if redisParticipant == nil {
-				log.Printf("participant not found for vote, skipping participant name: roundID=%s, voteID=%s, participantID=%s", roundId, voteID, redisVote.ParticipantId)
-				continue // 参加者情報が取れない場合は投票情報を含めない
+				log.Printf("participant not found for vote, skipping vote: roundID=%s, voteID=%s, participantID=%s", roundId, voteID, redisVote.ParticipantId)
+				continue
 			}
 
 			apiVote := Vote{
@@ -214,16 +220,61 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 			}
 
 			// 公開時か自身のもののみ投票結果をセット
-			if apiRound.Status == Revealed || (participantId != nil && *participantId == participantUUID) {
+			isRevealed := apiRound.Status == Revealed
+			isOwnVote := participantId != nil && *participantId == participantUUID
+
+			if isRevealed || isOwnVote {
 				if redisVote.Value != "" {
 					valueCopy := redisVote.Value // ポインタ用にコピー
 					apiVote.Value = &valueCopy
+
+					// revealed 状態の場合、数値変換を試みて集計用スライスに追加
+					if isRevealed {
+						numVal, err := strconv.ParseFloat(redisVote.Value, 32)
+						if err == nil {
+							numericVotes = append(numericVotes, float32(numVal))
+						} else {
+							// 数値に変換できない値はログに残しても良い（例: '?', 'coffee'）
+							log.Printf("Vote value is not numeric, skipping for summary calculation: roundID=%s, voteID=%s, value=%s", roundId, voteID, redisVote.Value)
+						}
+					}
 				}
 			}
 			apiVotes = append(apiVotes, apiVote)
 		}
-		if len(apiVotes) > 0 {
-			apiRound.Votes = apiVotes
+		apiRound.Votes = apiVotes
+	}
+
+	// revealed 状態かつ数値の投票が1つ以上ある場合、サマリーを生成
+	if apiRound.Status == Revealed && len(numericVotes) > 0 {
+		sort.Slice(numericVotes, func(i, j int) bool {
+			return numericVotes[i] < numericVotes[j]
+		})
+
+		var sum float32
+		for _, v := range numericVotes {
+			sum += v
+		}
+		average := sum / float32(len(numericVotes))
+
+		var median float32
+		n := len(numericVotes)
+		if n%2 == 1 {
+			// 奇数個の場合、中央の要素
+			median = numericVotes[n/2]
+		} else {
+			// 偶数個の場合、中央の2つの要素の平均
+			median = (numericVotes[n/2-1] + numericVotes[n/2]) / 2.0
+		}
+
+		max := numericVotes[len(numericVotes)-1]
+		min := numericVotes[0]
+
+		apiRound.Summary = &RoundSummary{
+			Average: average,
+			Median:  median,
+			Max:     max,
+			Min:     min,
 		}
 	}
 

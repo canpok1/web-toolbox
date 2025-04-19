@@ -712,6 +712,7 @@ export interface components {
             status: "voting" | "revealed";
             /** @description 投票結果のリスト */
             votes: components["schemas"]["Vote"][];
+            summary?: components["schemas"]["RoundSummary"];
             /**
              * Format: date-time
              * @description ラウンドの作成日時
@@ -734,6 +735,29 @@ export interface components {
             participantName: string;
             /** @description 投票値（参加者自身もしくはラウンドのstatusがrevealedの場合のみ） */
             value?: string;
+        };
+        /** @description 投票結果の要約 */
+        RoundSummary: {
+            /**
+             * Format: float
+             * @description 投票値の平均（未投票、不明除く）
+             */
+            average: number;
+            /**
+             * Format: float
+             * @description 投票値の中央値（未投票、不明除く）
+             */
+            median: number;
+            /**
+             * Format: float
+             * @description 投票値の最大値（未投票、不明除く）
+             */
+            max: number;
+            /**
+             * Format: float
+             * @description 投票値の最小値（未投票、不明除く）
+             */
+            min: number;
         };
         /** @description WebSocketメッセージ */
         WebSocketMessage: {
