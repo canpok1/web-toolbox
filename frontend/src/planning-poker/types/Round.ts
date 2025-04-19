@@ -1,3 +1,4 @@
+import type { RoundSummary } from "./RoundSummary";
 import type { Vote } from "./Vote";
 
 export interface Round {
@@ -5,6 +6,7 @@ export interface Round {
   sessionId: string;
   status: RoundStatus;
   votes: Vote[];
+  summary?: RoundSummary;
 }
 
 export type RoundStatus = "voting" | "revealed";
