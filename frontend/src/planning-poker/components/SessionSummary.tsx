@@ -1,15 +1,33 @@
 import { Check, ChevronDown, ChevronUp, Copy } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { useState } from "react";
+import { useMemo, useState } from "react"; // useMemo をインポート
 import type { Session } from "../types/Session";
 import Alert from "./Alert";
 
-function SessionSummary({ session }: { session: Session }) {
+export type SessionSummaryProps = {
+  session: Session;
+  currentParticipantId: string | null;
+};
+
+function SessionSummary({
+  session,
+  currentParticipantId,
+}: SessionSummaryProps) {
   const [isCopied, setIsCopied] = useState(false);
   const [isInviteSectionOpen, setIsInviteSectionOpen] = useState(false);
   const [copyError, setCopyError] = useState<string | null>(null);
 
-  const names = session.participants.map((p) => p.name);
+  const currentUserName = useMemo(() => {
+    if (!currentParticipantId) {
+      return null;
+    }
+    const currentUser = session.participants.find(
+      (p) => p.id === currentParticipantId,
+    );
+    return currentUser ? currentUser.name : null;
+  }, [session.participants, currentParticipantId]);
+
+  const participantNames = session.participants.map((p) => p.name);
   const joinPageUrl = new URL(
     `/planning-poker/sessions/join?id=${session.sessionId}`,
     window.location.origin,
@@ -32,7 +50,7 @@ function SessionSummary({ session }: { session: Session }) {
 
   const toggleInviteSection = () => {
     setIsInviteSectionOpen(!isInviteSectionOpen);
-    if (isInviteSectionOpen) {
+    if (!isInviteSectionOpen) {
       setCopyError(null);
       setIsCopied(false);
     }
@@ -41,12 +59,17 @@ function SessionSummary({ session }: { session: Session }) {
   return (
     <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
       <div className="card-body bg-neutral-content text-left">
-        <p className="mt-4">参加者: {names.join(", ")}</p>
+        {currentUserName && (
+          <p className="font-semibold">あなたの名前: {currentUserName}</p>
+        )}
+        <p>
+          参加者 ({participantNames.length}名): {participantNames.join(", ")}
+        </p>
         <div>
           <button
             type="button"
             onClick={toggleInviteSection}
-            className="btn btn-ghost btn-sm flex w-full justify-between"
+            className="btn btn-ghost btn-sm mt-2 flex w-full justify-between"
             aria-expanded={isInviteSectionOpen}
             aria-controls="invite-section"
           >

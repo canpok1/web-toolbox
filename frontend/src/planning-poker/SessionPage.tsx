@@ -43,7 +43,12 @@ function SessionPage() {
     <section className="mx-auto max-w-2xl px-5 py-25 text-center">
       <div className="mx-auto w-full">
         <h1 className="mb-5 font-bold text-3xl">プランニングポーカー</h1>
-        {session && <SessionSummary session={session} />}
+        {session && (
+          <SessionSummary
+            session={session}
+            currentParticipantId={participandId}
+          />
+        )}
 
         <Alert messages={errorMessages} />
 
