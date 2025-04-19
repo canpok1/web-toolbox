@@ -157,25 +157,26 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 		return nil, fmt.Errorf("round not found: roundID=%s", roundId)
 	}
 
+	sessionUUID, err := uuid.Parse(redisRound.SessionId)
+	if err != nil {
+		log.Printf("invalid session ID format found in round data: roundID=%s, sessionID=%s, err=%v", roundId, redisRound.SessionId, err)
+		return nil, fmt.Errorf("internal server error: invalid session ID format")
+	}
+
 	apiRound := Round{
 		RoundId:   roundId,
+		SessionId: sessionUUID,
 		Status:    RoundStatus(redisRound.Status),
 		CreatedAt: redisRound.CreatedAt,
 		UpdatedAt: redisRound.UpdatedAt,
-		Votes:     nil,
+		Votes:     []Vote{},
 	}
-
-	sessionUUID, err := uuid.Parse(redisRound.SessionId)
-	if err != nil {
-		return nil, fmt.Errorf("invalid session ID format")
-	}
-	apiRound.SessionId = sessionUUID
 
 	voteIDs, err := s.redis.GetVotesInRound(ctx, roundId.String())
 	if err != nil {
 		// 投票リスト取得エラーはログに残すが、ラウンド情報自体は返す（投票情報なしで）
 		log.Printf("failed to get votes in round, returning round data without votes: roundID=%s, err=%v", roundId, err)
-		// エラーを返さずに処理を続行
+		// エラーを返さずに処理を続行。apiRound.Votes は空のまま
 	}
 
 	if len(voteIDs) > 0 {
@@ -197,24 +198,33 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 				continue // ParticipantId の形式不正、スキップ
 			}
 
-			apiVote := Vote{
-				ParticipantId: participantUUID,
+			redisParticipant, err := s.redis.GetParticipant(ctx, redisVote.ParticipantId)
+			if err != nil {
+				log.Printf("failed to get participant details for vote, skipping participant name: roundID=%s, voteID=%s, participantID=%s, err=%v", roundId, voteID, redisVote.ParticipantId, err)
+				continue // 参加者情報が取れない場合は投票情報を含めない
 			}
+			if redisParticipant == nil {
+				log.Printf("participant not found for vote, skipping participant name: roundID=%s, voteID=%s, participantID=%s", roundId, voteID, redisVote.ParticipantId)
+				continue // 参加者情報が取れない場合は投票情報を含めない
+			}
+
+			apiVote := Vote{
+				ParticipantId:   participantUUID,
+				ParticipantName: redisParticipant.Name,
+			}
+
 			// 公開時か自身のもののみ投票結果をセット
 			if apiRound.Status == Revealed || (participantId != nil && *participantId == participantUUID) {
-				apiVote.Value = &redisVote.Value
+				if redisVote.Value != "" {
+					valueCopy := redisVote.Value // ポインタ用にコピー
+					apiVote.Value = &valueCopy
+				}
 			}
 			apiVotes = append(apiVotes, apiVote)
 		}
 		if len(apiVotes) > 0 {
 			apiRound.Votes = apiVotes
-		} else {
-			emptyVotes := make([]Vote, 0)
-			apiRound.Votes = emptyVotes
 		}
-	} else {
-		emptyVotes := make([]Vote, 0)
-		apiRound.Votes = emptyVotes
 	}
 
 	res := GetRoundResponse{

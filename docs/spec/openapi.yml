@@ -542,11 +542,15 @@ components:
           type: string
           format: uuid
           description: 参加者のID
+        participantName:
+          type: string
+          description: 参加者名
         value:
           type: string
           description: 投票値（参加者自身もしくはラウンドのstatusがrevealedの場合のみ）
       required:
         - participantId
+        - participantName
     WebSocketMessage:
       type: object
       description: WebSocketメッセージ

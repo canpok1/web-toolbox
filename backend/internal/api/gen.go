@@ -176,6 +176,9 @@ type Vote struct {
 	// ParticipantId 参加者のID
 	ParticipantId openapi_types.UUID `json:"participantId"`
 
+	// ParticipantName 参加者名
+	ParticipantName string `json:"participantName"`
+
 	// Value 投票値（参加者自身もしくはラウンドのstatusがrevealedの場合のみ）
 	Value *string `json:"value,omitempty"`
 }

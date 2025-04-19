@@ -730,6 +730,8 @@ export interface components {
              * @description 参加者のID
              */
             participantId: string;
+            /** @description 参加者名 */
+            participantName: string;
             /** @description 投票値（参加者自身もしくはラウンドのstatusがrevealedの場合のみ） */
             value?: string;
         };

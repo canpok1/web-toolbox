@@ -74,7 +74,8 @@ function SessionPage() {
 
         {round && (
           <RoundSummary
-            participants={round.participants}
+            participants={session?.participants ?? []}
+            votes={round.votes}
             revealed={round?.status === "revealed"}
           />
         )}
