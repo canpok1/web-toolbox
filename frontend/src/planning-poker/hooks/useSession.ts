@@ -89,6 +89,7 @@ export default function useSession(
       currentRoundId: response.session.currentRoundId,
       hostId: response.session.hostId,
       status: response.session.status,
+      scaleType: response.session.scaleType,
     };
   };
 

@@ -1,4 +1,4 @@
-const validScales = ["fibonacci", "t-shirt", "power-of-two"] as const;
+const validScales = ["fibonacci", "t-shirt", "power-of-two", "custom"] as const;
 export type ScaleType = (typeof validScales)[number];
 
 export function isScaleType(value: string): value is ScaleType {

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import Alert from "./components/Alert";
-import FibonacciVotePanel from "./components/FibonacciVotePanel";
 import HostPanel, { type HostPanelEvent } from "./components/HostPanel";
 import RoundSummaryPanel from "./components/RoundSummaryPanel";
 import SessionSummary from "./components/SessionSummary";
+import VotePanel from "./components/VotePanel";
 import useSession from "./hooks/useSession";
 
 function SessionPage() {
@@ -85,10 +85,11 @@ function SessionPage() {
             )}
 
             {round?.status === "voting" && (
-              <FibonacciVotePanel
+              <VotePanel
                 className="w-full"
                 roundId={round.roundId}
                 participantId={participandId}
+                scaleType={session?.scaleType ?? "fibonacci"}
                 votedOption={myVote?.vote ?? null}
                 onAfterVote={() => {
                   reload();
