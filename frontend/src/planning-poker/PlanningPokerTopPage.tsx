@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 function PlanningPokerTopPage() {
   return (
-    <div className="mx-auto max-w-2xl px-5 py-25 text-center">
+    <div className="mx-auto max-w-2xl px-5 py-5 text-center">
       <div className="mb-5">
         <h1 className="font-bold text-3xl">プランニングポーカー</h1>
       </div>
