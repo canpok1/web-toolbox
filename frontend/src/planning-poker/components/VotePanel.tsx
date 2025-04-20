@@ -1,20 +1,23 @@
 import { useState } from "react";
 import { ApiClient } from "../../api/ApiClient";
+import type { ScaleType } from "../types/ScaleType";
 import Alert from "./Alert";
 
 export type VotePanelProps = {
   roundId: string;
   participantId: string;
-  voteOptions: string[];
+  scaleType: ScaleType;
   votedOption: string | null;
   onAfterVote: (option: string) => void;
   className?: string;
+  customVoteOptions?: string[];
 };
 
 function VotePanel({
   roundId,
   participantId,
-  voteOptions,
+  scaleType,
+  customVoteOptions = [],
   votedOption,
   onAfterVote,
   className,
@@ -36,13 +39,46 @@ function VotePanel({
     }
   };
 
+  const voteOptionMap: Record<ScaleType, string[]> = {
+    fibonacci: [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5",
+      "8",
+      "13",
+      "21",
+      "34",
+      "55",
+      "89",
+      "?",
+    ],
+    "t-shirt": ["XS", "S", "M", "L", "XL", "XXL", "?"],
+    "power-of-two": [
+      "1",
+      "2",
+      "4",
+      "8",
+      "16",
+      "32",
+      "64",
+      "128",
+      "256",
+      "512",
+      "1024",
+      "?",
+    ],
+    custom: customVoteOptions,
+  };
+
   return (
     <div className={`card mx-auto shadow-sm ${className}`}>
       <div className="card-body bg-neutral-content text-left">
         <h2 className="card-title">投票</h2>
         <Alert messages={errorMessages} />
         <div className="grid grid-cols-3 gap-4">
-          {voteOptions.map((option) => (
+          {voteOptionMap[scaleType].map((option) => (
             <button
               key={option}
               type="button"

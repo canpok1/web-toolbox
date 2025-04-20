@@ -1,4 +1,5 @@
 import type { SessionParticipant } from "./Participant";
+import type { ScaleType } from "./ScaleType";
 
 export interface Session {
   sessionId: string;
@@ -6,6 +7,7 @@ export interface Session {
   currentRoundId?: string;
   hostId: string;
   status: SessionStatus;
+  scaleType: ScaleType;
 }
 
 export const SessionStatusValues = [
