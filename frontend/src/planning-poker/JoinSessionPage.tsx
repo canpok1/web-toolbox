@@ -82,7 +82,9 @@ function JoinSessionPage() {
               className="input w-full"
               type="text"
               value={userName}
+              maxLength={10}
               placeholder="あなたの名前"
+              aria-label="あなたの名前"
               onChange={handleUserNameChange}
             />
           </label>
