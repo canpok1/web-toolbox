@@ -5,7 +5,7 @@ const Layout = () => {
   const detailsRef = useRef<HTMLDetailsElement>(null);
 
   const closeDropdown = () => {
-    if (detailsRef.current) {
+    if (detailsRef?.current) {
       detailsRef.current.open = false;
     }
   };
