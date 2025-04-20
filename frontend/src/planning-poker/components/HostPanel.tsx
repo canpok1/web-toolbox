@@ -1,4 +1,4 @@
-import { CheckCircle2, Play, StopCircle } from "lucide-react";
+import { CheckCircle2, Play } from "lucide-react";
 import { ApiClient } from "../../api/ApiClient";
 import type { Round } from "../types/Round";
 import type { Session } from "../types/Session";
@@ -20,10 +20,8 @@ export default function HostPanel({
   onError,
   className,
 }: HostPanelProps) {
-  const hasEnableSession = session && session.status !== "finished";
   const showStartRoundButton = !round || round.status === "revealed";
   const showRevealVoteButton = round?.status === "voting";
-  const showEndSessionButton = !round || round.status === "revealed";
 
   const handleStartRound = async () => {
     try {
@@ -51,63 +49,32 @@ export default function HostPanel({
     }
   };
 
-  const handleEndSession = async () => {
-    try {
-      if (!session) {
-        return;
-      }
-      const client = new ApiClient();
-      await client.endSession(session.sessionId);
-      onClick("endSession");
-    } catch (error) {
-      onError("endSession", error);
-    }
-  };
-
   return (
     <div className={`card mx-auto shadow-sm ${className}`}>
-      {hasEnableSession && (
-        <div className="card-body bg-neutral-content text-left">
-          {showStartRoundButton && (
-            <button
-              type="button"
-              className="btn btn-primary w-full"
-              aria-label="投票を開始"
-              onClick={handleStartRound}
-            >
-              <Play />
-              投票を開始
-            </button>
-          )}
-          {showRevealVoteButton && (
-            <button
-              type="button"
-              className="btn btn-primary w-full"
-              aria-label="投票を公開"
-              onClick={handleRevealVotes}
-            >
-              <CheckCircle2 />
-              投票を公開
-            </button>
-          )}
-          {showEndSessionButton && (
-            <button
-              type="button"
-              className="btn btn-error w-full"
-              aria-label="セッションを終了"
-              onClick={handleEndSession}
-            >
-              <StopCircle />
-              セッションを終了
-            </button>
-          )}
-        </div>
-      )}
-      {!hasEnableSession && (
-        <div className="card-body bg-neutral-content text-left">
-          <p>セッション終了済み</p>
-        </div>
-      )}
+      <div className="card-body bg-neutral-content text-left">
+        {showStartRoundButton && (
+          <button
+            type="button"
+            className="btn btn-primary w-full"
+            aria-label="投票を開始"
+            onClick={handleStartRound}
+          >
+            <Play />
+            投票を開始
+          </button>
+        )}
+        {showRevealVoteButton && (
+          <button
+            type="button"
+            className="btn btn-primary w-full"
+            aria-label="投票を公開"
+            onClick={handleRevealVotes}
+          >
+            <CheckCircle2 />
+            投票を公開
+          </button>
+        )}
+      </div>
     </div>
   );
 }
