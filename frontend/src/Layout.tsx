@@ -10,10 +10,23 @@ const Layout = () => {
               Web Toolbox
             </Link>
           </div>
+
           <div className="flex-none">
             <ul className="menu menu-horizontal px-1">
               <li>
-                <a href="/planning-poker">プランニングポーカー</a>
+                <details className="dropdown dropdown-end">
+                  <summary className="btn btn-ghost">ツール一覧</summary>
+                  <ul className="menu dropdown-content z-1 mt-4 w-52 rounded-box bg-base-100 p-2 shadow">
+                    <li>
+                      <Link
+                        to="/planning-poker"
+                        className="text-primary-content"
+                      >
+                        プランニングポーカー
+                      </Link>
+                    </li>
+                  </ul>
+                </details>
               </li>
             </ul>
           </div>
