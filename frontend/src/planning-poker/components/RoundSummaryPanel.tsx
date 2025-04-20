@@ -7,14 +7,16 @@ export type RoundSummaryProps = {
   participants: SessionParticipant[];
   votes: Vote[];
   revealed: boolean;
-  summary?: RoundSummary; // バックエンドから渡される平均/中央値
+  summary?: RoundSummary;
+  className?: string;
 };
 
 export default function RoundSummaryPanel({
   participants,
   votes,
   revealed,
-  summary, // プロパティを受け取る
+  summary,
+  className,
 }: RoundSummaryProps) {
   const title = revealed ? "投票結果" : "投票状況";
   const voteMap = new Map(votes.map((v) => [v.participantId, v]));
@@ -26,7 +28,7 @@ export default function RoundSummaryPanel({
   };
 
   return (
-    <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
+    <div className={`card mx-auto shadow-sm ${className}`}>
       <div className="card-body bg-neutral-content text-left">
         <h2 className="card-title">{title}</h2>
 
@@ -61,7 +63,7 @@ export default function RoundSummaryPanel({
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-4 md:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {participants.map((p) => (
             <VoteResult
               key={p.id}

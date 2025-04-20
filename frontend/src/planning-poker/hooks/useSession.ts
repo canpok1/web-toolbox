@@ -62,8 +62,13 @@ export default function useSession(
     sessionId: string,
   ): Promise<Session | null> => {
     const response = await apiClient.fetchSession(sessionId);
+    if (!response) {
+      throw new Error("failed to fetchSession, response is null");
+    }
     if (!response.session) {
-      return null;
+      throw new Error(
+        "failed to fetchSession, response has not session property",
+      );
     }
     if (!isSessionStatus(response.session.status)) {
       throw new Error(

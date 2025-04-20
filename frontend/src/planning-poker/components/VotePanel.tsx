@@ -8,6 +8,7 @@ export type VotePanelProps = {
   voteOptions: string[];
   votedOption: string | null;
   onAfterVote: (option: string) => void;
+  className?: string;
 };
 
 function VotePanel({
@@ -16,6 +17,7 @@ function VotePanel({
   voteOptions,
   votedOption,
   onAfterVote,
+  className,
 }: VotePanelProps) {
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
@@ -35,7 +37,7 @@ function VotePanel({
   };
 
   return (
-    <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
+    <div className={`card mx-auto shadow-sm ${className}`}>
       <div className="card-body bg-neutral-content text-left">
         <h2 className="card-title">投票</h2>
         <Alert messages={errorMessages} />
