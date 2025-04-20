@@ -65,12 +65,15 @@ function JoinSessionPage() {
             <span>セッションID</span>
             <input
               readOnly={hasInitialSessionId}
-              className={`input w-full ${hasInitialSessionId ? "input-disabled bg-base-200 text-opacity-70" : ""}`}
+              className={`input w-full ${hasInitialSessionId ? "input-disabled cursor-not-allowed bg-base-200 text-opacity-70" : ""}`}
               type="text"
               value={sessionId}
               placeholder="セッションID"
               onChange={handleSessionIdChange}
               aria-readonly={hasInitialSessionId}
+              title={
+                hasInitialSessionId ? "セッションIDは変更できません" : undefined
+              }
             />
           </label>
           <label className="floating-label mx-auto mb-3 w-full">
