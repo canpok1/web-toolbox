@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiClient } from "../../api/ApiClient";
+import type { SessionParticipant } from "../types/Participant";
 import type { Round } from "../types/Round";
 import { type Session, isSessionStatus } from "../types/Session";
 import type { Vote } from "../types/Vote";
@@ -8,6 +9,7 @@ export type ReturnValue = {
   session: Session | null;
   round: Round | null;
   myVote: Vote | null;
+  myParticipant: SessionParticipant | null;
   error: unknown | null;
   reload: () => Promise<void>;
 };
@@ -19,6 +21,9 @@ export default function useSession(
   const [session, setSession] = useState<Session | null>(null);
   const [round, setRound] = useState<Round | null>(null);
   const [myVote, setMyVote] = useState<Vote | null>(null);
+  const [myParticipant, setMyParticipant] = useState<SessionParticipant | null>(
+    null,
+  );
   const [error, setError] = useState<unknown | null>(null);
 
   useEffect(() => {
@@ -40,6 +45,12 @@ export default function useSession(
         setError(null);
         return;
       }
+
+      setMyParticipant(
+        session.participants.find(
+          (participant) => participant.id === participantId,
+        ) ?? null,
+      );
 
       const round = await fetchRound(apiClient, session, participantId);
       setRound(round);
@@ -135,6 +146,7 @@ export default function useSession(
     session,
     round,
     myVote,
+    myParticipant,
     error,
     reload,
   };

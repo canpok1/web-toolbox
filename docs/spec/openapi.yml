@@ -66,7 +66,6 @@ paths:
           name: sessionId
           schema:
             type: string
-            format: uuid
           required: true
           description: セッションID
       requestBody:
@@ -108,7 +107,6 @@ paths:
           name: sessionId
           schema:
             type: string
-            format: uuid
           required: true
           description: セッションID
       responses:
@@ -138,7 +136,6 @@ paths:
           name: sessionId
           schema:
             type: string
-            format: uuid
           required: true
           description: セッションID
       responses:
@@ -168,7 +165,6 @@ paths:
           name: sessionId
           schema:
             type: string
-            format: uuid
           required: true
           description: セッションID
       responses:
@@ -204,14 +200,12 @@ paths:
           name: roundId
           schema:
             type: string
-            format: uuid
           required: true
           description: ラウンドID
         - in: query
           name: participantId
           schema:
             type: string
-            format: uuid
           required: false
           description: 取得したい投票情報の参加者ID。指定しない場合は、revealed状態であれば全参加者の投票情報を返す。
       responses:
@@ -241,7 +235,6 @@ paths:
           name: roundId
           schema:
             type: string
-            format: uuid
           required: true
           description: ラウンドID
       responses:
@@ -271,7 +264,6 @@ paths:
           name: roundId
           schema:
             type: string
-            format: uuid
           required: true
           description: ラウンドID
       requestBody:
@@ -351,11 +343,9 @@ components:
       properties:
         sessionId:
           type: string
-          format: uuid
           description: 作成されたセッションのID
         hostId:
           type: string
-          format: uuid
           description: セッションのホストID
     JoinSessionRequest:
       type: object
@@ -374,7 +364,6 @@ components:
       properties:
         participantId:
           type: string
-          format: uuid
           description: 参加者のID
     GetSessionResponse:
       type: object
@@ -396,7 +385,6 @@ components:
       properties:
         roundId:
           type: string
-          format: uuid
           description: 開始されたラウンドのID
     GetRoundResponse:
       type: object
@@ -419,7 +407,6 @@ components:
       properties:
         participantId:
           type: string
-          format: uuid
           description: 投票者のID
         value:
           type: string
@@ -432,7 +419,6 @@ components:
       properties:
         voteId:
           type: string
-          format: uuid
           description: 投票ID
     SessionParticipant:
       type: object
@@ -462,11 +448,9 @@ components:
       properties:
         sessionId:
           type: string
-          format: uuid
           description: セッションのID
         hostId:
           type: string
-          format: uuid
           description: セッションのホストID
         scaleType:
           $ref: "#/components/schemas/ScaleType"
@@ -478,7 +462,6 @@ components:
           description: カスタムスケール（scaleTypeがcustomの場合のみ有効）
         currentRoundId:
           type: string
-          format: uuid
           description: 現在のラウンドID
         status:
           type: string
@@ -509,11 +492,9 @@ components:
       properties:
         roundId:
           type: string
-          format: uuid
           description: ラウンドのID
         sessionId:
           type: string
-          format: uuid
           description: このラウンドが属するセッションのID
         status:
           type: string
@@ -542,7 +523,6 @@ components:
       properties:
         participantId:
           type: string
-          format: uuid
           description: 参加者のID
         participantName:
           type: string
@@ -606,7 +586,6 @@ components:
       properties:
         participantId:
           type: string
-          format: uuid
           description: 参加者のID
         name:
           type: string
@@ -617,7 +596,6 @@ components:
       properties:
         roundId:
           type: string
-          format: uuid
           description: ラウンドのID
     VoteSubmittedPayload:
       type: object
@@ -625,7 +603,6 @@ components:
       properties:
         participantId:
           type: string
-          format: uuid
           description: 投票した参加者のID
     VotesRevealedPayload:
       type: object

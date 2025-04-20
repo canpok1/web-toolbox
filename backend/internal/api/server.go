@@ -8,9 +8,7 @@ import (
 
 	"github.com/canpok1/web-toolbox/backend/internal/api/planningpoker"
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/oapi-codegen/runtime/types"
 )
 
 type Server struct {
@@ -42,7 +40,7 @@ func (s *Server) PostApiPlanningPokerSessions(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, res)
 }
 
-func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Context, sessionId uuid.UUID) error {
+func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Context, sessionId string) error {
 	var req JoinSessionRequest
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
@@ -60,7 +58,7 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Cont
 	return ctx.JSON(http.StatusCreated, res)
 }
 
-func (s *Server) GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId types.UUID, params GetApiPlanningPokerRoundsRoundIdParams) error {
+func (s *Server) GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId string, params GetApiPlanningPokerRoundsRoundIdParams) error {
 	res, err := s.HandleGetApiPlanningPokerRoundsRoundId(context.Background(), roundId, params.ParticipantId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
@@ -69,7 +67,7 @@ func (s *Server) GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId type
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId uuid.UUID) error {
+func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId string) error {
 	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdReveal(context.Background(), roundId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
@@ -78,7 +76,7 @@ func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, round
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundId uuid.UUID) error {
+func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundId string) error {
 	var req SendVoteRequest
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
@@ -95,7 +93,7 @@ func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundI
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionId uuid.UUID) error {
+func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionId string) error {
 	res, err := s.HandleGetApiPlanningPokerSessionsSessionId(sessionId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
@@ -104,7 +102,7 @@ func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionI
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sessionId uuid.UUID) error {
+func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sessionId string) error {
 	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdEnd(context.Background(), sessionId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
@@ -113,7 +111,7 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sess
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId uuid.UUID) error {
+func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId string) error {
 	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdRounds(context.Background(), sessionId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)

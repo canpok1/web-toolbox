@@ -10,7 +10,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // Defines values for RoundStatus.
@@ -42,10 +41,10 @@ type CreateSessionRequest struct {
 // CreateSessionResponse セッション作成レスポンス
 type CreateSessionResponse struct {
 	// HostId セッションのホストID
-	HostId openapi_types.UUID `json:"hostId"`
+	HostId string `json:"hostId"`
 
 	// SessionId 作成されたセッションのID
-	SessionId openapi_types.UUID `json:"sessionId"`
+	SessionId string `json:"sessionId"`
 }
 
 // EndSessionResponse セッション終了レスポンス
@@ -78,7 +77,7 @@ type JoinSessionRequest struct {
 // JoinSessionResponse セッション参加レスポンス
 type JoinSessionResponse struct {
 	// ParticipantId 参加者のID
-	ParticipantId openapi_types.UUID `json:"participantId"`
+	ParticipantId string `json:"participantId"`
 }
 
 // RevealRoundResponse ラウンド結果公開レスポンス
@@ -90,10 +89,10 @@ type Round struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// RoundId ラウンドのID
-	RoundId openapi_types.UUID `json:"roundId"`
+	RoundId string `json:"roundId"`
 
 	// SessionId このラウンドが属するセッションのID
-	SessionId openapi_types.UUID `json:"sessionId"`
+	SessionId string `json:"sessionId"`
 
 	// Status ラウンドの状態
 	Status RoundStatus `json:"status"`
@@ -132,7 +131,7 @@ type ScaleType string
 // SendVoteRequest 投票送信リクエスト
 type SendVoteRequest struct {
 	// ParticipantId 投票者のID
-	ParticipantId openapi_types.UUID `json:"participantId"`
+	ParticipantId string `json:"participantId"`
 
 	// Value 投票値
 	Value string `json:"value"`
@@ -141,7 +140,7 @@ type SendVoteRequest struct {
 // SendVoteResponse 投票送信レスポンス
 type SendVoteResponse struct {
 	// VoteId 投票ID
-	VoteId openapi_types.UUID `json:"voteId"`
+	VoteId string `json:"voteId"`
 }
 
 // Session セッション情報
@@ -150,13 +149,13 @@ type Session struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// CurrentRoundId 現在のラウンドID
-	CurrentRoundId *openapi_types.UUID `json:"currentRoundId,omitempty"`
+	CurrentRoundId *string `json:"currentRoundId,omitempty"`
 
 	// CustomScale カスタムスケール（scaleTypeがcustomの場合のみ有効）
 	CustomScale []string `json:"customScale"`
 
 	// HostId セッションのホストID
-	HostId openapi_types.UUID `json:"hostId"`
+	HostId string `json:"hostId"`
 
 	// Participants 参加者リスト
 	Participants []SessionParticipant `json:"participants"`
@@ -165,7 +164,7 @@ type Session struct {
 	ScaleType ScaleType `json:"scaleType"`
 
 	// SessionId セッションのID
-	SessionId openapi_types.UUID `json:"sessionId"`
+	SessionId string `json:"sessionId"`
 
 	// Status セッションの状態
 	Status string `json:"status"`
@@ -186,13 +185,13 @@ type SessionParticipant struct {
 // StartRoundResponse ラウンド開始レスポンス
 type StartRoundResponse struct {
 	// RoundId 開始されたラウンドのID
-	RoundId openapi_types.UUID `json:"roundId"`
+	RoundId string `json:"roundId"`
 }
 
 // Vote 投票情報
 type Vote struct {
 	// ParticipantId 参加者のID
-	ParticipantId openapi_types.UUID `json:"participantId"`
+	ParticipantId string `json:"participantId"`
 
 	// ParticipantName 参加者名
 	ParticipantName string `json:"participantName"`
@@ -204,7 +203,7 @@ type Vote struct {
 // GetApiPlanningPokerRoundsRoundIdParams defines parameters for GetApiPlanningPokerRoundsRoundId.
 type GetApiPlanningPokerRoundsRoundIdParams struct {
 	// ParticipantId 取得したい投票情報の参加者ID。指定しない場合は、revealed状態であれば全参加者の投票情報を返す。
-	ParticipantId *openapi_types.UUID `form:"participantId,omitempty" json:"participantId,omitempty"`
+	ParticipantId *string `form:"participantId,omitempty" json:"participantId,omitempty"`
 }
 
 // PostApiPlanningPokerRoundsRoundIdVotesJSONRequestBody defines body for PostApiPlanningPokerRoundsRoundIdVotes for application/json ContentType.
@@ -220,28 +219,28 @@ type PostApiPlanningPokerSessionsSessionIdParticipantsJSONRequestBody = JoinSess
 type ServerInterface interface {
 	// ラウンド情報を取得する
 	// (GET /api/planning-poker/rounds/{roundId})
-	GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId openapi_types.UUID, params GetApiPlanningPokerRoundsRoundIdParams) error
+	GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId string, params GetApiPlanningPokerRoundsRoundIdParams) error
 	// ラウンドを終了する
 	// (POST /api/planning-poker/rounds/{roundId}/reveal)
-	PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId openapi_types.UUID) error
+	PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId string) error
 	// 投票を送信する
 	// (POST /api/planning-poker/rounds/{roundId}/votes)
-	PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundId openapi_types.UUID) error
+	PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundId string) error
 	// セッションを作成する
 	// (POST /api/planning-poker/sessions)
 	PostApiPlanningPokerSessions(ctx echo.Context) error
 	// セッションを取得する
 	// (GET /api/planning-poker/sessions/{sessionId})
-	GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionId openapi_types.UUID) error
+	GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionId string) error
 	// セッションを終了する
 	// (POST /api/planning-poker/sessions/{sessionId}/end)
-	PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sessionId openapi_types.UUID) error
+	PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sessionId string) error
 	// セッションに参加する
 	// (POST /api/planning-poker/sessions/{sessionId}/participants)
-	PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Context, sessionId openapi_types.UUID) error
+	PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Context, sessionId string) error
 	// ラウンドを開始する
 	// (POST /api/planning-poker/sessions/{sessionId}/rounds)
-	PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId openapi_types.UUID) error
+	PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId string) error
 	// リアルタイム更新のための WebSocket エンドポイント
 	// (GET /api/planning-poker/ws)
 	GetApiPlanningPokerWs(ctx echo.Context) error
@@ -256,7 +255,7 @@ type ServerInterfaceWrapper struct {
 func (w *ServerInterfaceWrapper) GetApiPlanningPokerRoundsRoundId(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "roundId" -------------
-	var roundId openapi_types.UUID
+	var roundId string
 
 	err = runtime.BindStyledParameterWithOptions("simple", "roundId", ctx.Param("roundId"), &roundId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -281,7 +280,7 @@ func (w *ServerInterfaceWrapper) GetApiPlanningPokerRoundsRoundId(ctx echo.Conte
 func (w *ServerInterfaceWrapper) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "roundId" -------------
-	var roundId openapi_types.UUID
+	var roundId string
 
 	err = runtime.BindStyledParameterWithOptions("simple", "roundId", ctx.Param("roundId"), &roundId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -297,7 +296,7 @@ func (w *ServerInterfaceWrapper) PostApiPlanningPokerRoundsRoundIdReveal(ctx ech
 func (w *ServerInterfaceWrapper) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "roundId" -------------
-	var roundId openapi_types.UUID
+	var roundId string
 
 	err = runtime.BindStyledParameterWithOptions("simple", "roundId", ctx.Param("roundId"), &roundId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -322,7 +321,7 @@ func (w *ServerInterfaceWrapper) PostApiPlanningPokerSessions(ctx echo.Context) 
 func (w *ServerInterfaceWrapper) GetApiPlanningPokerSessionsSessionId(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
-	var sessionId openapi_types.UUID
+	var sessionId string
 
 	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -338,7 +337,7 @@ func (w *ServerInterfaceWrapper) GetApiPlanningPokerSessionsSessionId(ctx echo.C
 func (w *ServerInterfaceWrapper) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
-	var sessionId openapi_types.UUID
+	var sessionId string
 
 	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -354,7 +353,7 @@ func (w *ServerInterfaceWrapper) PostApiPlanningPokerSessionsSessionIdEnd(ctx ec
 func (w *ServerInterfaceWrapper) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
-	var sessionId openapi_types.UUID
+	var sessionId string
 
 	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
@@ -370,7 +369,7 @@ func (w *ServerInterfaceWrapper) PostApiPlanningPokerSessionsSessionIdParticipan
 func (w *ServerInterfaceWrapper) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
-	var sessionId openapi_types.UUID
+	var sessionId string
 
 	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
