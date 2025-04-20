@@ -5,6 +5,7 @@ export type FibonacciVotePanelProps = {
   participantId: string;
   votedOption: string | null;
   onAfterVote: (option: string) => void;
+  className?: string;
 };
 
 const voteOptions = [
@@ -27,6 +28,7 @@ export default function FibonacciVotePanel({
   participantId,
   votedOption,
   onAfterVote,
+  className,
 }: FibonacciVotePanelProps) {
   return (
     <VotePanel
@@ -35,6 +37,7 @@ export default function FibonacciVotePanel({
       voteOptions={voteOptions}
       votedOption={votedOption}
       onAfterVote={onAfterVote}
+      className={className}
     />
   );
 }

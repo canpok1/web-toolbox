@@ -10,6 +10,7 @@ export type HostPanelProps = {
   round: Round | null;
   onClick: (event: HostPanelEvent) => void;
   onError: (event: HostPanelEvent, error: unknown) => void;
+  className?: string;
 };
 
 export default function HostPanel({
@@ -17,6 +18,7 @@ export default function HostPanel({
   round,
   onClick,
   onError,
+  className,
 }: HostPanelProps) {
   const hasEnableSession = session && session.status !== "finished";
   const showStartRoundButton = !round || round.status === "revealed";
@@ -63,7 +65,7 @@ export default function HostPanel({
   };
 
   return (
-    <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
+    <div className={`card mx-auto shadow-sm ${className}`}>
       {hasEnableSession && (
         <div className="card-body bg-neutral-content text-left">
           {showStartRoundButton && (

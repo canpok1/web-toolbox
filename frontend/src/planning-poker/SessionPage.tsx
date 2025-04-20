@@ -40,51 +40,62 @@ function SessionPage() {
   }, [reload]);
 
   return (
-    <section className="mx-auto max-w-2xl px-5 py-25 text-center">
+    <section className="mx-auto max-w-4xl px-5 py-5 text-center md:py-25">
       <div className="mx-auto w-full">
         <h1 className="mb-5 font-bold text-3xl">プランニングポーカー</h1>
-        {session && (
-          <SessionSummary
-            session={session}
-            currentParticipantId={participandId}
-          />
-        )}
+        <div className="mb-5 flex flex-col flex-wrap items-start justify-around gap-5 md:flex-row">
+          {session && (
+            <SessionSummary
+              className="w-full flex-2 md:max-w-lg"
+              session={session}
+              currentParticipantId={participandId}
+            />
+          )}
 
-        <Alert messages={errorMessages} />
+          <Alert messages={errorMessages} />
 
-        {showHostPanel && (
-          <HostPanel
-            session={session}
-            round={round}
-            onClick={(event: HostPanelEvent): void => {
-              console.log("clicked HostPanel, event:", event);
-              reload();
-            }}
-            onError={(event: HostPanelEvent, error: unknown): void => {
-              console.log("error on HostPanel, event:", event, "error:", error);
-            }}
-          />
-        )}
+          {showHostPanel && (
+            <HostPanel
+              className="w-full flex-1 md:max-w-sm"
+              session={session}
+              round={round}
+              onClick={(event: HostPanelEvent): void => {
+                console.log("clicked HostPanel, event:", event);
+                reload();
+              }}
+              onError={(event: HostPanelEvent, error: unknown): void => {
+                console.log(
+                  "error on HostPanel, event:",
+                  event,
+                  "error:",
+                  error,
+                );
+              }}
+            />
+          )}
 
-        {round?.status === "voting" && (
-          <FibonacciVotePanel
-            roundId={round.roundId}
-            participantId={participandId}
-            votedOption={myVote?.vote ?? null}
-            onAfterVote={() => {
-              reload();
-            }}
-          />
-        )}
+          {round?.status === "voting" && (
+            <FibonacciVotePanel
+              className="w-full"
+              roundId={round.roundId}
+              participantId={participandId}
+              votedOption={myVote?.vote ?? null}
+              onAfterVote={() => {
+                reload();
+              }}
+            />
+          )}
 
-        {round && (
-          <RoundSummaryPanel
-            participants={session?.participants ?? []}
-            votes={round.votes}
-            revealed={round?.status === "revealed"}
-            summary={round.summary}
-          />
-        )}
+          {round && (
+            <RoundSummaryPanel
+              className="w-full"
+              participants={session?.participants ?? []}
+              votes={round.votes}
+              revealed={round?.status === "revealed"}
+              summary={round.summary}
+            />
+          )}
+        </div>
       </div>
     </section>
   );

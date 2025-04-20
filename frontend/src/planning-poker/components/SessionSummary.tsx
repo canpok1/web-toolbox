@@ -7,11 +7,13 @@ import Alert from "./Alert";
 export type SessionSummaryProps = {
   session: Session;
   currentParticipantId: string | null;
+  className?: string;
 };
 
 function SessionSummary({
   session,
   currentParticipantId,
+  className,
 }: SessionSummaryProps) {
   const [isCopied, setIsCopied] = useState(false);
   const [isInviteSectionOpen, setIsInviteSectionOpen] = useState(false);
@@ -57,7 +59,7 @@ function SessionSummary({
   };
 
   return (
-    <div className="card mx-auto mb-5 max-w-2xl shadow-sm">
+    <div className={`card mx-auto shadow-sm ${className}`}>
       <div className="card-body bg-neutral-content text-left">
         {currentUserName && (
           <p className="font-semibold">あなたの名前: {currentUserName}</p>
