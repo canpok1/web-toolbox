@@ -60,6 +60,8 @@ function CreateSessionPage() {
               type="text"
               placeholder="あなたの名前"
               value={userName}
+              maxLength={10}
+              aria-label="あなたの名前"
               onChange={handleUserNameChange}
             />
           </label>
