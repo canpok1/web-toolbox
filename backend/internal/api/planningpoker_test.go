@@ -12,7 +12,6 @@ import (
 	"github.com/canpok1/web-toolbox/backend/internal/redis"
 	mock_redis "github.com/canpok1/web-toolbox/backend/internal/redis/mock"
 	"github.com/google/uuid"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -208,25 +207,25 @@ func TestValidatePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T)
 	// Test cases
 	testCases := []struct {
 		name        string
-		sessionID   uuid.UUID
+		sessionID   string
 		body        *api.JoinSessionRequest
 		expectedErr string
 	}{
 		{
 			name:        "Valid request",
-			sessionID:   uuid.New(),
+			sessionID:   "valid-session-id",
 			body:        &api.JoinSessionRequest{Name: "Test User"},
 			expectedErr: "",
 		},
 		{
 			name:        "Nil request body",
-			sessionID:   uuid.New(),
+			sessionID:   "valid-session-id",
 			body:        nil,
 			expectedErr: "request body is required",
 		},
 		{
 			name:        "Empty name",
-			sessionID:   uuid.New(),
+			sessionID:   "valid-session-id",
 			body:        &api.JoinSessionRequest{Name: ""},
 			expectedErr: "name is required",
 		},
@@ -235,15 +234,9 @@ func TestValidatePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T)
 	// Run test cases
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create a new sessionID for each test case to avoid conflicts
-			sessionID := uuid.New()
-			if tc.sessionID != uuid.Nil {
-				sessionID = tc.sessionID
-			}
-
 			// Call the function
 			s := &api.Server{} // Assuming you have a Server struct
-			err := s.ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessionID, tc.body)
+			err := s.ValidatePostApiPlanningPokerSessionsSessionIdParticipants(tc.sessionID, tc.body)
 
 			// Check for errors
 			if tc.expectedErr == "" && err != nil {
@@ -262,74 +255,74 @@ func TestValidatePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T)
 func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 	tests := []struct {
 		name          string
-		sessionID     uuid.UUID
+		sessionID     string
 		req           *api.JoinSessionRequest
-		mockSetup     func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID)
+		mockSetup     func(mockRedis *mock_redis.MockClient, sessionID string)
 		expectedError string
 	}{
 		{
 			name:      "success",
-			sessionID: uuid.New(),
+			sessionID: "valid-session-id",
 			req: &api.JoinSessionRequest{
 				Name: "Test User",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{}, nil)
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{}, nil)
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), sessionID.String(), gomock.Any()).Return(nil)
+				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), sessionID, gomock.Any()).Return(nil)
 			},
 		},
 		{
 			name:          "failure - nil request body",
-			sessionID:     uuid.New(),
+			sessionID:     "valid-session-id",
 			req:           nil,
-			mockSetup:     func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {},
+			mockSetup:     func(mockRedis *mock_redis.MockClient, sessionID string) {},
 			expectedError: "request body is required (sessionID:",
 		},
 		{
 			name:      "failure - get session error",
-			sessionID: uuid.New(),
+			sessionID: "valid-session-id",
 			req: &api.JoinSessionRequest{
 				Name: "Test User",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, errors.New("get session error"))
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(nil, errors.New("get session error"))
 			},
 			expectedError: "failed to get session",
 		},
 		{
 			name:      "failure - session not found error",
-			sessionID: uuid.New(),
+			sessionID: "valid-session-id",
 			req: &api.JoinSessionRequest{
 				Name: "Test User",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, nil)
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(nil, nil)
 			},
 			expectedError: "session is not found",
 		},
 		{
 			name:      "failure - create participant error",
-			sessionID: uuid.New(),
+			sessionID: "valid-session-id",
 			req: &api.JoinSessionRequest{
 				Name: "Test User",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{}, nil)
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{}, nil)
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("create participant error"))
 			},
 			expectedError: "failed to create participant",
 		},
 		{
 			name:      "failure - add participant to session error",
-			sessionID: uuid.New(),
+			sessionID: "valid-session-id",
 			req: &api.JoinSessionRequest{
 				Name: "Test User",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{}, nil)
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{}, nil)
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), sessionID.String(), gomock.Any()).Return(errors.New("add participant to session error"))
+				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), sessionID, gomock.Any()).Return(errors.New("add participant to session error"))
 			},
 			expectedError: "failed to add participant to session",
 		},
@@ -344,14 +337,9 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 			server := api.NewServer(mockRedis, mockWebSocketHub)
 
 			// Create a new sessionID for each test case to avoid conflicts
-			sessionID := uuid.New()
-			if tt.sessionID != uuid.Nil {
-				sessionID = tt.sessionID
-			}
+			tt.mockSetup(mockRedis, tt.sessionID)
 
-			tt.mockSetup(mockRedis, sessionID)
-
-			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionID, tt.req)
+			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdParticipants(tt.sessionID, tt.req)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
@@ -371,21 +359,21 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 	t.Run("異常系", func(t *testing.T) {
 		tests := []struct {
 			name                  string
-			sessionID             uuid.UUID
+			sessionID             string
 			getSessionReturnValue *redis.Session
 			getSessionReturnError error
 			expectedError         string
 		}{
 			{
 				name:                  "セッションがnil",
-				sessionID:             uuid.New(),
+				sessionID:             "valid-session-id",
 				getSessionReturnValue: nil,
 				getSessionReturnError: nil,
 				expectedError:         "session not found",
 			},
 			{
 				name:                  "セッション取得失敗",
-				sessionID:             uuid.New(),
+				sessionID:             "valid-session-id",
 				getSessionReturnValue: nil,
 				getSessionReturnError: errors.New("redis error"),
 				expectedError:         "failed to get session from redis",
@@ -401,7 +389,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 				mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
 				server := api.NewServer(mockRedis, mockWebSocketHub)
 
-				mockRedis.EXPECT().GetSession(gomock.Any(), tt.sessionID.String()).Return(tt.getSessionReturnValue, tt.getSessionReturnError)
+				mockRedis.EXPECT().GetSession(gomock.Any(), tt.sessionID).Return(tt.getSessionReturnValue, tt.getSessionReturnError)
 
 				res, err := server.HandleGetApiPlanningPokerSessionsSessionId(tt.sessionID)
 
@@ -413,22 +401,21 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 	})
 
 	t.Run("正常系", func(t *testing.T) {
-		dummyUUID := uuid.New()
 		tests := []struct {
 			name           string
-			sessionID      uuid.UUID
+			sessionID      string
 			hostID         string
 			participantIDs []string
 		}{
 			{
 				name:           "参加者はホストのみ",
-				sessionID:      dummyUUID,
+				sessionID:      uuid.New().String(),
 				hostID:         "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
 				participantIDs: []string{"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"},
 			},
 			{
 				name:      "参加者はホスト以外にも複数",
-				sessionID: dummyUUID,
+				sessionID: uuid.New().String(),
 				hostID:    "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
 				participantIDs: []string{
 					"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
@@ -445,7 +432,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 				mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
 				server := api.NewServer(mockRedis, mockWebSocketHub)
 
-				mockRedis.EXPECT().GetSession(gomock.Any(), tt.sessionID.String()).Return(&redis.Session{
+				mockRedis.EXPECT().GetSession(gomock.Any(), tt.sessionID).Return(&redis.Session{
 					HostId:         tt.hostID,
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -454,7 +441,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 					CreatedAt:      time.Now(),
 					UpdatedAt:      time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipantsInSession(gomock.Any(), tt.sessionID.String()).Return(tt.participantIDs, nil)
+				mockRedis.EXPECT().GetParticipantsInSession(gomock.Any(), tt.sessionID).Return(tt.participantIDs, nil)
 				for _, participantID := range tt.participantIDs {
 					mockRedis.EXPECT().GetParticipant(gomock.Any(), participantID).Return(&redis.Participant{}, nil)
 				}
@@ -463,7 +450,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 
 				assert.NoError(t, err, "Expected no error")
 				assert.NotNil(t, res, "Expected non-nil response on success")
-				assert.Equal(t, tt.sessionID, res.Session.SessionId)
+				assert.Equal(t, tt.sessionID, res.Session.SessionId.String())
 				assert.Equal(t, len(tt.participantIDs), len(res.Session.Participants))
 			})
 		}
@@ -474,15 +461,15 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 	tests := []struct {
 		name          string
-		sessionID     uuid.UUID
-		mockSetup     func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID)
+		sessionID     string
+		mockSetup     func(mockRedis *mock_redis.MockClient, sessionID string)
 		expectedError string
 	}{
 		{
 			name:      "success",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
+			sessionID: "valid-session-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -491,30 +478,30 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 					CreatedAt:      time.Now(),
 					UpdatedAt:      time.Now(),
 				}, nil)
-				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID.String(), gomock.Any()).Return(nil)
+				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID, gomock.Any()).Return(nil)
 			},
 		},
 		{
 			name:      "failure - session not found",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, nil)
+			sessionID: "valid-session-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(nil, nil)
 			},
 			expectedError: "session not found",
 		},
 		{
 			name:      "failure - redis get session error",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, errors.New("redis error"))
+			sessionID: "valid-session-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(nil, errors.New("redis error"))
 			},
 			expectedError: "failed to get session from redis",
 		},
 		{
 			name:      "failure - redis update session error",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
+			sessionID: "valid-session-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -523,7 +510,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 					CreatedAt:      time.Now(),
 					UpdatedAt:      time.Now(),
 				}, nil)
-				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID.String(), gomock.Any()).Return(errors.New("redis error"))
+				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID, gomock.Any()).Return(errors.New("redis error"))
 			},
 			expectedError: "failed to update session in redis",
 		},
@@ -537,16 +524,10 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
 			server := api.NewServer(mockRedis, mockWebSocketHub)
 
-			// Create a new sessionID for each test case to avoid conflicts
-			sessionID := uuid.New()
-			if tt.sessionID != uuid.Nil {
-				sessionID = tt.sessionID
-			}
-
-			tt.mockSetup(mockRedis, sessionID)
+			tt.mockSetup(mockRedis, tt.sessionID)
 
 			ctx := context.Background()
-			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx, sessionID)
+			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx, tt.sessionID)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
@@ -563,15 +544,15 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 	tests := []struct {
 		name          string
-		sessionID     uuid.UUID
-		mockSetup     func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID)
+		sessionID     string
+		mockSetup     func(mockRedis *mock_redis.MockClient, sessionID string)
 		expectedError string
 	}{
 		{
 			name:      "success",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
+			sessionID: "valid-session-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -581,30 +562,30 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 					UpdatedAt:      time.Now(),
 				}, nil)
 				mockRedis.EXPECT().CreateRound(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID.String(), gomock.Any()).Return(nil)
+				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID, gomock.Any()).Return(nil)
 			},
 		},
 		{
 			name:      "failure - session not found",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, nil)
+			sessionID: "valid-session-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(nil, nil)
 			},
 			expectedError: "session not found",
 		},
 		{
 			name:      "failure - redis get session error",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(nil, errors.New("redis error"))
+			sessionID: "valid-session-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(nil, errors.New("redis error"))
 			},
 			expectedError: "failed to get session from redis",
 		},
 		{
 			name:      "failure - redis create round error",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
+			sessionID: "valid-session-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -619,9 +600,9 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 		},
 		{
 			name:      "failure - redis update session error",
-			sessionID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID uuid.UUID) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID.String()).Return(&redis.Session{
+			sessionID: "valid-session-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, sessionID string) {
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -631,7 +612,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 					UpdatedAt:      time.Now(),
 				}, nil)
 				mockRedis.EXPECT().CreateRound(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID.String(), gomock.Any()).Return(errors.New("redis error"))
+				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID, gomock.Any()).Return(errors.New("redis error"))
 			},
 			expectedError: "failed to update session in redis",
 		},
@@ -645,16 +626,10 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
 			server := api.NewServer(mockRedis, mockWebSocketHub)
 
-			// Create a new sessionID for each test case to avoid conflicts
-			sessionID := uuid.New()
-			if tt.sessionID != uuid.Nil {
-				sessionID = tt.sessionID
-			}
-
-			tt.mockSetup(mockRedis, sessionID)
+			tt.mockSetup(mockRedis, tt.sessionID)
 
 			ctx := context.Background()
-			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx, sessionID)
+			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx, tt.sessionID)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
@@ -674,39 +649,39 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 	now := time.Now()
 
 	t.Run("正常系", func(t *testing.T) {
-		validSessionID := uuid.New()
-		validRoundID := uuid.New()
-		validParticipantID1 := uuid.New()
-		validParticipantID2 := uuid.New()
-		validParticipantID3 := uuid.New()
+		validSessionID := uuid.New().String()
+		validRoundID := uuid.New().String()
+		validParticipantID1 := uuid.New().String()
+		validParticipantID2 := uuid.New().String()
+		validParticipantID3 := uuid.New().String()
 		voteID1 := uuid.New().String()
 		voteID2 := uuid.New().String()
 		voteID3 := uuid.New().String()
 
 		tests := []struct {
 			name             string
-			roundID          openapi_types.UUID
-			participantID    *openapi_types.UUID
+			roundID          string
+			participantID    *string
 			mockSetup        func(mockRedis *mock_redis.MockClient)
 			expectedResponse *api.GetRoundResponse
 			expectedError    string
 		}{
 			{
 				name:    "成功 - ステータス voting, 投票なし, 参加者指定なし",
-				roundID: openapi_types.UUID(validRoundID),
+				roundID: validRoundID,
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
-					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetRound(ctx, validRoundID).Return(&redis.Round{
+						SessionId: validSessionID,
 						Status:    string(api.Voting), // "voting"
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{}, nil)
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   openapi_types.UUID(validRoundID),
-						SessionId: openapi_types.UUID(validSessionID),
+						RoundId:   uuid.MustParse(validRoundID),
+						SessionId: uuid.MustParse(validSessionID),
 						Status:    api.Voting,
 						CreatedAt: now,
 						UpdatedAt: now,
@@ -716,39 +691,39 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 			},
 			{
 				name:          "成功 - ステータス voting, 投票あり, 参加者指定あり",
-				roundID:       openapi_types.UUID(validRoundID),
+				roundID:       validRoundID,
 				participantID: &validParticipantID1,
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
-					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetRound(ctx, validRoundID).Return(&redis.Round{
+						SessionId: validSessionID,
 						Status:    string(api.Voting), // "voting"
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{voteID1, voteID2}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{voteID1, voteID2}, nil)
 					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
-						ParticipantId: validParticipantID1.String(),
+						RoundId:       validRoundID,
+						ParticipantId: validParticipantID1,
 						Value:         "5",
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
 					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
-						ParticipantId: validParticipantID2.String(),
+						RoundId:       validRoundID,
+						ParticipantId: validParticipantID2,
 						Value:         "8",
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1.String()).Return(&redis.Participant{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&redis.Participant{
+						SessionId: validSessionID,
 						Name:      "Alice",
 						IsHost:    true,
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2.String()).Return(&redis.Participant{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(&redis.Participant{
+						SessionId: validSessionID,
 						Name:      "Bob",
 						IsHost:    false,
 						CreatedAt: now,
@@ -757,66 +732,66 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   openapi_types.UUID(validRoundID),
-						SessionId: openapi_types.UUID(validSessionID),
+						RoundId:   uuid.MustParse(validRoundID),
+						SessionId: uuid.MustParse(validSessionID),
 						Status:    api.Voting,
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{
-							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
-							{ParticipantId: openapi_types.UUID(validParticipantID2), ParticipantName: "Bob"},
+							{ParticipantId: uuid.MustParse(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: uuid.MustParse(validParticipantID2), ParticipantName: "Bob"},
 						},
 					},
 				},
 			},
 			{
 				name:    "成功 - ステータス revealed, 投票あり",
-				roundID: openapi_types.UUID(validRoundID),
+				roundID: validRoundID,
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
-					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetRound(ctx, validRoundID).Return(&redis.Round{
+						SessionId: validSessionID,
 						Status:    string(api.Revealed), // "revealed"
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{voteID1, voteID2, voteID3}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{voteID1, voteID2, voteID3}, nil)
 					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
-						ParticipantId: validParticipantID1.String(),
+						RoundId:       validRoundID,
+						ParticipantId: validParticipantID1,
 						Value:         "5",
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
 					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
-						ParticipantId: validParticipantID2.String(),
+						RoundId:       validRoundID,
+						ParticipantId: validParticipantID2,
 						Value:         "8",
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
 					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
-						ParticipantId: validParticipantID3.String(),
+						RoundId:       validRoundID,
+						ParticipantId: validParticipantID3,
 						Value:         "2",
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1.String()).Return(&redis.Participant{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&redis.Participant{
+						SessionId: validSessionID,
 						Name:      "Alice",
 						IsHost:    true,
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2.String()).Return(&redis.Participant{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(&redis.Participant{
+						SessionId: validSessionID,
 						Name:      "Bob",
 						IsHost:    false,
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID3.String()).Return(&redis.Participant{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID3).Return(&redis.Participant{
+						SessionId: validSessionID,
 						Name:      "Charlie",
 						IsHost:    false,
 						CreatedAt: now,
@@ -825,15 +800,15 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   openapi_types.UUID(validRoundID),
-						SessionId: openapi_types.UUID(validSessionID),
+						RoundId:   uuid.MustParse(validRoundID),
+						SessionId: uuid.MustParse(validSessionID),
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{
-							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
-							{ParticipantId: openapi_types.UUID(validParticipantID2), ParticipantName: "Bob", Value: PtrString("8")},
-							{ParticipantId: openapi_types.UUID(validParticipantID3), ParticipantName: "Charlie", Value: PtrString("2")},
+							{ParticipantId: uuid.MustParse(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: uuid.MustParse(validParticipantID2), ParticipantName: "Bob", Value: PtrString("8")},
+							{ParticipantId: uuid.MustParse(validParticipantID3), ParticipantName: "Charlie", Value: PtrString("2")},
 						},
 						Summary: &api.RoundSummary{
 							Average: 5.0,
@@ -846,20 +821,20 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 			},
 			{
 				name:    "成功 - ステータス revealed, 投票なし",
-				roundID: openapi_types.UUID(validRoundID),
+				roundID: validRoundID,
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
-					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetRound(ctx, validRoundID).Return(&redis.Round{
+						SessionId: validSessionID,
 						Status:    string(api.Revealed),
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{}, nil) // 空のリストを返す
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{}, nil) // 空のリストを返す
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   openapi_types.UUID(validRoundID),
-						SessionId: openapi_types.UUID(validSessionID),
+						RoundId:   uuid.MustParse(validRoundID),
+						SessionId: uuid.MustParse(validSessionID),
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
@@ -869,20 +844,20 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 			},
 			{
 				name:    "成功 - ステータス revealed, GetVotesInRound エラー (ログ出力のみ)",
-				roundID: openapi_types.UUID(validRoundID),
+				roundID: validRoundID,
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
-					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetRound(ctx, validRoundID).Return(&redis.Round{
+						SessionId: validSessionID,
 						Status:    string(api.Revealed),
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return(nil, errors.New("redis error")) // エラーを返す
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return(nil, errors.New("redis error")) // エラーを返す
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   openapi_types.UUID(validRoundID),
-						SessionId: openapi_types.UUID(validSessionID),
+						RoundId:   uuid.MustParse(validRoundID),
+						SessionId: uuid.MustParse(validSessionID),
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
@@ -892,25 +867,25 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 			},
 			{
 				name:    "成功 - ステータス revealed, 一部の GetVote エラー/nil/パースエラー (スキップされる)",
-				roundID: openapi_types.UUID(validRoundID),
+				roundID: validRoundID,
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
 					invalidParticipantID := "invalid-uuid"
 					voteID3 := uuid.New().String()
 					voteID4 := uuid.New().String()
 					voteID5 := uuid.New().String()
 
-					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetRound(ctx, validRoundID).Return(&redis.Round{
+						SessionId: validSessionID,
 						Status:    string(api.Revealed),
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{voteID1, voteID2, voteID3, voteID4, voteID5}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{voteID1, voteID2, voteID3, voteID4, voteID5}, nil)
 
 					// 正常な投票
 					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
-						ParticipantId: validParticipantID1.String(),
+						RoundId:       validRoundID,
+						ParticipantId: validParticipantID1,
 						Value:         "5",
 					}, nil)
 					// GetVote エラー
@@ -919,25 +894,25 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(nil, nil)
 					// ParticipantId パースエラー
 					mockRedis.EXPECT().GetVote(ctx, voteID4).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
+						RoundId:       validRoundID,
 						ParticipantId: invalidParticipantID, // 不正なUUID
 						Value:         "13",
 					}, nil)
 					// 正常な投票 (エラーの後でも処理される)
 					mockRedis.EXPECT().GetVote(ctx, voteID5).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
-						ParticipantId: validParticipantID2.String(),
+						RoundId:       validRoundID,
+						ParticipantId: validParticipantID2,
 						Value:         "21",
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1.String()).Return(&redis.Participant{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&redis.Participant{
+						SessionId: validSessionID,
 						Name:      "Alice",
 						IsHost:    true,
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2.String()).Return(&redis.Participant{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(&redis.Participant{
+						SessionId: validSessionID,
 						Name:      "Bob",
 						IsHost:    false,
 						CreatedAt: now,
@@ -946,14 +921,14 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   openapi_types.UUID(validRoundID),
-						SessionId: openapi_types.UUID(validSessionID),
+						RoundId:   uuid.MustParse(validRoundID),
+						SessionId: uuid.MustParse(validSessionID),
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{ // エラー/nil/パースエラーの投票は含まれない
-							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
-							{ParticipantId: openapi_types.UUID(validParticipantID2), ParticipantName: "Bob", Value: PtrString("21")},
+							{ParticipantId: uuid.MustParse(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: uuid.MustParse(validParticipantID2), ParticipantName: "Bob", Value: PtrString("21")},
 						},
 						Summary: &api.RoundSummary{
 							Average: 13.0,
@@ -966,38 +941,38 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 			},
 			{
 				name:    "成功 - ステータス revealed, 一部の GetParticipant エラー (スキップされる)",
-				roundID: openapi_types.UUID(validRoundID),
+				roundID: validRoundID,
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
 					voteID3 := uuid.New().String()
 					validParticipantID3 := uuid.New()
 
-					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
-						SessionId: validSessionID.String(),
+					mockRedis.EXPECT().GetRound(ctx, validRoundID).Return(&redis.Round{
+						SessionId: validSessionID,
 						Status:    string(api.Revealed),
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID.String()).Return([]string{voteID1, voteID2, voteID3}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{voteID1, voteID2, voteID3}, nil)
 
 					// 正常な投票
 					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
-						ParticipantId: validParticipantID1.String(),
+						RoundId:       validRoundID,
+						ParticipantId: validParticipantID1,
 						Value:         "5",
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1.String()).Return(&redis.Participant{Name: "Alice"}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&redis.Participant{Name: "Alice"}, nil)
 
 					// GetParticipant エラー
 					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
-						ParticipantId: validParticipantID2.String(),
+						RoundId:       validRoundID,
+						ParticipantId: validParticipantID2,
 						Value:         "8",
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2.String()).Return(nil, errors.New("get participant error"))
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(nil, errors.New("get participant error"))
 
 					// GetParticipant nil (Not Found)
 					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(&redis.Vote{
-						RoundId:       validRoundID.String(),
+						RoundId:       validRoundID,
 						ParticipantId: validParticipantID3.String(),
 						Value:         "13",
 					}, nil)
@@ -1006,13 +981,13 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   openapi_types.UUID(validRoundID),
-						SessionId: openapi_types.UUID(validSessionID),
+						RoundId:   uuid.MustParse(validRoundID),
+						SessionId: uuid.MustParse(validSessionID),
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{ // GetParticipantでエラー/nilになった投票は含まれない
-							{ParticipantId: openapi_types.UUID(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: uuid.MustParse(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
 						},
 						Summary: &api.RoundSummary{
 							Average: 5.0,
@@ -1055,14 +1030,14 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 
 		tests := []struct {
 			name          string
-			roundID       openapi_types.UUID
-			participantID *openapi_types.UUID
+			roundID       string
+			participantID *string
 			mockSetup     func(mockRedis *mock_redis.MockClient)
 			expectedError string
 		}{
 			{
 				name:    "失敗 - GetRound エラー",
-				roundID: openapi_types.UUID(invalidRoundID),
+				roundID: invalidRoundID.String(),
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
 					mockRedis.EXPECT().GetRound(ctx, invalidRoundID.String()).Return(nil, errors.New("redis connection error"))
 				},
@@ -1070,7 +1045,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 			},
 			{
 				name:    "失敗 - Round Not Found",
-				roundID: openapi_types.UUID(invalidRoundID),
+				roundID: invalidRoundID.String(),
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
 					mockRedis.EXPECT().GetRound(ctx, invalidRoundID.String()).Return(nil, nil) // nil, nil を返す
 				},
@@ -1078,7 +1053,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 			},
 			{
 				name:    "失敗 - SessionId パースエラー",
-				roundID: openapi_types.UUID(validRoundID),
+				roundID: validRoundID.String(),
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
 					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
 						SessionId: "invalid-session-id-format", // 不正な形式
@@ -1114,50 +1089,50 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
 	tests := []struct {
 		name          string
-		roundID       uuid.UUID
-		mockSetup     func(mockRedis *mock_redis.MockClient, roundID uuid.UUID)
+		roundID       string
+		mockSetup     func(mockRedis *mock_redis.MockClient, roundID string)
 		expectedError string
 	}{
 		{
 			name:    "success",
-			roundID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+			roundID: "valid-round-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().UpdateRound(gomock.Any(), roundID.String(), gomock.Any()).Return(nil)
+				mockRedis.EXPECT().UpdateRound(gomock.Any(), roundID, gomock.Any()).Return(nil)
 			},
 		},
 		{
 			name:    "failure - round not found",
-			roundID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(nil, errors.New("round not found"))
+			roundID: "valid-round-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(nil, errors.New("round not found"))
 			},
 			expectedError: "failed to get round from redis",
 		},
 		{
 			name:    "failure - redis get round error",
-			roundID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(nil, errors.New("redis error"))
+			roundID: "valid-round-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(nil, errors.New("redis error"))
 			},
 			expectedError: "failed to get round from redis",
 		},
 		{
 			name:    "failure - redis update round error",
-			roundID: uuid.New(),
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+			roundID: "valid-round-id",
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().UpdateRound(gomock.Any(), roundID.String(), gomock.Any()).Return(errors.New("redis error"))
+				mockRedis.EXPECT().UpdateRound(gomock.Any(), roundID, gomock.Any()).Return(errors.New("redis error"))
 			},
 			expectedError: "failed to update round in redis",
 		},
@@ -1171,16 +1146,10 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
 			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
 			server := api.NewServer(mockRedis, mockWebSocketHub)
 
-			// Create a new roundID for each test case to avoid conflicts
-			roundID := uuid.New()
-			if tt.roundID != uuid.Nil {
-				roundID = tt.roundID
-			}
-
-			tt.mockSetup(mockRedis, roundID)
+			tt.mockSetup(mockRedis, tt.roundID)
 
 			ctx := context.Background()
-			res, err := server.HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx, roundID)
+			res, err := server.HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx, tt.roundID)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
@@ -1197,51 +1166,51 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
 func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 	tests := []struct {
 		name          string
-		roundID       uuid.UUID
+		roundID       string
 		req           *api.SendVoteRequest
-		mockSetup     func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest)
+		mockSetup     func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest)
 		expectedError string
 	}{
 		{
 			name:    "success - first time vote",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "5",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
-				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(nil, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(nil, nil)
 				mockRedis.EXPECT().CreateVote(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-				mockRedis.EXPECT().AddVoteToRound(gomock.Any(), roundID.String(), gomock.Any()).Return(nil)
+				mockRedis.EXPECT().AddVoteToRound(gomock.Any(), roundID, gomock.Any()).Return(nil)
 			},
 		},
 		{
 			name:    "success - multiple votes",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "8",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
 				voteId := uuid.New().String()
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
-				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(&voteId, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(&voteId, nil)
 				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(&redis.Vote{
-					RoundId:       roundID.String(),
-					ParticipantId: req.ParticipantId.String(),
+					RoundId:       roundID,
+					ParticipantId: req.ParticipantId,
 					Value:         "5",
 					CreatedAt:     time.Now(),
 					UpdatedAt:     time.Now(),
@@ -1251,45 +1220,45 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 		},
 		{
 			name:    "failure - nil request body",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req:     nil,
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
 			},
 			expectedError: "request body is required",
 		},
 		{
 			name:    "failure - round not found",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "5",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(nil, nil)
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(nil, nil)
 			},
 			expectedError: "round not found",
 		},
 		{
 			name:    "failure - redis get round error",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "5",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(nil, errors.New("redis error"))
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(nil, errors.New("redis error"))
 			},
 			expectedError: "failed to get round from redis",
 		},
 		{
 			name:    "failure - round not in voting state",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "5",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "revealed",
 					CreatedAt: time.Now(),
@@ -1300,141 +1269,141 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 		},
 		{
 			name:    "failure - participant not found",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "5",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(nil, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(nil, nil)
 			},
 			expectedError: "participant not found",
 		},
 		{
 			name:    "failure - redis get participant error",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "5",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(nil, errors.New("redis error"))
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(nil, errors.New("redis error"))
 			},
 			expectedError: "failed to get participant from redis",
 		},
 		{
 			name:    "failure - redis get vote id error",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "5",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
-				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(nil, errors.New("redis error"))
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(nil, errors.New("redis error"))
 			},
 			expectedError: "failed to get vote id from redis",
 		},
 		{
 			name:    "failure - redis create vote error",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "5",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
-				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(nil, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(nil, nil)
 				mockRedis.EXPECT().CreateVote(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("redis error"))
 			},
 			expectedError: "failed to create vote in redis",
 		},
 		{
 			name:    "failure - redis add vote to round error",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "5",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
-				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(nil, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(nil, nil)
 				mockRedis.EXPECT().CreateVote(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-				mockRedis.EXPECT().AddVoteToRound(gomock.Any(), roundID.String(), gomock.Any()).Return(errors.New("redis error"))
+				mockRedis.EXPECT().AddVoteToRound(gomock.Any(), roundID, gomock.Any()).Return(errors.New("redis error"))
 			},
 			expectedError: "failed to add vote to round in redis",
 		},
 		{
 			name:    "failure - redis get vote error",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "8",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
 				voteId := uuid.New().String()
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
-				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(&voteId, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(&voteId, nil)
 				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(nil, errors.New("redis error"))
 			},
 			expectedError: "failed to get vote from redis",
 		},
 		{
 			name:    "failure - redis update vote error",
-			roundID: uuid.New(),
+			roundID: "valid-round-id",
 			req: &api.SendVoteRequest{
-				ParticipantId: uuid.New(),
+				ParticipantId: "valid-participant-id",
 				Value:         "8",
 			},
-			mockSetup: func(mockRedis *mock_redis.MockClient, roundID uuid.UUID, req *api.SendVoteRequest) {
+			mockSetup: func(mockRedis *mock_redis.MockClient, roundID string, req *api.SendVoteRequest) {
 				voteId := uuid.New().String()
-				mockRedis.EXPECT().GetRound(gomock.Any(), roundID.String()).Return(&redis.Round{
+				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
 					SessionId: uuid.New().String(),
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId.String()).Return(&redis.Participant{}, nil)
-				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID.String(), req.ParticipantId.String()).Return(&voteId, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(&voteId, nil)
 				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(&redis.Vote{
-					RoundId:       roundID.String(),
-					ParticipantId: req.ParticipantId.String(),
+					RoundId:       roundID,
+					ParticipantId: req.ParticipantId,
 					Value:         "5",
 					CreatedAt:     time.Now(),
 					UpdatedAt:     time.Now(),
@@ -1453,16 +1422,10 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 			mockWebSocketHub := mock_planningpoker.NewMockWebSocketHub(ctrl)
 			server := api.NewServer(mockRedis, mockWebSocketHub)
 
-			// Create a new roundID for each test case to avoid conflicts
-			roundID := uuid.New()
-			if tt.roundID != uuid.Nil {
-				roundID = tt.roundID
-			}
-
-			tt.mockSetup(mockRedis, roundID, tt.req)
+			tt.mockSetup(mockRedis, tt.roundID, tt.req)
 
 			ctx := context.Background()
-			res, err := server.HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx, roundID, tt.req)
+			res, err := server.HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx, tt.roundID, tt.req)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")

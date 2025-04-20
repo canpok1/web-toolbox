@@ -66,7 +66,6 @@ paths:
           name: sessionId
           schema:
             type: string
-            format: uuid
           required: true
           description: セッションID
       requestBody:
@@ -108,7 +107,6 @@ paths:
           name: sessionId
           schema:
             type: string
-            format: uuid
           required: true
           description: セッションID
       responses:
@@ -138,7 +136,6 @@ paths:
           name: sessionId
           schema:
             type: string
-            format: uuid
           required: true
           description: セッションID
       responses:
@@ -168,7 +165,6 @@ paths:
           name: sessionId
           schema:
             type: string
-            format: uuid
           required: true
           description: セッションID
       responses:
@@ -204,14 +200,12 @@ paths:
           name: roundId
           schema:
             type: string
-            format: uuid
           required: true
           description: ラウンドID
         - in: query
           name: participantId
           schema:
             type: string
-            format: uuid
           required: false
           description: 取得したい投票情報の参加者ID。指定しない場合は、revealed状態であれば全参加者の投票情報を返す。
       responses:
@@ -241,7 +235,6 @@ paths:
           name: roundId
           schema:
             type: string
-            format: uuid
           required: true
           description: ラウンドID
       responses:
@@ -271,7 +264,6 @@ paths:
           name: roundId
           schema:
             type: string
-            format: uuid
           required: true
           description: ラウンドID
       requestBody:
@@ -419,7 +411,6 @@ components:
       properties:
         participantId:
           type: string
-          format: uuid
           description: 投票者のID
         value:
           type: string

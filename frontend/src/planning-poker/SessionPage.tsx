@@ -13,7 +13,7 @@ function SessionPage() {
   const { sessionId = "" } = useParams<{ sessionId: string }>();
   const participandId = searchParams.get("id") ?? "";
 
-  const { session, round, myVote, error, reload } = useSession(
+  const { session, round, myVote, myParticipant, error, reload } = useSession(
     sessionId,
     participandId,
   );
@@ -42,10 +42,16 @@ function SessionPage() {
     if (error) {
       console.error(error);
       setErrorMessages(["エラーが発生しました。画面を再読み込みして下さい。"]);
-    } else {
-      setErrorMessages([]);
+      return;
     }
-  }, [error]);
+
+    if (!myParticipant) {
+      setErrorMessages(["参加者が見つかりません。参加し直して下さい。"]);
+      return;
+    }
+
+    setErrorMessages([]);
+  }, [myParticipant, error]);
 
   return (
     <section className="mx-auto max-w-4xl px-5 py-5 text-center md:py-25">
@@ -54,7 +60,7 @@ function SessionPage() {
 
         <Alert className="w-full" messages={errorMessages} />
 
-        {!error && (
+        {errorMessages.length === 0 && (
           <div className="mb-5 flex flex-col flex-wrap items-start justify-around gap-5 md:flex-row">
             {session && (
               <SessionSummary

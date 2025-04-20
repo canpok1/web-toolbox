@@ -634,10 +634,7 @@ export interface components {
         RevealRoundResponse: Record<string, never>;
         /** @description 投票送信リクエスト */
         SendVoteRequest: {
-            /**
-             * Format: uuid
-             * @description 投票者のID
-             */
+            /** @description 投票者のID */
             participantId: string;
             /** @description 投票値 */
             value: string;
