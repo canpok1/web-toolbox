@@ -22,6 +22,10 @@ export default function RoundSummaryPanel({
   const voteMap = new Map(votes.map((v) => [v.participantId, v]));
   const hasVotes = votes.length > 0; // 投票があるかどうかを判定する変数
 
+  const showSummary = revealed && summary;
+  const showNoVote = revealed && !hasVotes;
+  const showVote = !revealed || hasVotes;
+
   // 平均値と中央値を小数点以下1桁にフォーマットする関数 (必要に応じて調整)
   const formatNumber = (num: number | undefined): string => {
     if (num === undefined) return "-";
@@ -34,7 +38,7 @@ export default function RoundSummaryPanel({
         <h2 className="card-title">{title}</h2>
 
         {/* 集計結果の表示 (revealed かつ summary が存在する場合) */}
-        {revealed && summary && (
+        {showSummary && (
           <div className="mb-4 pb-4">
             <div className="stats stats-horizontal w-full shadow">
               {/* 平均値 */}
@@ -76,14 +80,14 @@ export default function RoundSummaryPanel({
         )}
 
         {/* 投票結果表示エリア */}
-        {revealed && !hasVotes && (
+        {showNoVote && (
           // revealed が true で投票がない場合
           <div className="py-4 text-center text-gray-500">
             投票はありませんでした。
           </div>
         )}
 
-        {(!revealed || hasVotes) && (
+        {showVote && (
           // revealed が false、または revealed が true で投票がある場合
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {participants.map((p) => (
