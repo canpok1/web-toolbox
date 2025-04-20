@@ -8,6 +8,7 @@ import { ExtractErrorMessage } from "./utils/error";
 function JoinSessionPage() {
   const [searchParams] = useSearchParams();
   const initialSessionId = searchParams.get("id") ?? "";
+  const hasInitialSessionId = initialSessionId !== "";
 
   const [sessionId, setSessionId] = useState<string>(initialSessionId);
   const [userName, setUserName] = useState<string>("");
@@ -19,6 +20,9 @@ function JoinSessionPage() {
   const shouldSubmit = sessionId.trim() !== "" && userName.trim() !== "";
 
   const handleSessionIdChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (hasInitialSessionId) {
+      return;
+    }
     setSessionId(event.target.value);
   };
 
@@ -60,11 +64,13 @@ function JoinSessionPage() {
           <label className="floating-label mx-auto mb-3 w-full">
             <span>セッションID</span>
             <input
-              className="input w-full"
+              readOnly={hasInitialSessionId}
+              className={`input w-full ${hasInitialSessionId ? "input-disabled bg-base-200 text-opacity-70" : ""}`}
               type="text"
               value={sessionId}
               placeholder="セッションID"
               onChange={handleSessionIdChange}
+              aria-readonly={hasInitialSessionId}
             />
           </label>
           <label className="floating-label mx-auto mb-3 w-full">
