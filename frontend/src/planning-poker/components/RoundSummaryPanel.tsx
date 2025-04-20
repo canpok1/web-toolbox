@@ -20,8 +20,13 @@ export default function RoundSummaryPanel({
 }: RoundSummaryProps) {
   const title = revealed ? "投票結果" : "投票状況";
   const voteMap = new Map(votes.map((v) => [v.participantId, v]));
+  const hasVotes = votes.length > 0;
 
-  // 平均値と中央値を小数点以下1桁にフォーマットする関数 (必要に応じて調整)
+  const showSummary = revealed && summary;
+  const showNoVote = revealed && !hasVotes;
+  const showVote = !revealed || hasVotes;
+
+  // 平均値と中央値を小数点以下1桁にフォーマットする関数
   const formatNumber = (num: number | undefined): string => {
     if (num === undefined) return "-";
     return num.toFixed(1);
@@ -32,7 +37,7 @@ export default function RoundSummaryPanel({
       <div className="card-body bg-neutral-content text-left">
         <h2 className="card-title">{title}</h2>
 
-        {revealed && summary && (
+        {showSummary && (
           <div className="mb-4 pb-4">
             <div className="stats stats-horizontal w-full shadow">
               <div className="stat">
@@ -47,32 +52,44 @@ export default function RoundSummaryPanel({
                   {formatNumber(summary.median)}
                 </div>
               </div>
-              <div className="stat">
-                <div className="stat-title">最大値</div>
-                <div className="stat-value text-primary">
-                  {formatNumber(summary.max)}
+              {summary.max !== undefined && (
+                <div className="stat">
+                  <div className="stat-title">最大値</div>
+                  <div className="stat-value text-primary">
+                    {formatNumber(summary.max)}
+                  </div>
                 </div>
-              </div>
-              <div className="stat">
-                <div className="stat-title">最小値</div>
-                <div className="stat-value text-primary">
-                  {formatNumber(summary.min)}
+              )}
+              {summary.min !== undefined && (
+                <div className="stat">
+                  <div className="stat-title">最小値</div>
+                  <div className="stat-value text-primary">
+                    {formatNumber(summary.min)}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {participants.map((p) => (
-            <VoteResult
-              key={p.id}
-              name={p.name}
-              vote={voteMap.get(p.id)}
-              revealed={revealed}
-            />
-          ))}
-        </div>
+        {showNoVote && (
+          <div className="py-4 text-center text-gray-500">
+            投票はありませんでした。
+          </div>
+        )}
+
+        {showVote && (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {participants.map((p) => (
+              <VoteResult
+                key={p.id}
+                name={p.name}
+                vote={voteMap.get(p.id)}
+                revealed={revealed}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
