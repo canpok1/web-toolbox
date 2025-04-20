@@ -586,15 +586,9 @@ export interface components {
         };
         /** @description セッション作成レスポンス */
         CreateSessionResponse: {
-            /**
-             * Format: uuid
-             * @description 作成されたセッションのID
-             */
+            /** @description 作成されたセッションのID */
             sessionId: string;
-            /**
-             * Format: uuid
-             * @description セッションのホストID
-             */
+            /** @description セッションのホストID */
             hostId: string;
         };
         /** @description セッション参加リクエスト */
@@ -604,10 +598,7 @@ export interface components {
         };
         /** @description セッション参加レスポンス */
         JoinSessionResponse: {
-            /**
-             * Format: uuid
-             * @description 参加者のID
-             */
+            /** @description 参加者のID */
             participantId: string;
         };
         /** @description セッション取得レスポンス */
@@ -619,10 +610,7 @@ export interface components {
         EndSessionResponse: Record<string, never>;
         /** @description ラウンド開始レスポンス */
         StartRoundResponse: {
-            /**
-             * Format: uuid
-             * @description 開始されたラウンドのID
-             */
+            /** @description 開始されたラウンドのID */
             roundId: string;
         };
         /** @description ラウンド情報取得レスポンス */
@@ -641,10 +629,7 @@ export interface components {
         };
         /** @description 投票送信レスポンス */
         SendVoteResponse: {
-            /**
-             * Format: uuid
-             * @description 投票ID
-             */
+            /** @description 投票ID */
             voteId: string;
         };
         /** @description セッション参加者 */
@@ -656,24 +641,15 @@ export interface components {
         };
         /** @description セッション情報 */
         Session: {
-            /**
-             * Format: uuid
-             * @description セッションのID
-             */
+            /** @description セッションのID */
             sessionId: string;
-            /**
-             * Format: uuid
-             * @description セッションのホストID
-             */
+            /** @description セッションのホストID */
             hostId: string;
             /** @description スケールの種類 */
             scaleType: components["schemas"]["ScaleType"];
             /** @description カスタムスケール（scaleTypeがcustomの場合のみ有効） */
             customScale: string[];
-            /**
-             * Format: uuid
-             * @description 現在のラウンドID
-             */
+            /** @description 現在のラウンドID */
             currentRoundId?: string;
             /** @description セッションの状態 */
             status: string;
@@ -692,15 +668,9 @@ export interface components {
         };
         /** @description ラウンド情報 */
         Round: {
-            /**
-             * Format: uuid
-             * @description ラウンドのID
-             */
+            /** @description ラウンドのID */
             roundId: string;
-            /**
-             * Format: uuid
-             * @description このラウンドが属するセッションのID
-             */
+            /** @description このラウンドが属するセッションのID */
             sessionId: string;
             /**
              * @description ラウンドの状態
@@ -723,10 +693,7 @@ export interface components {
         };
         /** @description 投票情報 */
         Vote: {
-            /**
-             * Format: uuid
-             * @description 参加者のID
-             */
+            /** @description 参加者のID */
             participantId: string;
             /** @description 参加者名 */
             participantName: string;
@@ -768,28 +735,19 @@ export interface components {
         };
         /** @description participantJoinedイベントのペイロード */
         ParticipantJoinedPayload: {
-            /**
-             * Format: uuid
-             * @description 参加者のID
-             */
+            /** @description 参加者のID */
             participantId?: string;
             /** @description 参加者の名前 */
             name?: string;
         };
         /** @description roundStartedイベントのペイロード */
         RoundStartedPayload: {
-            /**
-             * Format: uuid
-             * @description ラウンドのID
-             */
+            /** @description ラウンドのID */
             roundId?: string;
         };
         /** @description voteSubmittedイベントのペイロード */
         VoteSubmittedPayload: {
-            /**
-             * Format: uuid
-             * @description 投票した参加者のID
-             */
+            /** @description 投票した参加者のID */
             participantId?: string;
         };
         /** @description votesRevealedイベントのペイロード */

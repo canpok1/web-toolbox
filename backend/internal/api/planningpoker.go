@@ -92,8 +92,8 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 
 	// レスポンスの作成
 	res := CreateSessionResponse{
-		HostId:    hostId,
-		SessionId: sessionId,
+		HostId:    hostIdValue,
+		SessionId: sessionIdValue,
 	}
 	return &res, nil
 }
@@ -145,7 +145,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 	}
 
 	res := JoinSessionResponse{
-		ParticipantId: participantId,
+		ParticipantId: participantId.String(),
 	}
 	return &res, nil
 }
@@ -159,15 +159,9 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 		return nil, fmt.Errorf("round not found: roundID=%s", roundId)
 	}
 
-	sessionUUID, err := uuid.Parse(redisRound.SessionId)
-	if err != nil {
-		log.Printf("invalid session ID format found in round data: roundID=%s, sessionID=%s, err=%v", roundId, redisRound.SessionId, err)
-		return nil, fmt.Errorf("internal server error: invalid session ID format")
-	}
-
 	apiRound := Round{
-		RoundId:   uuid.MustParse(roundId),
-		SessionId: sessionUUID,
+		RoundId:   roundId,
+		SessionId: redisRound.SessionId,
 		Status:    RoundStatus(redisRound.Status),
 		CreatedAt: redisRound.CreatedAt,
 		UpdatedAt: redisRound.UpdatedAt,
@@ -197,12 +191,6 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 				continue // データ不整合の可能性、スキップ
 			}
 
-			participantUUID, err := uuid.Parse(redisVote.ParticipantId)
-			if err != nil {
-				log.Printf("failed to parse participantId for vote, skipping vote: roundID=%s, voteID=%s, participantID=%s, err=%v", roundId, voteID, redisVote.ParticipantId, err)
-				continue // ParticipantId の形式不正、スキップ
-			}
-
 			redisParticipant, err := s.redis.GetParticipant(ctx, redisVote.ParticipantId)
 			// GetParticipant でエラーが発生した場合や見つからなかった場合は、その投票を除外する
 			if err != nil {
@@ -215,13 +203,13 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 			}
 
 			apiVote := Vote{
-				ParticipantId:   participantUUID,
+				ParticipantId:   redisVote.ParticipantId,
 				ParticipantName: redisParticipant.Name,
 			}
 
 			// 公開時か自身のもののみ投票結果をセット
 			isRevealed := apiRound.Status == Revealed
-			isOwnVote := participantId != nil && *participantId == participantUUID.String()
+			isOwnVote := participantId != nil && *participantId == apiVote.ParticipantId
 
 			if isRevealed || isOwnVote {
 				if redisVote.Value != "" {
@@ -385,7 +373,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 			return nil, fmt.Errorf("failed to add vote to round in redis: roundID=%s, voteID=%s, err=%v", roundId, newVoteId.String(), err)
 		}
 
-		res := SendVoteResponse{VoteId: newVoteId}
+		res := SendVoteResponse{VoteId: newVoteId.String()}
 		return &res, nil
 	} else {
 		// Update the existing vote
@@ -399,7 +387,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 		if err := s.redis.UpdateVote(ctx, *voteId, *vote); err != nil {
 			return nil, fmt.Errorf("failed to update vote in redis: roundID=%s, voteID=%s, err=%v", roundId, *voteId, err)
 		}
-		res := SendVoteResponse{VoteId: uuid.MustParse(*voteId)}
+		res := SendVoteResponse{VoteId: *voteId}
 		return &res, nil
 	}
 }
@@ -436,8 +424,8 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*
 	// Convert the redis.Session to GetSessionResponse
 	res := GetSessionResponse{
 		Session: Session{
-			SessionId:      uuid.MustParse(sessionID),
-			HostId:         uuid.MustParse(session.HostId),
+			SessionId:      sessionID,
+			HostId:         session.HostId,
 			ScaleType:      ScaleType(session.ScaleType),
 			Status:         session.Status,
 			CustomScale:    session.CustomScale,
@@ -448,12 +436,7 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*
 		},
 	}
 	if session.CurrentRoundId != "" {
-		currendRoundId, err := uuid.Parse(session.CurrentRoundId)
-		if err != nil {
-			log.Printf("failed to parse CurrentRoundId: %v", err)
-			return nil, fmt.Errorf("failed to parse CurrentRoundId: %w", err)
-		}
-		res.Session.CurrentRoundId = &currendRoundId
+		res.Session.CurrentRoundId = &session.CurrentRoundId
 	}
 
 	return &res, nil
@@ -496,6 +479,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx context.C
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate round uuid: sessionID=%s, err=%v", sessionID, err)
 	}
+	roundIdValue := roundId.String()
 
 	round := redis.Round{
 		SessionId: sessionID,
@@ -505,18 +489,18 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx context.C
 	}
 
 	// Save the round to Redis
-	if err := s.redis.CreateRound(ctx, roundId.String(), round); err != nil {
+	if err := s.redis.CreateRound(ctx, roundIdValue, round); err != nil {
 		return nil, fmt.Errorf("failed to create round in redis: sessionID=%s, roundID=%s, err=%v", sessionID, roundId, err)
 	}
 
 	// Update the session's currentRoundId
-	session.CurrentRoundId = roundId.String()
+	session.CurrentRoundId = roundIdValue
 	session.Status = "inProgress"
 	session.UpdatedAt = time.Now()
 	if err := s.redis.UpdateSession(ctx, sessionID, *session); err != nil {
 		return nil, fmt.Errorf("failed to update session in redis: sessionID=%s, roundID=%s, err=%v", sessionID, roundId, err)
 	}
 
-	res := StartRoundResponse{RoundId: roundId}
+	res := StartRoundResponse{RoundId: roundIdValue}
 	return &res, nil
 }

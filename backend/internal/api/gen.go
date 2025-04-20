@@ -10,7 +10,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // Defines values for RoundStatus.
@@ -42,10 +41,10 @@ type CreateSessionRequest struct {
 // CreateSessionResponse セッション作成レスポンス
 type CreateSessionResponse struct {
 	// HostId セッションのホストID
-	HostId openapi_types.UUID `json:"hostId"`
+	HostId string `json:"hostId"`
 
 	// SessionId 作成されたセッションのID
-	SessionId openapi_types.UUID `json:"sessionId"`
+	SessionId string `json:"sessionId"`
 }
 
 // EndSessionResponse セッション終了レスポンス
@@ -78,7 +77,7 @@ type JoinSessionRequest struct {
 // JoinSessionResponse セッション参加レスポンス
 type JoinSessionResponse struct {
 	// ParticipantId 参加者のID
-	ParticipantId openapi_types.UUID `json:"participantId"`
+	ParticipantId string `json:"participantId"`
 }
 
 // RevealRoundResponse ラウンド結果公開レスポンス
@@ -90,10 +89,10 @@ type Round struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// RoundId ラウンドのID
-	RoundId openapi_types.UUID `json:"roundId"`
+	RoundId string `json:"roundId"`
 
 	// SessionId このラウンドが属するセッションのID
-	SessionId openapi_types.UUID `json:"sessionId"`
+	SessionId string `json:"sessionId"`
 
 	// Status ラウンドの状態
 	Status RoundStatus `json:"status"`
@@ -141,7 +140,7 @@ type SendVoteRequest struct {
 // SendVoteResponse 投票送信レスポンス
 type SendVoteResponse struct {
 	// VoteId 投票ID
-	VoteId openapi_types.UUID `json:"voteId"`
+	VoteId string `json:"voteId"`
 }
 
 // Session セッション情報
@@ -150,13 +149,13 @@ type Session struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// CurrentRoundId 現在のラウンドID
-	CurrentRoundId *openapi_types.UUID `json:"currentRoundId,omitempty"`
+	CurrentRoundId *string `json:"currentRoundId,omitempty"`
 
 	// CustomScale カスタムスケール（scaleTypeがcustomの場合のみ有効）
 	CustomScale []string `json:"customScale"`
 
 	// HostId セッションのホストID
-	HostId openapi_types.UUID `json:"hostId"`
+	HostId string `json:"hostId"`
 
 	// Participants 参加者リスト
 	Participants []SessionParticipant `json:"participants"`
@@ -165,7 +164,7 @@ type Session struct {
 	ScaleType ScaleType `json:"scaleType"`
 
 	// SessionId セッションのID
-	SessionId openapi_types.UUID `json:"sessionId"`
+	SessionId string `json:"sessionId"`
 
 	// Status セッションの状態
 	Status string `json:"status"`
@@ -186,13 +185,13 @@ type SessionParticipant struct {
 // StartRoundResponse ラウンド開始レスポンス
 type StartRoundResponse struct {
 	// RoundId 開始されたラウンドのID
-	RoundId openapi_types.UUID `json:"roundId"`
+	RoundId string `json:"roundId"`
 }
 
 // Vote 投票情報
 type Vote struct {
 	// ParticipantId 参加者のID
-	ParticipantId openapi_types.UUID `json:"participantId"`
+	ParticipantId string `json:"participantId"`
 
 	// ParticipantName 参加者名
 	ParticipantName string `json:"participantName"`

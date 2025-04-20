@@ -450,7 +450,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 
 				assert.NoError(t, err, "Expected no error")
 				assert.NotNil(t, res, "Expected non-nil response on success")
-				assert.Equal(t, tt.sessionID, res.Session.SessionId.String())
+				assert.Equal(t, tt.sessionID, res.Session.SessionId)
 				assert.Equal(t, len(tt.participantIDs), len(res.Session.Participants))
 			})
 		}
@@ -680,8 +680,8 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   uuid.MustParse(validRoundID),
-						SessionId: uuid.MustParse(validSessionID),
+						RoundId:   validRoundID,
+						SessionId: validSessionID,
 						Status:    api.Voting,
 						CreatedAt: now,
 						UpdatedAt: now,
@@ -732,14 +732,14 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   uuid.MustParse(validRoundID),
-						SessionId: uuid.MustParse(validSessionID),
+						RoundId:   validRoundID,
+						SessionId: validSessionID,
 						Status:    api.Voting,
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{
-							{ParticipantId: uuid.MustParse(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
-							{ParticipantId: uuid.MustParse(validParticipantID2), ParticipantName: "Bob"},
+							{ParticipantId: validParticipantID1, ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: validParticipantID2, ParticipantName: "Bob"},
 						},
 					},
 				},
@@ -800,15 +800,15 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   uuid.MustParse(validRoundID),
-						SessionId: uuid.MustParse(validSessionID),
+						RoundId:   validRoundID,
+						SessionId: validSessionID,
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{
-							{ParticipantId: uuid.MustParse(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
-							{ParticipantId: uuid.MustParse(validParticipantID2), ParticipantName: "Bob", Value: PtrString("8")},
-							{ParticipantId: uuid.MustParse(validParticipantID3), ParticipantName: "Charlie", Value: PtrString("2")},
+							{ParticipantId: validParticipantID1, ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: validParticipantID2, ParticipantName: "Bob", Value: PtrString("8")},
+							{ParticipantId: validParticipantID3, ParticipantName: "Charlie", Value: PtrString("2")},
 						},
 						Summary: &api.RoundSummary{
 							Average: 5.0,
@@ -833,8 +833,8 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   uuid.MustParse(validRoundID),
-						SessionId: uuid.MustParse(validSessionID),
+						RoundId:   validRoundID,
+						SessionId: validSessionID,
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
@@ -856,8 +856,8 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   uuid.MustParse(validRoundID),
-						SessionId: uuid.MustParse(validSessionID),
+						RoundId:   validRoundID,
+						SessionId: validSessionID,
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
@@ -869,10 +869,8 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				name:    "成功 - ステータス revealed, 一部の GetVote エラー/nil/パースエラー (スキップされる)",
 				roundID: validRoundID,
 				mockSetup: func(mockRedis *mock_redis.MockClient) {
-					invalidParticipantID := "invalid-uuid"
 					voteID3 := uuid.New().String()
 					voteID4 := uuid.New().String()
-					voteID5 := uuid.New().String()
 
 					mockRedis.EXPECT().GetRound(ctx, validRoundID).Return(&redis.Round{
 						SessionId: validSessionID,
@@ -880,7 +878,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{voteID1, voteID2, voteID3, voteID4, voteID5}, nil)
+					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{voteID1, voteID2, voteID3, voteID4}, nil)
 
 					// 正常な投票
 					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
@@ -892,14 +890,8 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(nil, errors.New("get vote error"))
 					// GetVote nil
 					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(nil, nil)
-					// ParticipantId パースエラー
-					mockRedis.EXPECT().GetVote(ctx, voteID4).Return(&redis.Vote{
-						RoundId:       validRoundID,
-						ParticipantId: invalidParticipantID, // 不正なUUID
-						Value:         "13",
-					}, nil)
 					// 正常な投票 (エラーの後でも処理される)
-					mockRedis.EXPECT().GetVote(ctx, voteID5).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID4).Return(&redis.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID2,
 						Value:         "21",
@@ -921,14 +913,14 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   uuid.MustParse(validRoundID),
-						SessionId: uuid.MustParse(validSessionID),
+						RoundId:   validRoundID,
+						SessionId: validSessionID,
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{ // エラー/nil/パースエラーの投票は含まれない
-							{ParticipantId: uuid.MustParse(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
-							{ParticipantId: uuid.MustParse(validParticipantID2), ParticipantName: "Bob", Value: PtrString("21")},
+							{ParticipantId: validParticipantID1, ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: validParticipantID2, ParticipantName: "Bob", Value: PtrString("21")},
 						},
 						Summary: &api.RoundSummary{
 							Average: 13.0,
@@ -981,13 +973,13 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 				},
 				expectedResponse: &api.GetRoundResponse{
 					Round: api.Round{
-						RoundId:   uuid.MustParse(validRoundID),
-						SessionId: uuid.MustParse(validSessionID),
+						RoundId:   validRoundID,
+						SessionId: validSessionID,
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes: []api.Vote{ // GetParticipantでエラー/nilになった投票は含まれない
-							{ParticipantId: uuid.MustParse(validParticipantID1), ParticipantName: "Alice", Value: PtrString("5")},
+							{ParticipantId: validParticipantID1, ParticipantName: "Alice", Value: PtrString("5")},
 						},
 						Summary: &api.RoundSummary{
 							Average: 5.0,
@@ -1026,7 +1018,6 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 
 	t.Run("異常系", func(t *testing.T) {
 		invalidRoundID := uuid.New()
-		validRoundID := uuid.New()
 
 		tests := []struct {
 			name          string
@@ -1050,19 +1041,6 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 					mockRedis.EXPECT().GetRound(ctx, invalidRoundID.String()).Return(nil, nil) // nil, nil を返す
 				},
 				expectedError: "round not found",
-			},
-			{
-				name:    "失敗 - SessionId パースエラー",
-				roundID: validRoundID.String(),
-				mockSetup: func(mockRedis *mock_redis.MockClient) {
-					mockRedis.EXPECT().GetRound(ctx, validRoundID.String()).Return(&redis.Round{
-						SessionId: "invalid-session-id-format", // 不正な形式
-						Status:    string(api.Voting),
-						CreatedAt: now,
-						UpdatedAt: now,
-					}, nil)
-				},
-				expectedError: "invalid session ID format",
 			},
 		}
 
