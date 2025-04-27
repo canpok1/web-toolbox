@@ -25,7 +25,6 @@ function SessionPage() {
 
   useEffect(() => {
     setShowLoading(!loaded);
-    console.log("set showLoading: %s", loaded ? "false" : "true");
   }, [setShowLoading, loaded]);
 
   // 定期更新
