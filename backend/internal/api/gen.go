@@ -113,16 +113,19 @@ type RoundStatus string
 // RoundSummary 投票結果の要約
 type RoundSummary struct {
 	// Average 投票値の平均（未投票、不明除く）
-	Average float32 `json:"average"`
+	Average *float32 `json:"average,omitempty"`
 
 	// Max 投票値の最大値（未投票、不明除く）
-	Max float32 `json:"max"`
+	Max *float32 `json:"max,omitempty"`
 
 	// Median 投票値の中央値（未投票、不明除く）
-	Median float32 `json:"median"`
+	Median *float32 `json:"median,omitempty"`
 
 	// Min 投票値の最小値（未投票、不明除く）
-	Min float32 `json:"min"`
+	Min *float32 `json:"min,omitempty"`
+
+	// VoteCounts 選択肢ごとの投票数
+	VoteCounts []VoteCount `json:"voteCounts"`
 }
 
 // ScaleType スケールの種類
@@ -151,9 +154,6 @@ type Session struct {
 	// CurrentRoundId 現在のラウンドID
 	CurrentRoundId *string `json:"currentRoundId,omitempty"`
 
-	// CustomScale カスタムスケール（scaleTypeがcustomの場合のみ有効）
-	CustomScale []string `json:"customScale"`
-
 	// HostId セッションのホストID
 	HostId string `json:"hostId"`
 
@@ -162,6 +162,9 @@ type Session struct {
 
 	// ScaleType スケールの種類
 	ScaleType ScaleType `json:"scaleType"`
+
+	// Scales スケールのリスト
+	Scales []string `json:"scales"`
 
 	// SessionId セッションのID
 	SessionId string `json:"sessionId"`
@@ -198,6 +201,18 @@ type Vote struct {
 
 	// Value 投票値（参加者自身もしくはラウンドのstatusがrevealedの場合のみ）
 	Value *string `json:"value,omitempty"`
+}
+
+// VoteCount 選択肢ごとの投票数
+type VoteCount struct {
+	// Count 投票数
+	Count int `json:"count"`
+
+	// Participants 投票者リスト
+	Participants []SessionParticipant `json:"participants"`
+
+	// Value 投票値
+	Value string `json:"value"`
 }
 
 // GetApiPlanningPokerRoundsRoundIdParams defines parameters for GetApiPlanningPokerRoundsRoundId.

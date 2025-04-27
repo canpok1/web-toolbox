@@ -105,6 +105,7 @@ export default function useSession(
       hostId: response.session.hostId,
       status: response.session.status,
       scaleType: response.session.scaleType,
+      scales: response.session.scales,
     };
   };
 

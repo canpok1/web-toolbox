@@ -647,8 +647,8 @@ export interface components {
             hostId: string;
             /** @description スケールの種類 */
             scaleType: components["schemas"]["ScaleType"];
-            /** @description カスタムスケール（scaleTypeがcustomの場合のみ有効） */
-            customScale: string[];
+            /** @description スケールのリスト */
+            scales: string[];
             /** @description 現在のラウンドID */
             currentRoundId?: string;
             /** @description セッションの状態 */
@@ -706,22 +706,33 @@ export interface components {
              * Format: float
              * @description 投票値の平均（未投票、不明除く）
              */
-            average: number;
+            average?: number;
             /**
              * Format: float
              * @description 投票値の中央値（未投票、不明除く）
              */
-            median: number;
+            median?: number;
             /**
              * Format: float
              * @description 投票値の最大値（未投票、不明除く）
              */
-            max: number;
+            max?: number;
             /**
              * Format: float
              * @description 投票値の最小値（未投票、不明除く）
              */
-            min: number;
+            min?: number;
+            /** @description 選択肢ごとの投票数 */
+            voteCounts: components["schemas"]["VoteCount"][];
+        };
+        /** @description 選択肢ごとの投票数 */
+        VoteCount: {
+            /** @description 投票値 */
+            value: string;
+            /** @description 投票数 */
+            count: number;
+            /** @description 投票者リスト */
+            participants: components["schemas"]["SessionParticipant"][];
         };
         /** @description WebSocketメッセージ */
         WebSocketMessage: {

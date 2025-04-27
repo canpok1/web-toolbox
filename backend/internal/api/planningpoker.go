@@ -12,6 +12,19 @@ import (
 	"github.com/google/uuid"
 )
 
+var scaleListMap = map[ScaleType][]string{
+	Fibonacci:  {"0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?"},
+	TShirt:     {"XS", "S", "M", "L", "XL", "XXL", "?"},
+	PowerOfTwo: {"1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "?"},
+	Custom:     {},
+}
+
+var scaleOrder = []string{
+	"0", "1", "2", "3", "4", "5", "8", "13", "16", "21",
+	"32", "34", "55", "64", "89", "128", "256", "512", "1024",
+	"XS", "S", "M", "L", "XL", "XXL", "?",
+}
+
 var validScaleTypeMap = map[ScaleType]struct{}{
 	Fibonacci:  {},
 	TShirt:     {},
@@ -177,6 +190,7 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 	}
 
 	numericVotes := []float32{} // 数値として扱える投票値を格納するスライス
+	voteCountMap := map[string]VoteCount{}
 
 	if len(voteIDs) > 0 {
 		apiVotes := make([]Vote, 0, len(voteIDs))
@@ -218,6 +232,24 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 
 					// revealed 状態の場合、数値変換を試みて集計用スライスに追加
 					if isRevealed {
+						participant := SessionParticipant{
+							ParticipantId: redisVote.ParticipantId,
+							Name:          redisParticipant.Name,
+						}
+						if voteCount, exist := voteCountMap[redisVote.Value]; exist {
+							voteCountMap[redisVote.Value] = VoteCount{
+								Value:        voteCount.Value,
+								Count:        voteCount.Count + 1,
+								Participants: append(voteCount.Participants, participant),
+							}
+						} else {
+							voteCountMap[redisVote.Value] = VoteCount{
+								Value:        redisVote.Value,
+								Count:        1,
+								Participants: []SessionParticipant{participant},
+							}
+						}
+
 						numVal, err := strconv.ParseFloat(redisVote.Value, 32)
 						if err == nil {
 							numericVotes = append(numericVotes, float32(numVal))
@@ -233,37 +265,49 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 		apiRound.Votes = apiVotes
 	}
 
-	// revealed 状態かつ数値の投票が1つ以上ある場合、サマリーを生成
-	if apiRound.Status == Revealed && len(numericVotes) > 0 {
-		sort.Slice(numericVotes, func(i, j int) bool {
-			return numericVotes[i] < numericVotes[j]
-		})
-
-		var sum float32
-		for _, v := range numericVotes {
-			sum += v
-		}
-		average := sum / float32(len(numericVotes))
-
-		var median float32
-		n := len(numericVotes)
-		if n%2 == 1 {
-			// 奇数個の場合、中央の要素
-			median = numericVotes[n/2]
-		} else {
-			// 偶数個の場合、中央の2つの要素の平均
-			median = (numericVotes[n/2-1] + numericVotes[n/2]) / 2.0
+	// revealed 状態の場合、サマリーを生成
+	if apiRound.Status == Revealed {
+		summary := RoundSummary{
+			VoteCounts: []VoteCount{},
 		}
 
-		max := numericVotes[len(numericVotes)-1]
-		min := numericVotes[0]
-
-		apiRound.Summary = &RoundSummary{
-			Average: average,
-			Median:  median,
-			Max:     max,
-			Min:     min,
+		for _, scale := range scaleOrder {
+			if voteCount, exist := voteCountMap[scale]; exist {
+				summary.VoteCounts = append(summary.VoteCounts, voteCount)
+			}
 		}
+
+		if len(numericVotes) > 0 {
+			sort.Slice(numericVotes, func(i, j int) bool {
+				return numericVotes[i] < numericVotes[j]
+			})
+
+			var sum float32
+			for _, v := range numericVotes {
+				sum += v
+			}
+			average := sum / float32(len(numericVotes))
+			summary.Average = &average
+
+			var median float32
+			n := len(numericVotes)
+			if n%2 == 1 {
+				// 奇数個の場合、中央の要素
+				median = numericVotes[n/2]
+			} else {
+				// 偶数個の場合、中央の2つの要素の平均
+				median = (numericVotes[n/2-1] + numericVotes[n/2]) / 2.0
+			}
+			summary.Median = &median
+
+			max := numericVotes[len(numericVotes)-1]
+			summary.Max = &max
+
+			min := numericVotes[0]
+			summary.Min = &min
+		}
+
+		apiRound.Summary = &summary
 	}
 
 	res := GetRoundResponse{
@@ -421,6 +465,13 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*
 		})
 	}
 
+	var scales []string
+	if session.ScaleType == "custom" {
+		scales = session.CustomScale
+	} else {
+		scales = scaleListMap[ScaleType(session.ScaleType)]
+	}
+
 	// Convert the redis.Session to GetSessionResponse
 	res := GetSessionResponse{
 		Session: Session{
@@ -428,7 +479,7 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*
 			HostId:         session.HostId,
 			ScaleType:      ScaleType(session.ScaleType),
 			Status:         session.Status,
-			CustomScale:    session.CustomScale,
+			Scales:         scales,
 			CurrentRoundId: nil,
 			Participants:   participants,
 			CreatedAt:      session.CreatedAt,

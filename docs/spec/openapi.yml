@@ -440,7 +440,7 @@ components:
         - sessionId
         - hostId
         - scaleType
-        - customScale
+        - scales
         - status
         - participants
         - createdAt
@@ -455,11 +455,11 @@ components:
         scaleType:
           $ref: "#/components/schemas/ScaleType"
           description: スケールの種類
-        customScale:
+        scales:
           type: array
           items:
             type: string
-          description: カスタムスケール（scaleTypeがcustomの場合のみ有効）
+          description: スケールのリスト
         currentRoundId:
           type: string
           description: 現在のラウンドID
@@ -537,10 +537,7 @@ components:
       type: object
       description: 投票結果の要約
       required:
-        - average
-        - median
-        - max
-        - min
+        - voteCounts
       properties:
         average:
           type: number
@@ -558,6 +555,30 @@ components:
           type: number
           format: float
           description: 投票値の最小値（未投票、不明除く）
+        voteCounts:
+          type: array
+          description: 選択肢ごとの投票数
+          items:
+            $ref: "#/components/schemas/VoteCount"
+    VoteCount:
+      type: object
+      description: 選択肢ごとの投票数
+      required:
+        - value
+        - count
+        - participants
+      properties:
+        value:
+          type: string
+          description: 投票値
+        count:
+          type: integer
+          description: 投票数
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionParticipant"
+          description: 投票者リスト
     WebSocketMessage:
       type: object
       description: WebSocketメッセージ

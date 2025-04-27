@@ -99,7 +99,7 @@ function SessionPage() {
                 className="w-full"
                 roundId={round.roundId}
                 participantId={participandId}
-                scaleType={session?.scaleType ?? "fibonacci"}
+                scales={session?.scales ?? []}
                 votedOption={myVote?.vote ?? null}
                 onAfterVote={() => {
                   reload();
