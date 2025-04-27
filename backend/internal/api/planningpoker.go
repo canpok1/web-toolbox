@@ -231,7 +231,7 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 							}
 						} else {
 							voteCountMap[redisVote.Value] = VoteCount{
-								Value:        voteCount.Value,
+								Value:        redisVote.Value,
 								Count:        1,
 								Participants: []SessionParticipant{participant},
 							}
@@ -252,43 +252,50 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 		apiRound.Votes = apiVotes
 	}
 
-	// revealed 状態かつ数値の投票が1つ以上ある場合、サマリーを生成
-	if apiRound.Status == Revealed && len(numericVotes) > 0 {
-		sort.Slice(numericVotes, func(i, j int) bool {
-			return numericVotes[i] < numericVotes[j]
+	// revealed 状態の場合、サマリーを生成
+	if apiRound.Status == Revealed {
+		summary := RoundSummary{
+			VoteCounts: []VoteCount{},
+		}
+
+		for _, voteCount := range voteCountMap {
+			summary.VoteCounts = append(summary.VoteCounts, voteCount)
+		}
+		sort.Slice(summary.VoteCounts, func(i, j int) bool {
+			return summary.VoteCounts[i].Value < summary.VoteCounts[j].Value
 		})
 
-		var sum float32
-		for _, v := range numericVotes {
-			sum += v
-		}
-		average := sum / float32(len(numericVotes))
+		if len(numericVotes) > 0 {
+			sort.Slice(numericVotes, func(i, j int) bool {
+				return numericVotes[i] < numericVotes[j]
+			})
 
-		var median float32
-		n := len(numericVotes)
-		if n%2 == 1 {
-			// 奇数個の場合、中央の要素
-			median = numericVotes[n/2]
-		} else {
-			// 偶数個の場合、中央の2つの要素の平均
-			median = (numericVotes[n/2-1] + numericVotes[n/2]) / 2.0
+			var sum float32
+			for _, v := range numericVotes {
+				sum += v
+			}
+			average := sum / float32(len(numericVotes))
+			summary.Average = &average
+
+			var median float32
+			n := len(numericVotes)
+			if n%2 == 1 {
+				// 奇数個の場合、中央の要素
+				median = numericVotes[n/2]
+			} else {
+				// 偶数個の場合、中央の2つの要素の平均
+				median = (numericVotes[n/2-1] + numericVotes[n/2]) / 2.0
+			}
+			summary.Median = &median
+
+			max := numericVotes[len(numericVotes)-1]
+			summary.Max = &max
+
+			min := numericVotes[0]
+			summary.Min = &min
 		}
 
-		max := numericVotes[len(numericVotes)-1]
-		min := numericVotes[0]
-
-		voteCounts := []VoteCount{}
-		for _, voteCount := range voteCountMap {
-			voteCounts = append(voteCounts, voteCount)
-		}
-
-		apiRound.Summary = &RoundSummary{
-			Average:    &average,
-			Median:     &median,
-			Max:        &max,
-			Min:        &min,
-			VoteCounts: voteCounts,
-		}
+		apiRound.Summary = &summary
 	}
 
 	res := GetRoundResponse{

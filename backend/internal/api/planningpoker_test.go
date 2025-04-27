@@ -811,10 +811,15 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 							{ParticipantId: validParticipantID3, ParticipantName: "Charlie", Value: PtrString("2")},
 						},
 						Summary: &api.RoundSummary{
-							Average: 5.0,
-							Median:  5.0,
-							Max:     8.0,
-							Min:     2.0,
+							Average: PtrFloat32(5.0),
+							Median:  PtrFloat32(5.0),
+							Max:     PtrFloat32(8.0),
+							Min:     PtrFloat32(2.0),
+							VoteCounts: []api.VoteCount{
+								{Value: "2", Count: 1, Participants: []api.SessionParticipant{{ParticipantId: validParticipantID3, Name: "Charlie"}}},
+								{Value: "5", Count: 1, Participants: []api.SessionParticipant{{ParticipantId: validParticipantID1, Name: "Alice"}}},
+								{Value: "8", Count: 1, Participants: []api.SessionParticipant{{ParticipantId: validParticipantID2, Name: "Bob"}}},
+							},
 						},
 					},
 				},
@@ -838,7 +843,10 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						Status:    api.Revealed,
 						CreatedAt: now,
 						UpdatedAt: now,
-						Votes:     []api.Vote{}, // 空のスライスが返る
+						Votes:     []api.Vote{},
+						Summary: &api.RoundSummary{
+							VoteCounts: []api.VoteCount{},
+						},
 					},
 				},
 			},
@@ -862,6 +870,9 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt: now,
 						UpdatedAt: now,
 						Votes:     []api.Vote{},
+						Summary: &api.RoundSummary{
+							VoteCounts: []api.VoteCount{},
+						},
 					},
 				},
 			},
@@ -923,10 +934,14 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 							{ParticipantId: validParticipantID2, ParticipantName: "Bob", Value: PtrString("21")},
 						},
 						Summary: &api.RoundSummary{
-							Average: 13.0,
-							Median:  13.0,
-							Max:     21.0,
-							Min:     5.0,
+							Average: PtrFloat32(13.0),
+							Median:  PtrFloat32(13.0),
+							Max:     PtrFloat32(21.0),
+							Min:     PtrFloat32(5.0),
+							VoteCounts: []api.VoteCount{
+								{Value: "5", Count: 1, Participants: []api.SessionParticipant{{ParticipantId: validParticipantID1, Name: "Alice"}}},
+								{Value: "21", Count: 1, Participants: []api.SessionParticipant{{ParticipantId: validParticipantID2, Name: "Bob"}}},
+							},
 						},
 					},
 				},
@@ -982,10 +997,13 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 							{ParticipantId: validParticipantID1, ParticipantName: "Alice", Value: PtrString("5")},
 						},
 						Summary: &api.RoundSummary{
-							Average: 5.0,
-							Median:  5.0,
-							Max:     5.0,
-							Min:     5.0,
+							Average: PtrFloat32(float32(5.0)),
+							Median:  PtrFloat32(float32(5.0)),
+							Max:     PtrFloat32(float32(5.0)),
+							Min:     PtrFloat32(float32(5.0)),
+							VoteCounts: []api.VoteCount{
+								{Value: "5", Count: 1, Participants: []api.SessionParticipant{{ParticipantId: validParticipantID1, Name: "Alice"}}},
+							},
 						},
 					},
 				},
@@ -1421,4 +1439,9 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 // PtrString は string のポインタを返すヘルパー関数です。
 func PtrString(s string) *string {
 	return &s
+}
+
+// PtrFloat32 は float32 のポインタを返すヘルパー関数です。
+func PtrFloat32(f float32) *float32 {
+	return &f
 }
