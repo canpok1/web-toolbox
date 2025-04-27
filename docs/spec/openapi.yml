@@ -541,6 +541,7 @@ components:
         - median
         - max
         - min
+        - voteCounts
       properties:
         average:
           type: number
@@ -558,6 +559,20 @@ components:
           type: number
           format: float
           description: 投票値の最小値（未投票、不明除く）
+        voteCounts:
+          type: object
+          description: 選択肢ごとの投票数
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              properties:
+                participantId:
+                  type: string
+                  description: 投票者のID
+                participantName:
+                  type: string
+                  description: 投票者の名前
     WebSocketMessage:
       type: object
       description: WebSocketメッセージ

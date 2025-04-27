@@ -123,6 +123,15 @@ type RoundSummary struct {
 
 	// Min 投票値の最小値（未投票、不明除く）
 	Min float32 `json:"min"`
+
+	// VoteCounts 選択肢ごとの投票数
+	VoteCounts map[string][]struct {
+		// ParticipantId 投票者のID
+		ParticipantId *string `json:"participantId,omitempty"`
+
+		// ParticipantName 投票者の名前
+		ParticipantName *string `json:"participantName,omitempty"`
+	} `json:"voteCounts"`
 }
 
 // ScaleType スケールの種類

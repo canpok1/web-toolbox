@@ -722,6 +722,15 @@ export interface components {
              * @description 投票値の最小値（未投票、不明除く）
              */
             min: number;
+            /** @description 選択肢ごとの投票数 */
+            voteCounts: {
+                [key: string]: {
+                    /** @description 投票者のID */
+                    participantId?: string;
+                    /** @description 投票者の名前 */
+                    participantName?: string;
+                }[];
+            };
         };
         /** @description WebSocketメッセージ */
         WebSocketMessage: {
