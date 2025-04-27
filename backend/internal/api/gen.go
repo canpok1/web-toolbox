@@ -113,16 +113,16 @@ type RoundStatus string
 // RoundSummary 投票結果の要約
 type RoundSummary struct {
 	// Average 投票値の平均（未投票、不明除く）
-	Average float32 `json:"average"`
+	Average *float32 `json:"average,omitempty"`
 
 	// Max 投票値の最大値（未投票、不明除く）
-	Max float32 `json:"max"`
+	Max *float32 `json:"max,omitempty"`
 
 	// Median 投票値の中央値（未投票、不明除く）
-	Median float32 `json:"median"`
+	Median *float32 `json:"median,omitempty"`
 
 	// Min 投票値の最小値（未投票、不明除く）
-	Min float32 `json:"min"`
+	Min *float32 `json:"min,omitempty"`
 
 	// VoteCounts 選択肢ごとの投票数
 	VoteCounts []VoteCount `json:"voteCounts"`

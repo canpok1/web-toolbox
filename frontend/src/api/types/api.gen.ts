@@ -706,22 +706,22 @@ export interface components {
              * Format: float
              * @description 投票値の平均（未投票、不明除く）
              */
-            average: number;
+            average?: number;
             /**
              * Format: float
              * @description 投票値の中央値（未投票、不明除く）
              */
-            median: number;
+            median?: number;
             /**
              * Format: float
              * @description 投票値の最大値（未投票、不明除く）
              */
-            max: number;
+            max?: number;
             /**
              * Format: float
              * @description 投票値の最小値（未投票、不明除く）
              */
-            min: number;
+            min?: number;
             /** @description 選択肢ごとの投票数 */
             voteCounts: components["schemas"]["VoteCount"][];
         };

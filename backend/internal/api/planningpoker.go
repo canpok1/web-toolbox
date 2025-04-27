@@ -177,6 +177,7 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 	}
 
 	numericVotes := []float32{} // 数値として扱える投票値を格納するスライス
+	voteCountMap := map[string]VoteCount{}
 
 	if len(voteIDs) > 0 {
 		apiVotes := make([]Vote, 0, len(voteIDs))
@@ -218,6 +219,24 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 
 					// revealed 状態の場合、数値変換を試みて集計用スライスに追加
 					if isRevealed {
+						participant := SessionParticipant{
+							ParticipantId: redisVote.ParticipantId,
+							Name:          redisParticipant.Name,
+						}
+						if voteCount, exist := voteCountMap[redisVote.Value]; exist {
+							voteCountMap[redisVote.Value] = VoteCount{
+								Value:        voteCount.Value,
+								Count:        voteCount.Count + 1,
+								Participants: append(voteCount.Participants, participant),
+							}
+						} else {
+							voteCountMap[redisVote.Value] = VoteCount{
+								Value:        voteCount.Value,
+								Count:        1,
+								Participants: []SessionParticipant{participant},
+							}
+						}
+
 						numVal, err := strconv.ParseFloat(redisVote.Value, 32)
 						if err == nil {
 							numericVotes = append(numericVotes, float32(numVal))
@@ -258,11 +277,17 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 		max := numericVotes[len(numericVotes)-1]
 		min := numericVotes[0]
 
+		voteCounts := []VoteCount{}
+		for _, voteCount := range voteCountMap {
+			voteCounts = append(voteCounts, voteCount)
+		}
+
 		apiRound.Summary = &RoundSummary{
-			Average: average,
-			Median:  median,
-			Max:     max,
-			Min:     min,
+			Average:    &average,
+			Median:     &median,
+			Max:        &max,
+			Min:        &min,
+			VoteCounts: voteCounts,
 		}
 	}
 

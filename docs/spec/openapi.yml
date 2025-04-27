@@ -537,10 +537,6 @@ components:
       type: object
       description: 投票結果の要約
       required:
-        - average
-        - median
-        - max
-        - min
         - voteCounts
       properties:
         average:
