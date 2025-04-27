@@ -12,6 +12,19 @@ import (
 	"github.com/google/uuid"
 )
 
+var scaleListMap = map[ScaleType][]string{
+	Fibonacci:  {"0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?"},
+	TShirt:     {"XS", "S", "M", "L", "XL", "XXL", "?"},
+	PowerOfTwo: {"1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "?"},
+	Custom:     {},
+}
+
+var scaleOrder = []string{
+	"0", "1", "2", "3", "4", "5", "8", "13", "16", "21",
+	"32", "34", "55", "64", "89", "128", "256", "512", "1024",
+	"XS", "S", "M", "L", "XL", "XXL", "?",
+}
+
 var validScaleTypeMap = map[ScaleType]struct{}{
 	Fibonacci:  {},
 	TShirt:     {},
@@ -258,12 +271,11 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 			VoteCounts: []VoteCount{},
 		}
 
-		for _, voteCount := range voteCountMap {
-			summary.VoteCounts = append(summary.VoteCounts, voteCount)
+		for _, scale := range scaleOrder {
+			if voteCount, exist := voteCountMap[scale]; exist {
+				summary.VoteCounts = append(summary.VoteCounts, voteCount)
+			}
 		}
-		sort.Slice(summary.VoteCounts, func(i, j int) bool {
-			return summary.VoteCounts[i].Value < summary.VoteCounts[j].Value
-		})
 
 		if len(numericVotes) > 0 {
 			sort.Slice(numericVotes, func(i, j int) bool {
@@ -453,6 +465,13 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*
 		})
 	}
 
+	var scales []string
+	if session.ScaleType == "custom" {
+		scales = session.CustomScale
+	} else {
+		scales = scaleListMap[ScaleType(session.ScaleType)]
+	}
+
 	// Convert the redis.Session to GetSessionResponse
 	res := GetSessionResponse{
 		Session: Session{
@@ -460,7 +479,7 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*
 			HostId:         session.HostId,
 			ScaleType:      ScaleType(session.ScaleType),
 			Status:         session.Status,
-			CustomScale:    session.CustomScale,
+			Scales:         scales,
 			CurrentRoundId: nil,
 			Participants:   participants,
 			CreatedAt:      session.CreatedAt,
