@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
+import { useLoading } from "../common/hooks/useLoading";
 import Alert from "./components/Alert";
 import HostPanel, { type HostPanelEvent } from "./components/HostPanel";
 import RoundSummaryPanel from "./components/RoundSummaryPanel";
@@ -13,15 +14,19 @@ function SessionPage() {
   const { sessionId = "" } = useParams<{ sessionId: string }>();
   const participandId = searchParams.get("id") ?? "";
 
-  const { session, round, myVote, myParticipant, error, reload } = useSession(
-    sessionId,
-    participandId,
-  );
+  const { session, round, myVote, myParticipant, loaded, error, reload } =
+    useSession(sessionId, participandId);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
+  const { setShowLoading } = useLoading();
 
   const showHostPanel = session && participandId === session?.hostId;
 
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null); // setIntervalのIDを保持
+
+  useEffect(() => {
+    setShowLoading(!loaded);
+    console.log("set showLoading: %s", loaded ? "false" : "true");
+  }, [setShowLoading, loaded]);
 
   // 定期更新
   useEffect(() => {

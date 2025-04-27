@@ -1,5 +1,7 @@
 import { useRef } from "react";
 import { Link, Outlet } from "react-router-dom";
+import Loading from "./common/components/Loading";
+import { LoadingProvider } from "./common/providers/LoadingProvider";
 
 const Layout = () => {
   const detailsRef = useRef<HTMLDetailsElement>(null);
@@ -44,7 +46,10 @@ const Layout = () => {
       </header>
 
       <main className="container mx-auto p-4">
-        <Outlet />
+        <LoadingProvider>
+          <Loading />
+          <Outlet />
+        </LoadingProvider>
       </main>
     </div>
   );
