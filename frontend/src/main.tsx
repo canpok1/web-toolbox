@@ -19,19 +19,50 @@ if (rootElement) {
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
-            <Route path="/" element={<TopPage />} />
-            <Route path="/planning-poker" element={<PlanningPokerTopPage />} />
+            <Route
+              path="/"
+              element={
+                <>
+                  <title>Web Toolbox</title>
+                  <TopPage />
+                </>
+              }
+            />
+            <Route
+              path="/planning-poker"
+              element={
+                <>
+                  <title>プランニングポーカー | Web Toolbox</title>
+                  <PlanningPokerTopPage />
+                </>
+              }
+            />
             <Route
               path="/planning-poker/sessions/create"
-              element={<CreateSessionPage />}
+              element={
+                <>
+                  <title>プランニングポーカー | Web Toolbox</title>
+                  <CreateSessionPage />
+                </>
+              }
             />
             <Route
               path="/planning-poker/sessions/join"
-              element={<JoinSessionPage />}
+              element={
+                <>
+                  <title>プランニングポーカー | Web Toolbox</title>
+                  <JoinSessionPage />
+                </>
+              }
             />
             <Route
               path="/planning-poker/sessions/:sessionId"
-              element={<SessionPage />}
+              element={
+                <>
+                  <title>プランニングポーカー | Web Toolbox</title>
+                  <SessionPage />
+                </>
+              }
             />
           </Route>
         </Routes>
