@@ -440,7 +440,7 @@ components:
         - sessionId
         - hostId
         - scaleType
-        - customScale
+        - scales
         - status
         - participants
         - createdAt
@@ -455,11 +455,11 @@ components:
         scaleType:
           $ref: "#/components/schemas/ScaleType"
           description: スケールの種類
-        customScale:
+        scales:
           type: array
           items:
             type: string
-          description: カスタムスケール（scaleTypeがcustomの場合のみ有効）
+          description: スケールのリスト
         currentRoundId:
           type: string
           description: 現在のラウンドID

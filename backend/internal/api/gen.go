@@ -154,9 +154,6 @@ type Session struct {
 	// CurrentRoundId 現在のラウンドID
 	CurrentRoundId *string `json:"currentRoundId,omitempty"`
 
-	// CustomScale カスタムスケール（scaleTypeがcustomの場合のみ有効）
-	CustomScale []string `json:"customScale"`
-
 	// HostId セッションのホストID
 	HostId string `json:"hostId"`
 
@@ -165,6 +162,9 @@ type Session struct {
 
 	// ScaleType スケールの種類
 	ScaleType ScaleType `json:"scaleType"`
+
+	// Scales スケールのリスト
+	Scales []string `json:"scales"`
 
 	// SessionId セッションのID
 	SessionId string `json:"sessionId"`

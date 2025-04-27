@@ -647,8 +647,8 @@ export interface components {
             hostId: string;
             /** @description スケールの種類 */
             scaleType: components["schemas"]["ScaleType"];
-            /** @description カスタムスケール（scaleTypeがcustomの場合のみ有効） */
-            customScale: string[];
+            /** @description スケールのリスト */
+            scales: string[];
             /** @description 現在のラウンドID */
             currentRoundId?: string;
             /** @description セッションの状態 */
