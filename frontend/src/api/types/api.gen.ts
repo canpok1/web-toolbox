@@ -723,14 +723,16 @@ export interface components {
              */
             min: number;
             /** @description 選択肢ごとの投票数 */
-            voteCounts: {
-                [key: string]: {
-                    /** @description 投票者のID */
-                    participantId: string;
-                    /** @description 投票者の名前 */
-                    participantName: string;
-                }[];
-            };
+            voteCounts: components["schemas"]["VoteCount"][];
+        };
+        /** @description 選択肢ごとの投票数 */
+        VoteCount: {
+            /** @description 投票値 */
+            value: string;
+            /** @description 投票数 */
+            count: number;
+            /** @description 投票者リスト */
+            participants: components["schemas"]["SessionParticipant"][];
         };
         /** @description WebSocketメッセージ */
         WebSocketMessage: {

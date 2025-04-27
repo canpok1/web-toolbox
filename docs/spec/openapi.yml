@@ -560,22 +560,29 @@ components:
           format: float
           description: 投票値の最小値（未投票、不明除く）
         voteCounts:
-          type: object
+          type: array
           description: 選択肢ごとの投票数
-          additionalProperties:
-            type: array
-            items:
-              type: object
-              required:
-                - participantId
-                - participantName
-              properties:
-                participantId:
-                  type: string
-                  description: 投票者のID
-                participantName:
-                  type: string
-                  description: 投票者の名前
+          items:
+            $ref: "#/components/schemas/VoteCount"
+    VoteCount:
+      type: object
+      description: 選択肢ごとの投票数
+      required:
+        - value
+        - count
+        - participants
+      properties:
+        value:
+          type: string
+          description: 投票値
+        count:
+          type: integer
+          description: 投票数
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionParticipant"
+          description: 投票者リスト
     WebSocketMessage:
       type: object
       description: WebSocketメッセージ

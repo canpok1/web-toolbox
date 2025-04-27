@@ -125,13 +125,7 @@ type RoundSummary struct {
 	Min float32 `json:"min"`
 
 	// VoteCounts 選択肢ごとの投票数
-	VoteCounts map[string][]struct {
-		// ParticipantId 投票者のID
-		ParticipantId string `json:"participantId"`
-
-		// ParticipantName 投票者の名前
-		ParticipantName string `json:"participantName"`
-	} `json:"voteCounts"`
+	VoteCounts []VoteCount `json:"voteCounts"`
 }
 
 // ScaleType スケールの種類
@@ -207,6 +201,18 @@ type Vote struct {
 
 	// Value 投票値（参加者自身もしくはラウンドのstatusがrevealedの場合のみ）
 	Value *string `json:"value,omitempty"`
+}
+
+// VoteCount 選択肢ごとの投票数
+type VoteCount struct {
+	// Count 投票数
+	Count int `json:"count"`
+
+	// Participants 投票者リスト
+	Participants []SessionParticipant `json:"participants"`
+
+	// Value 投票値
+	Value string `json:"value"`
 }
 
 // GetApiPlanningPokerRoundsRoundIdParams defines parameters for GetApiPlanningPokerRoundsRoundId.
