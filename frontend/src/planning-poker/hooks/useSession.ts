@@ -10,6 +10,7 @@ export type ReturnValue = {
   round: Round | null;
   myVote: Vote | null;
   myParticipant: SessionParticipant | null;
+  loaded: boolean;
   error: unknown | null;
   reload: () => Promise<void>;
 };
@@ -24,6 +25,7 @@ export default function useSession(
   const [myParticipant, setMyParticipant] = useState<SessionParticipant | null>(
     null,
   );
+  const [loaded, setLoaded] = useState<boolean>(false);
   const [error, setError] = useState<unknown | null>(null);
 
   useEffect(() => {
@@ -65,6 +67,8 @@ export default function useSession(
       setError(null);
     } catch (error) {
       setError(error);
+    } finally {
+      setLoaded(true);
     }
   }, [sessionId, participantId]);
 
@@ -147,6 +151,7 @@ export default function useSession(
     round,
     myVote,
     myParticipant,
+    loaded,
     error,
     reload,
   };
