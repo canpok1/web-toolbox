@@ -22,7 +22,8 @@ export default function RoundSummaryPanel({
   const voteMap = new Map(votes.map((v) => [v.participantId, v]));
   const hasVotes = votes.length > 0;
 
-  const showSummary = revealed && summary;
+  const showSummary = revealed && summary && summary.voteCounts.length > 0;
+  const showCount = revealed && summary && summary.voteCounts.length > 0;
   const showNoVote = revealed && !hasVotes;
   const showVote = !revealed || hasVotes;
 
@@ -43,31 +44,46 @@ export default function RoundSummaryPanel({
               <div className="stat">
                 <div className="stat-title">平均値</div>
                 <div className="stat-value text-primary">
-                  {formatNumber(summary.average)}
+                  {formatNumber(summary?.average)}
                 </div>
               </div>
               <div className="stat">
                 <div className="stat-title">中央値</div>
                 <div className="stat-value text-primary">
-                  {formatNumber(summary.median)}
+                  {formatNumber(summary?.median)}
                 </div>
               </div>
-              {summary.max !== undefined && (
+              {summary?.max !== undefined && (
                 <div className="stat">
                   <div className="stat-title">最大値</div>
                   <div className="stat-value text-primary">
-                    {formatNumber(summary.max)}
+                    {formatNumber(summary?.max)}
                   </div>
                 </div>
               )}
-              {summary.min !== undefined && (
+              {summary?.min !== undefined && (
                 <div className="stat">
                   <div className="stat-title">最小値</div>
                   <div className="stat-value text-primary">
-                    {formatNumber(summary.min)}
+                    {formatNumber(summary?.min)}
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {showCount && (
+          <div className="mb-4 pb-4">
+            <div className="stats stats-horizontal w-full shadow">
+              {summary.voteCounts.map((voteCount) => (
+                <div className="stat" key={voteCount.value}>
+                  <div className="stat-title">{voteCount.value}</div>
+                  <div className="stat-value text-primary">
+                    {voteCount.count}票
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

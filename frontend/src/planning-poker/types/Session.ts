@@ -8,6 +8,7 @@ export interface Session {
   hostId: string;
   status: SessionStatus;
   scaleType: ScaleType;
+  scales: string[];
 }
 
 export const SessionStatusValues = [
