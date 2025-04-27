@@ -21,9 +21,15 @@ export default function RoundSummaryPanel({
   const title = revealed ? "投票結果" : "投票状況";
   const voteMap = new Map(votes.map((v) => [v.participantId, v]));
   const hasVotes = votes.length > 0;
+  const hasSummary =
+    summary?.average !== undefined &&
+    summary?.median !== undefined &&
+    summary?.max !== undefined &&
+    summary?.min !== undefined;
+  const hasCount = summary && summary.voteCounts.length > 0;
 
-  const showSummary = revealed && summary && summary.voteCounts.length > 0;
-  const showCount = revealed && summary && summary.voteCounts.length > 0;
+  const showSummary = revealed && hasSummary;
+  const showCount = revealed && hasCount;
   const showNoVote = revealed && !hasVotes;
   const showVote = !revealed || hasVotes;
 
@@ -53,22 +59,18 @@ export default function RoundSummaryPanel({
                   {formatNumber(summary?.median)}
                 </div>
               </div>
-              {summary?.max !== undefined && (
-                <div className="stat">
-                  <div className="stat-title">最大値</div>
-                  <div className="stat-value text-primary">
-                    {formatNumber(summary?.max)}
-                  </div>
+              <div className="stat">
+                <div className="stat-title">最大値</div>
+                <div className="stat-value text-primary">
+                  {formatNumber(summary?.max)}
                 </div>
-              )}
-              {summary?.min !== undefined && (
-                <div className="stat">
-                  <div className="stat-title">最小値</div>
-                  <div className="stat-value text-primary">
-                    {formatNumber(summary?.min)}
-                  </div>
+              </div>
+              <div className="stat">
+                <div className="stat-title">最小値</div>
+                <div className="stat-value text-primary">
+                  {formatNumber(summary?.min)}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         )}
