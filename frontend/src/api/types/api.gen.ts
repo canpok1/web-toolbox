@@ -726,9 +726,9 @@ export interface components {
             voteCounts: {
                 [key: string]: {
                     /** @description 投票者のID */
-                    participantId?: string;
+                    participantId: string;
                     /** @description 投票者の名前 */
-                    participantName?: string;
+                    participantName: string;
                 }[];
             };
         };

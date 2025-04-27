@@ -127,10 +127,10 @@ type RoundSummary struct {
 	// VoteCounts 選択肢ごとの投票数
 	VoteCounts map[string][]struct {
 		// ParticipantId 投票者のID
-		ParticipantId *string `json:"participantId,omitempty"`
+		ParticipantId string `json:"participantId"`
 
 		// ParticipantName 投票者の名前
-		ParticipantName *string `json:"participantName,omitempty"`
+		ParticipantName string `json:"participantName"`
 	} `json:"voteCounts"`
 }
 

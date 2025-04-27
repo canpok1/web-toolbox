@@ -566,6 +566,9 @@ components:
             type: array
             items:
               type: object
+              required:
+                - participantId
+                - participantName
               properties:
                 participantId:
                   type: string
