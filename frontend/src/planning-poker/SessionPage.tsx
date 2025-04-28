@@ -58,6 +58,7 @@ function SessionPage() {
       };
     } catch (error) {
       console.error("websocket error: ", error);
+      setErrorMessages(["エラーが発生しました。画面を再読み込みして下さい。"]);
     }
   }, []);
 
