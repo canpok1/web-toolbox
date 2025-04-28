@@ -36,6 +36,7 @@ func main() {
 	log.Printf("Success to connect to Redis: address=%s", redisAddress)
 
 	webSocketHub := planningpoker.NewWebSocketHub()
+	go webSocketHub.Run()
 
 	server := api.NewServer(redisClient, webSocketHub)
 	e := echo.New()
