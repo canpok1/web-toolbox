@@ -28,6 +28,39 @@ function SessionPage() {
     setShowLoading(!loaded);
   }, [setShowLoading, loaded]);
 
+  useEffect(() => {
+    console.log("start websocket");
+    try {
+      // WebSocket 接続
+      const ws = new WebSocket("/api/planning-poker/ws");
+      console.log("made websocket");
+
+      ws.onopen = () => {
+        console.log("WebSocket connected");
+      };
+
+      ws.onmessage = (event) => {
+        console.log("Received message:", event.data);
+      };
+
+      ws.onclose = () => {
+        console.log("WebSocket disconnected");
+      };
+
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      // コンポーネントのアンマウント時に WebSocket 接続を閉じる
+      return () => {
+        console.log("call ws.close()");
+        ws.close();
+      };
+    } catch (error) {
+      console.error("websocket error: ", error);
+    }
+  }, []);
+
   // 定期更新
   useEffect(() => {
     intervalIdRef.current = setInterval(reload, 5000);
