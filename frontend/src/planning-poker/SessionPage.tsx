@@ -33,7 +33,7 @@ function SessionPage() {
     console.log("start websocket");
     try {
       // WebSocket 接続
-      const ws = new WebSocket("/api/planning-poker/ws");
+      const ws = new WebSocket(`/api/planning-poker/ws/${sessionId}`);
       console.log("made websocket");
 
       ws.onopen = () => {

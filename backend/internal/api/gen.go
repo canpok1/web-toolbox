@@ -257,8 +257,8 @@ type ServerInterface interface {
 	// (POST /api/planning-poker/sessions/{sessionId}/rounds)
 	PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId string) error
 	// リアルタイム更新のための WebSocket エンドポイント
-	// (GET /api/planning-poker/ws)
-	GetApiPlanningPokerWs(ctx echo.Context) error
+	// (GET /api/planning-poker/ws/{sessionId})
+	GetApiPlanningPokerWsSessionId(ctx echo.Context, sessionId string) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -396,12 +396,19 @@ func (w *ServerInterfaceWrapper) PostApiPlanningPokerSessionsSessionIdRounds(ctx
 	return err
 }
 
-// GetApiPlanningPokerWs converts echo context to params.
-func (w *ServerInterfaceWrapper) GetApiPlanningPokerWs(ctx echo.Context) error {
+// GetApiPlanningPokerWsSessionId converts echo context to params.
+func (w *ServerInterfaceWrapper) GetApiPlanningPokerWsSessionId(ctx echo.Context) error {
 	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetApiPlanningPokerWs(ctx)
+	err = w.Handler.GetApiPlanningPokerWsSessionId(ctx, sessionId)
 	return err
 }
 
@@ -441,6 +448,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/end", wrapper.PostApiPlanningPokerSessionsSessionIdEnd)
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/participants", wrapper.PostApiPlanningPokerSessionsSessionIdParticipants)
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/rounds", wrapper.PostApiPlanningPokerSessionsSessionIdRounds)
-	router.GET(baseURL+"/api/planning-poker/ws", wrapper.GetApiPlanningPokerWs)
+	router.GET(baseURL+"/api/planning-poker/ws/:sessionId", wrapper.GetApiPlanningPokerWsSessionId)
 
 }

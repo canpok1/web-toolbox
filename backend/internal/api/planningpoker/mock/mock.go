@@ -41,77 +41,77 @@ func (m *MockWebSocketHub) EXPECT() *MockWebSocketHubMockRecorder {
 }
 
 // BroadcastParticipantJoined mocks base method.
-func (m *MockWebSocketHub) BroadcastParticipantJoined(participantId, name string) {
+func (m *MockWebSocketHub) BroadcastParticipantJoined(sessionID, participantId, name string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "BroadcastParticipantJoined", participantId, name)
+	m.ctrl.Call(m, "BroadcastParticipantJoined", sessionID, participantId, name)
 }
 
 // BroadcastParticipantJoined indicates an expected call of BroadcastParticipantJoined.
-func (mr *MockWebSocketHubMockRecorder) BroadcastParticipantJoined(participantId, name any) *gomock.Call {
+func (mr *MockWebSocketHubMockRecorder) BroadcastParticipantJoined(sessionID, participantId, name any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastParticipantJoined", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastParticipantJoined), participantId, name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastParticipantJoined", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastParticipantJoined), sessionID, participantId, name)
 }
 
 // BroadcastRoundStarted mocks base method.
-func (m *MockWebSocketHub) BroadcastRoundStarted(roundId string) {
+func (m *MockWebSocketHub) BroadcastRoundStarted(sessionID, roundId string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "BroadcastRoundStarted", roundId)
+	m.ctrl.Call(m, "BroadcastRoundStarted", sessionID, roundId)
 }
 
 // BroadcastRoundStarted indicates an expected call of BroadcastRoundStarted.
-func (mr *MockWebSocketHubMockRecorder) BroadcastRoundStarted(roundId any) *gomock.Call {
+func (mr *MockWebSocketHubMockRecorder) BroadcastRoundStarted(sessionID, roundId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastRoundStarted", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastRoundStarted), roundId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastRoundStarted", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastRoundStarted), sessionID, roundId)
 }
 
 // BroadcastSessionEnded mocks base method.
-func (m *MockWebSocketHub) BroadcastSessionEnded() {
+func (m *MockWebSocketHub) BroadcastSessionEnded(sessionID string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "BroadcastSessionEnded")
+	m.ctrl.Call(m, "BroadcastSessionEnded", sessionID)
 }
 
 // BroadcastSessionEnded indicates an expected call of BroadcastSessionEnded.
-func (mr *MockWebSocketHubMockRecorder) BroadcastSessionEnded() *gomock.Call {
+func (mr *MockWebSocketHubMockRecorder) BroadcastSessionEnded(sessionID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastSessionEnded", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastSessionEnded))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastSessionEnded", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastSessionEnded), sessionID)
 }
 
 // BroadcastVoteSubmitted mocks base method.
-func (m *MockWebSocketHub) BroadcastVoteSubmitted(participantId string) {
+func (m *MockWebSocketHub) BroadcastVoteSubmitted(sessionID, participantId string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "BroadcastVoteSubmitted", participantId)
+	m.ctrl.Call(m, "BroadcastVoteSubmitted", sessionID, participantId)
 }
 
 // BroadcastVoteSubmitted indicates an expected call of BroadcastVoteSubmitted.
-func (mr *MockWebSocketHubMockRecorder) BroadcastVoteSubmitted(participantId any) *gomock.Call {
+func (mr *MockWebSocketHubMockRecorder) BroadcastVoteSubmitted(sessionID, participantId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastVoteSubmitted", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastVoteSubmitted), participantId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastVoteSubmitted", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastVoteSubmitted), sessionID, participantId)
 }
 
 // BroadcastVotesRevealed mocks base method.
-func (m *MockWebSocketHub) BroadcastVotesRevealed(roundId string) {
+func (m *MockWebSocketHub) BroadcastVotesRevealed(sessionID, roundId string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "BroadcastVotesRevealed", roundId)
+	m.ctrl.Call(m, "BroadcastVotesRevealed", sessionID, roundId)
 }
 
 // BroadcastVotesRevealed indicates an expected call of BroadcastVotesRevealed.
-func (mr *MockWebSocketHubMockRecorder) BroadcastVotesRevealed(roundId any) *gomock.Call {
+func (mr *MockWebSocketHubMockRecorder) BroadcastVotesRevealed(sessionID, roundId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastVotesRevealed", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastVotesRevealed), roundId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastVotesRevealed", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastVotesRevealed), sessionID, roundId)
 }
 
 // HandleWebSocket mocks base method.
-func (m *MockWebSocketHub) HandleWebSocket(c echo.Context) error {
+func (m *MockWebSocketHub) HandleWebSocket(c echo.Context, sessionID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HandleWebSocket", c)
+	ret := m.ctrl.Call(m, "HandleWebSocket", c, sessionID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // HandleWebSocket indicates an expected call of HandleWebSocket.
-func (mr *MockWebSocketHubMockRecorder) HandleWebSocket(c any) *gomock.Call {
+func (mr *MockWebSocketHubMockRecorder) HandleWebSocket(c, sessionID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleWebSocket", reflect.TypeOf((*MockWebSocketHub)(nil).HandleWebSocket), c)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleWebSocket", reflect.TypeOf((*MockWebSocketHub)(nil).HandleWebSocket), c, sessionID)
 }
 
 // Run mocks base method.

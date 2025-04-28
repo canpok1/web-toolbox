@@ -270,7 +270,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{}, nil)
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), sessionID, gomock.Any()).Return(nil)
-				mockWebSocketHub.EXPECT().BroadcastParticipantJoined(gomock.Any(), gomock.Any()).Return()
+				mockWebSocketHub.EXPECT().BroadcastParticipantJoined(gomock.Any(), gomock.Any(), gomock.Any()).Return()
 			},
 		},
 		{
@@ -565,7 +565,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 				}, nil)
 				mockRedis.EXPECT().CreateRound(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRedis.EXPECT().UpdateSession(gomock.Any(), sessionID, gomock.Any()).Return(nil)
-				mockWebSocketHub.EXPECT().BroadcastRoundStarted(gomock.Any())
+				mockWebSocketHub.EXPECT().BroadcastRoundStarted(gomock.Any(), gomock.Any())
 			},
 		},
 		{
@@ -1096,14 +1096,15 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
 			name:    "success",
 			roundID: "valid-round-id",
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_planningpoker.MockWebSocketHub, roundID string) {
+				sessionID := uuid.New().String()
 				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
-					SessionId: uuid.New().String(),
+					SessionId: sessionID,
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
 				mockRedis.EXPECT().UpdateRound(gomock.Any(), roundID, gomock.Any()).Return(nil)
-				mockWebSocketHub.EXPECT().BroadcastVotesRevealed(roundID)
+				mockWebSocketHub.EXPECT().BroadcastVotesRevealed(sessionID, roundID)
 			},
 		},
 		{
@@ -1179,8 +1180,9 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 				Value:         "5",
 			},
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_planningpoker.MockWebSocketHub, roundID string, req *api.SendVoteRequest) {
+				sessionID := uuid.New().String()
 				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
-					SessionId: uuid.New().String(),
+					SessionId: sessionID,
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
@@ -1189,7 +1191,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(nil, nil)
 				mockRedis.EXPECT().CreateVote(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRedis.EXPECT().AddVoteToRound(gomock.Any(), roundID, gomock.Any()).Return(nil)
-				mockWebSocketHub.EXPECT().BroadcastVoteSubmitted(req.ParticipantId)
+				mockWebSocketHub.EXPECT().BroadcastVoteSubmitted(sessionID, req.ParticipantId)
 			},
 		},
 		{
@@ -1200,9 +1202,10 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 				Value:         "8",
 			},
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_planningpoker.MockWebSocketHub, roundID string, req *api.SendVoteRequest) {
+				sessionID := uuid.New().String()
 				voteId := uuid.New().String()
 				mockRedis.EXPECT().GetRound(gomock.Any(), roundID).Return(&redis.Round{
-					SessionId: uuid.New().String(),
+					SessionId: sessionID,
 					Status:    "voting",
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
@@ -1217,7 +1220,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 					UpdatedAt:     time.Now(),
 				}, nil)
 				mockRedis.EXPECT().UpdateVote(gomock.Any(), voteId, gomock.Any()).Return(nil)
-				mockWebSocketHub.EXPECT().BroadcastVoteSubmitted(req.ParticipantId)
+				mockWebSocketHub.EXPECT().BroadcastVoteSubmitted(sessionID, req.ParticipantId)
 			},
 		},
 		{

@@ -48,12 +48,12 @@ type SessionEndedPayload struct{}
 // WebSocketHubInterface defines the interface for managing WebSocket connections.
 type WebSocketHub interface {
 	Run()
-	HandleWebSocket(c echo.Context) error
-	BroadcastParticipantJoined(participantId, name string)
-	BroadcastRoundStarted(roundId string)
-	BroadcastVoteSubmitted(participantId string)
-	BroadcastVotesRevealed(roundId string)
-	BroadcastSessionEnded()
+	HandleWebSocket(c echo.Context, sessionID string) error
+	BroadcastParticipantJoined(sessionID, participantId, name string)
+	BroadcastRoundStarted(sessionID, roundId string)
+	BroadcastVoteSubmitted(sessionID, participantId string)
+	BroadcastVotesRevealed(sessionID, roundId string)
+	BroadcastSessionEnded(sessionID string)
 }
 
 // WebSocketHub manages WebSocket connections and message broadcasting.
@@ -63,6 +63,7 @@ type webSocketHub struct {
 	register   chan *websocket.Conn
 	unregister chan *websocket.Conn
 	mutex      sync.RWMutex
+	sessions   map[string]map[*websocket.Conn]bool
 }
 
 // NewWebSocketHub creates a new WebSocketHub.
@@ -72,6 +73,7 @@ func NewWebSocketHub() WebSocketHub {
 		broadcast:  make(chan WebSocketMessage),
 		register:   make(chan *websocket.Conn),
 		unregister: make(chan *websocket.Conn),
+		sessions:   make(map[string]map[*websocket.Conn]bool),
 	}
 }
 
@@ -107,7 +109,7 @@ func (hub *webSocketHub) Run() {
 }
 
 // HandleWebSocket handles WebSocket connections.
-func (hub *webSocketHub) HandleWebSocket(c echo.Context) error {
+func (hub *webSocketHub) HandleWebSocket(c echo.Context, sessionID string) error {
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true // Allow all origins for simplicity
@@ -120,12 +122,30 @@ func (hub *webSocketHub) HandleWebSocket(c echo.Context) error {
 		return err
 	}
 
-	hub.register <- conn
+	if sessionID == "" {
+		log.Println("Session ID is required")
+		conn.Close()
+		return echo.NewHTTPError(http.StatusBadRequest, "Session ID is required")
+	}
+
+	hub.mutex.Lock()
+	if hub.sessions[sessionID] == nil {
+		hub.sessions[sessionID] = make(map[*websocket.Conn]bool)
+	}
+	hub.sessions[sessionID][conn] = true
+	hub.mutex.Unlock()
 
 	// Handle incoming messages (if needed)
 	go func() {
 		defer func() {
-			hub.unregister <- conn
+			hub.mutex.Lock()
+			delete(hub.sessions[sessionID], conn)
+			if len(hub.sessions[sessionID]) == 0 {
+				delete(hub.sessions, sessionID)
+			}
+			hub.mutex.Unlock()
+			conn.Close()
+			log.Println("WebSocket connection unregistered")
 		}()
 		for {
 			var msg WebSocketMessage
@@ -142,7 +162,7 @@ func (hub *webSocketHub) HandleWebSocket(c echo.Context) error {
 }
 
 // BroadcastParticipantJoined broadcasts the participantJoined event.
-func (hub *webSocketHub) BroadcastParticipantJoined(participantId, name string) {
+func (hub *webSocketHub) BroadcastParticipantJoined(sessionID, participantId, name string) {
 	payload := ParticipantJoinedPayload{
 		ParticipantId: participantId,
 		Name:          name,
@@ -151,11 +171,11 @@ func (hub *webSocketHub) BroadcastParticipantJoined(participantId, name string) 
 		Event:   "participantJoined",
 		Payload: payload,
 	}
-	hub.broadcast <- message
+	hub.broadcastToSession(sessionID, message)
 }
 
 // BroadcastRoundStarted broadcasts the roundStarted event.
-func (hub *webSocketHub) BroadcastRoundStarted(roundId string) {
+func (hub *webSocketHub) BroadcastRoundStarted(sessionID, roundId string) {
 	payload := RoundStartedPayload{
 		RoundId: roundId,
 	}
@@ -163,11 +183,11 @@ func (hub *webSocketHub) BroadcastRoundStarted(roundId string) {
 		Event:   "roundStarted",
 		Payload: payload,
 	}
-	hub.broadcast <- message
+	hub.broadcastToSession(sessionID, message)
 }
 
 // BroadcastVoteSubmitted broadcasts the voteSubmitted event.
-func (hub *webSocketHub) BroadcastVoteSubmitted(participantId string) {
+func (hub *webSocketHub) BroadcastVoteSubmitted(sessionID, participantId string) {
 	payload := VoteSubmittedPayload{
 		ParticipantId: participantId,
 	}
@@ -175,11 +195,11 @@ func (hub *webSocketHub) BroadcastVoteSubmitted(participantId string) {
 		Event:   "voteSubmitted",
 		Payload: payload,
 	}
-	hub.broadcast <- message
+	hub.broadcastToSession(sessionID, message)
 }
 
 // BroadcastVotesRevealed broadcasts the votesRevealed event.
-func (hub *webSocketHub) BroadcastVotesRevealed(roundId string) {
+func (hub *webSocketHub) BroadcastVotesRevealed(sessionID, roundId string) {
 	payload := VotesRevealedPayload{
 		RoundId: roundId,
 	}
@@ -187,15 +207,32 @@ func (hub *webSocketHub) BroadcastVotesRevealed(roundId string) {
 		Event:   "votesRevealed",
 		Payload: payload,
 	}
-	hub.broadcast <- message
+	hub.broadcastToSession(sessionID, message)
 }
 
 // BroadcastSessionEnded broadcasts the sessionEnded event.
-func (hub *webSocketHub) BroadcastSessionEnded() {
+func (hub *webSocketHub) BroadcastSessionEnded(sessionID string) {
 	payload := SessionEndedPayload{}
 	message := WebSocketMessage{
 		Event:   "sessionEnded",
 		Payload: payload,
 	}
-	hub.broadcast <- message
+	hub.broadcastToSession(sessionID, message)
+}
+
+func (hub *webSocketHub) broadcastToSession(sessionID string, message WebSocketMessage) {
+	hub.mutex.RLock()
+	defer hub.mutex.RUnlock()
+
+	if clients, ok := hub.sessions[sessionID]; ok {
+		for connection := range clients {
+			if err := connection.WriteJSON(message); err != nil {
+				log.Println("Error broadcasting message:", err)
+				hub.unregister <- connection
+			}
+		}
+		log.Println("Message broadcasted to session", sessionID, ":", message)
+	} else {
+		log.Println("Session not found:", sessionID)
+	}
 }
