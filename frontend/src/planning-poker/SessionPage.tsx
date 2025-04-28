@@ -4,6 +4,7 @@ import { useLoading } from "../common/hooks/useLoading";
 import Alert from "./components/Alert";
 import HostPanel, { type HostPanelEvent } from "./components/HostPanel";
 import RoundSummaryPanel from "./components/RoundSummaryPanel";
+import SessionInvitePanel from "./components/SessionInvitePanel";
 import SessionSummary from "./components/SessionSummary";
 import VotePanel from "./components/VotePanel";
 import useSession from "./hooks/useSession";
@@ -67,16 +68,22 @@ function SessionPage() {
         {errorMessages.length === 0 && (
           <div className="mb-5 flex flex-col flex-wrap items-start justify-around gap-5 md:flex-row">
             {session && (
-              <SessionSummary
-                className="w-full flex-2 md:max-w-lg"
-                session={session}
-                currentParticipantId={participandId}
-              />
+              <>
+                <SessionSummary
+                  className="w-full flex-2 md:max-w-lg"
+                  session={session}
+                  currentParticipantId={participandId}
+                />
+                <SessionInvitePanel
+                  className="w-full flex-1 md:max-w-md"
+                  sessionId={sessionId}
+                />
+              </>
             )}
 
             {showHostPanel && (
               <HostPanel
-                className="w-full flex-1 md:max-w-sm"
+                className="w-full"
                 session={session}
                 round={round}
                 onClick={(event: HostPanelEvent): void => {
