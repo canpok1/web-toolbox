@@ -17,8 +17,7 @@ function SessionPage() {
     useSession(sessionId, participandId);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const { setShowLoading } = useLoading();
-  const [reconnectIntervalId, setReconnectIntervalId] =
-    useState<NodeJS.Timeout | null>(null);
+  const [connected, setConnected] = useState(false);
 
   const showHostPanel = session && participandId === session?.hostId;
 
@@ -27,6 +26,10 @@ function SessionPage() {
   }, [setShowLoading, loaded]);
 
   const connectWebSocket = useCallback(() => {
+    if (connected) {
+      return;
+    }
+
     console.log("start websocket");
     try {
       // WebSocket 接続
@@ -35,21 +38,17 @@ function SessionPage() {
 
       ws.onopen = () => {
         console.log("WebSocket connected");
+        setConnected(true);
       };
 
       ws.onmessage = async (event) => {
         console.log("Received message:", event.data);
-        reload();
+        await reload();
       };
 
       ws.onclose = () => {
         console.log("WebSocket disconnected");
-        // 再接続を試みる
-        const id = setInterval(() => {
-          console.log("attempting to reconnect...");
-          connectWebSocket();
-        }, 3000);
-        setReconnectIntervalId(id);
+        setConnected(false);
       };
 
       ws.onerror = (error) => {
@@ -65,17 +64,14 @@ function SessionPage() {
       console.error("websocket error: ", error);
       setErrorMessages(["エラーが発生しました。画面を再読み込みして下さい。"]);
     }
-  }, [reload]);
+  }, [connected, setConnected, reload]);
 
   useEffect(() => {
-    connectWebSocket();
-
-    return () => {
-      if (reconnectIntervalId) {
-        clearInterval(reconnectIntervalId);
-      }
-    };
-  }, [connectWebSocket, reconnectIntervalId]);
+    const id = setInterval(() => {
+      connectWebSocket();
+    }, 3000);
+    return () => clearInterval(id);
+  }, [connectWebSocket]);
 
   useEffect(() => {
     if (error) {
