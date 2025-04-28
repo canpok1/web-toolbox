@@ -39,9 +39,7 @@ type Vote struct {
 
 // VotesRevealedPayload represents the payload for the votesRevealed event.
 type VotesRevealedPayload struct {
-	Votes   []Vote  `json:"votes"`
-	Average float64 `json:"average"`
-	Median  float64 `json:"median"`
+	RoundId string `json:"roundId"`
 }
 
 // SessionEndedPayload represents the payload for the sessionEnded event.
@@ -54,7 +52,7 @@ type WebSocketHub interface {
 	BroadcastParticipantJoined(participantId, name string)
 	BroadcastRoundStarted(roundId string)
 	BroadcastVoteSubmitted(participantId string)
-	BroadcastVotesRevealed(votes []Vote, average, median float64)
+	BroadcastVotesRevealed(roundId string)
 	BroadcastSessionEnded()
 }
 
@@ -181,11 +179,9 @@ func (hub *webSocketHub) BroadcastVoteSubmitted(participantId string) {
 }
 
 // BroadcastVotesRevealed broadcasts the votesRevealed event.
-func (hub *webSocketHub) BroadcastVotesRevealed(votes []Vote, average, median float64) {
+func (hub *webSocketHub) BroadcastVotesRevealed(roundId string) {
 	payload := VotesRevealedPayload{
-		Votes:   votes,
-		Average: average,
-		Median:  median,
+		RoundId: roundId,
 	}
 	message := WebSocketMessage{
 		Event:   "votesRevealed",

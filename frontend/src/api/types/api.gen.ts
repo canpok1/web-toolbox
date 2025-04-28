@@ -763,18 +763,8 @@ export interface components {
         };
         /** @description votesRevealedイベントのペイロード */
         VotesRevealedPayload: {
-            /** @description 投票結果のリスト */
-            votes?: components["schemas"]["Vote"][];
-            /**
-             * Format: float
-             * @description 投票値の平均
-             */
-            average?: number;
-            /**
-             * Format: float
-             * @description 投票値の中央値
-             */
-            median?: number;
+            /** @description ラウンドのID */
+            roundId?: string;
         };
         /** @description sessionEndedイベントのペイロード */
         SessionEndedPayload: Record<string, never>;

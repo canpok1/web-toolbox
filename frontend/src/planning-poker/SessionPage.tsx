@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useLoading } from "../common/hooks/useLoading";
 import Alert from "./components/Alert";
@@ -22,8 +22,6 @@ function SessionPage() {
 
   const showHostPanel = session && participandId === session?.hostId;
 
-  const intervalIdRef = useRef<NodeJS.Timeout | null>(null); // setIntervalのIDを保持
-
   useEffect(() => {
     setShowLoading(!loaded);
   }, [setShowLoading, loaded]);
@@ -39,8 +37,9 @@ function SessionPage() {
         console.log("WebSocket connected");
       };
 
-      ws.onmessage = (event) => {
+      ws.onmessage = async (event) => {
         console.log("Received message:", event.data);
+        await reload();
       };
 
       ws.onclose = () => {
@@ -61,21 +60,6 @@ function SessionPage() {
       setErrorMessages(["エラーが発生しました。画面を再読み込みして下さい。"]);
     }
   }, []);
-
-  // 定期更新
-  useEffect(() => {
-    intervalIdRef.current = setInterval(reload, 5000);
-    return () => {
-      if (intervalIdRef.current) {
-        console.log(
-          "useEffect cleanup: インターバルをクリアします",
-          intervalIdRef.current,
-        );
-        clearInterval(intervalIdRef.current);
-        intervalIdRef.current = null;
-      }
-    };
-  }, [reload]);
 
   useEffect(() => {
     if (error) {
