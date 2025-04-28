@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useLoading } from "../common/hooks/useLoading";
 import Alert from "./components/Alert";
@@ -26,7 +26,7 @@ function SessionPage() {
     setShowLoading(!loaded);
   }, [setShowLoading, loaded]);
 
-  const connectWebSocket = () => {
+  const connectWebSocket = useCallback(() => {
     console.log("start websocket");
     try {
       // WebSocket 接続
@@ -65,7 +65,7 @@ function SessionPage() {
       console.error("websocket error: ", error);
       setErrorMessages(["エラーが発生しました。画面を再読み込みして下さい。"]);
     }
-  };
+  }, [reload]);
 
   useEffect(() => {
     connectWebSocket();
