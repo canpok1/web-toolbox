@@ -31,7 +31,12 @@ function SessionSummary({
           <p className="font-semibold">あなたの名前: {currentUserName}</p>
         )}
         <p>
-          参加者 ({participantNames.length}名): {participantNames.join(", ")}
+          参加者 ({participantNames.length}名):{" "}
+          {participantNames.map((p) => (
+            <span key={p} className="badge badge-sm">
+              {p}
+            </span>
+          ))}
         </p>
       </div>
     </div>
