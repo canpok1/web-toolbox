@@ -120,6 +120,6 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, s
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) GetApiPlanningPokerWs(ctx echo.Context) error {
-	return s.wsHub.HandleWebSocket(ctx)
+func (s *Server) GetApiPlanningPokerWsSessionId(ctx echo.Context, sessionID string) error {
+	return s.wsHub.HandleWebSocket(ctx, sessionID)
 }

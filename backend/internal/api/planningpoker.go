@@ -157,7 +157,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 		return nil, fmt.Errorf("failed to add participant to session (sessionID: %s, participantID: %s): %v", sessionID, participantId.String(), err)
 	}
 
-	s.wsHub.BroadcastParticipantJoined(participantId.String(), body.Name)
+	s.wsHub.BroadcastParticipantJoined(sessionID, participantId.String(), body.Name)
 
 	res := JoinSessionResponse{
 		ParticipantId: participantId.String(),
@@ -336,7 +336,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx context.Conte
 		return nil, fmt.Errorf("failed to update round in redis: roundID=%s, err=%v", roundId, err)
 	}
 
-	s.wsHub.BroadcastVotesRevealed(roundId)
+	s.wsHub.BroadcastVotesRevealed(round.SessionId, roundId)
 
 	res := RevealRoundResponse{}
 	return &res, nil
@@ -436,7 +436,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 		res = SendVoteResponse{VoteId: *voteId}
 	}
 
-	s.wsHub.BroadcastVoteSubmitted(body.ParticipantId)
+	s.wsHub.BroadcastVoteSubmitted(round.SessionId, body.ParticipantId)
 
 	return &res, nil
 }
@@ -557,7 +557,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx context.C
 		return nil, fmt.Errorf("failed to update session in redis: sessionID=%s, roundID=%s, err=%v", sessionID, roundId, err)
 	}
 
-	s.wsHub.BroadcastRoundStarted(roundIdValue)
+	s.wsHub.BroadcastRoundStarted(sessionID, roundIdValue)
 
 	res := StartRoundResponse{RoundId: roundIdValue}
 	return &res, nil

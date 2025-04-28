@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/planning-poker/ws": {
+    "/api/planning-poker/ws/{sessionId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -26,7 +26,10 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    /** @description セッションID */
+                    sessionId: string;
+                };
                 cookie?: never;
             };
             requestBody?: never;

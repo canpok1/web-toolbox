@@ -3,7 +3,7 @@ info:
   title: Planning Poker API
   version: v1
 paths:
-  /api/planning-poker/ws:
+  /api/planning-poker/ws/{sessionId}:
     get:
       summary: リアルタイム更新のための WebSocket エンドポイント
       description: |
@@ -14,6 +14,13 @@ paths:
         - voteSubmitted: 参加者が投票を送信しました。
         - votesRevealed: ラウンドの投票が公開されました。
         - sessionEnded: セッションが終了しました。
+      parameters:
+        - in: path
+          name: sessionId
+          schema:
+            type: string
+          required: true
+          description: セッションID
       responses:
         "101":
           description: プロトコルの切り替え
