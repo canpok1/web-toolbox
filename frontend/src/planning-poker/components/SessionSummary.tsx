@@ -75,7 +75,7 @@ function SessionSummary({
             aria-expanded={isInviteSectionOpen}
             aria-controls="invite-section"
           >
-            <span>参加用URL/QRコードを表示</span>
+            <span>参加用URL/QRコード</span>
             {isInviteSectionOpen ? (
               <ChevronUp size={18} />
             ) : (
@@ -88,9 +88,14 @@ function SessionSummary({
               <Alert messages={copyError ? [copyError] : []} />
 
               <div className="flex items-center gap-2">
-                <p className="flex-grow break-all text-sm">
+                <a
+                  className="flex-grow break-all text-sm"
+                  href={joinPageUrlString}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {joinPageUrlString}
-                </p>
+                </a>
                 <button
                   type="button"
                   className={`btn btn-sm shrink-0 ${isCopied ? "btn-success" : "btn-ghost"}`}
