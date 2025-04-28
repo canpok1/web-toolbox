@@ -135,7 +135,7 @@ export default function useSession(
     });
 
     return {
-      ...response.round,
+      ...round,
       votes,
     };
   };

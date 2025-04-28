@@ -1,15 +1,4 @@
-export interface RoundSummary {
-  average?: number;
-  median?: number;
-  max?: number;
-  min?: number;
-  voteCounts: VoteCount[];
-}
+import type { components } from "../../api/types/api.gen";
 
-export interface VoteCount {
-  value: string;
-  count: number;
-  participants: {
-    name: string;
-  }[];
-}
+export type RoundSummary = components["schemas"]["RoundSummary"];
+export type VoteCount = components["schemas"]["VoteCount"];
