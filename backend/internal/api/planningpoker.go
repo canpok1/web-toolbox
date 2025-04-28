@@ -157,6 +157,8 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 		return nil, fmt.Errorf("failed to add participant to session (sessionID: %s, participantID: %s): %v", sessionID, participantId.String(), err)
 	}
 
+	s.wsHub.BroadcastParticipantJoined(participantId.String(), body.Name)
+
 	res := JoinSessionResponse{
 		ParticipantId: participantId.String(),
 	}
@@ -334,8 +336,9 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx context.Conte
 		return nil, fmt.Errorf("failed to update round in redis: roundID=%s, err=%v", roundId, err)
 	}
 
-	res := RevealRoundResponse{}
+	s.wsHub.BroadcastVotesRevealed(roundId)
 
+	res := RevealRoundResponse{}
 	return &res, nil
 }
 
@@ -391,7 +394,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 		return nil, fmt.Errorf("failed to get vote id from redis: roundID=%s, participantID=%s, err=%v", roundId, body.ParticipantId, err)
 	}
 
-	var vote redis.Vote
+	var res SendVoteResponse
 	if voteId == nil {
 		// Create a new vote
 		newVoteId, err := uuid.NewUUID()
@@ -399,7 +402,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 			return nil, fmt.Errorf("failed to generate vote uuid: roundID=%s, err=%v", roundId, err)
 		}
 
-		vote = redis.Vote{
+		vote := redis.Vote{
 			RoundId:       roundId,
 			ParticipantId: body.ParticipantId,
 			Value:         body.Value,
@@ -417,8 +420,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 			return nil, fmt.Errorf("failed to add vote to round in redis: roundID=%s, voteID=%s, err=%v", roundId, newVoteId.String(), err)
 		}
 
-		res := SendVoteResponse{VoteId: newVoteId.String()}
-		return &res, nil
+		res = SendVoteResponse{VoteId: newVoteId.String()}
 	} else {
 		// Update the existing vote
 		vote, err := s.redis.GetVote(ctx, *voteId)
@@ -431,9 +433,12 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 		if err := s.redis.UpdateVote(ctx, *voteId, *vote); err != nil {
 			return nil, fmt.Errorf("failed to update vote in redis: roundID=%s, voteID=%s, err=%v", roundId, *voteId, err)
 		}
-		res := SendVoteResponse{VoteId: *voteId}
-		return &res, nil
+		res = SendVoteResponse{VoteId: *voteId}
 	}
+
+	s.wsHub.BroadcastVoteSubmitted(body.ParticipantId)
+
+	return &res, nil
 }
 
 func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*GetSessionResponse, error) {
@@ -551,6 +556,8 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx context.C
 	if err := s.redis.UpdateSession(ctx, sessionID, *session); err != nil {
 		return nil, fmt.Errorf("failed to update session in redis: sessionID=%s, roundID=%s, err=%v", sessionID, roundId, err)
 	}
+
+	s.wsHub.BroadcastRoundStarted(roundIdValue)
 
 	res := StartRoundResponse{RoundId: roundIdValue}
 	return &res, nil

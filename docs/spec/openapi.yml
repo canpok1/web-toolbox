@@ -629,19 +629,9 @@ components:
       type: object
       description: votesRevealedイベントのペイロード
       properties:
-        votes:
-          type: array
-          items:
-            $ref: "#/components/schemas/Vote"
-          description: 投票結果のリスト
-        average:
-          type: number
-          format: float
-          description: 投票値の平均
-        median:
-          type: number
-          format: float
-          description: 投票値の中央値
+        roundId:
+          type: string
+          description: ラウンドのID
     SessionEndedPayload:
       type: object
       description: sessionEndedイベントのペイロード

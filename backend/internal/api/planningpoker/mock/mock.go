@@ -12,7 +12,6 @@ package mock_planningpoker
 import (
 	reflect "reflect"
 
-	planningpoker "github.com/canpok1/web-toolbox/backend/internal/api/planningpoker"
 	echo "github.com/labstack/echo/v4"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -90,15 +89,15 @@ func (mr *MockWebSocketHubMockRecorder) BroadcastVoteSubmitted(participantId any
 }
 
 // BroadcastVotesRevealed mocks base method.
-func (m *MockWebSocketHub) BroadcastVotesRevealed(votes []planningpoker.Vote, average, median float64) {
+func (m *MockWebSocketHub) BroadcastVotesRevealed(roundId string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "BroadcastVotesRevealed", votes, average, median)
+	m.ctrl.Call(m, "BroadcastVotesRevealed", roundId)
 }
 
 // BroadcastVotesRevealed indicates an expected call of BroadcastVotesRevealed.
-func (mr *MockWebSocketHubMockRecorder) BroadcastVotesRevealed(votes, average, median any) *gomock.Call {
+func (mr *MockWebSocketHubMockRecorder) BroadcastVotesRevealed(roundId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastVotesRevealed", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastVotesRevealed), votes, average, median)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastVotesRevealed", reflect.TypeOf((*MockWebSocketHub)(nil).BroadcastVotesRevealed), roundId)
 }
 
 // HandleWebSocket mocks base method.
