@@ -47,25 +47,25 @@ export default function RoundSummaryPanel({
         {showSummary && (
           <div className="mb-4 pb-4">
             <div className="stats stats-horizontal w-full shadow">
-              <div className="stat">
+              <div className="stat place-items-center">
                 <div className="stat-title">平均値</div>
                 <div className="stat-value text-primary">
                   {formatNumber(summary?.average)}
                 </div>
               </div>
-              <div className="stat">
+              <div className="stat place-items-center">
                 <div className="stat-title">中央値</div>
                 <div className="stat-value text-primary">
                   {formatNumber(summary?.median)}
                 </div>
               </div>
-              <div className="stat">
+              <div className="stat place-items-center">
                 <div className="stat-title">最大値</div>
                 <div className="stat-value text-primary">
                   {formatNumber(summary?.max)}
                 </div>
               </div>
-              <div className="stat">
+              <div className="stat place-items-center">
                 <div className="stat-title">最小値</div>
                 <div className="stat-value text-primary">
                   {formatNumber(summary?.min)}
@@ -79,10 +79,18 @@ export default function RoundSummaryPanel({
           <div className="mb-4 pb-4">
             <div className="stats stats-horizontal w-full shadow">
               {summary.voteCounts.map((voteCount) => (
-                <div className="stat" key={voteCount.value}>
+                <div
+                  className="stat max-w-sm place-items-center"
+                  key={voteCount.value}
+                >
                   <div className="stat-title">{voteCount.value}</div>
                   <div className="stat-value text-primary">
                     {voteCount.count}票
+                  </div>
+                  <div className="stat-desc whitespace-pre-line">
+                    {voteCount.participants.map((p) => (
+                      <span className="badge badge-sm">{p.name}</span>
+                    ))}
                   </div>
                 </div>
               ))}

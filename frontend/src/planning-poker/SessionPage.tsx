@@ -5,7 +5,7 @@ import Alert from "./components/Alert";
 import HostPanel, { type HostPanelEvent } from "./components/HostPanel";
 import RoundSummaryPanel from "./components/RoundSummaryPanel";
 import SessionInvitePanel from "./components/SessionInvitePanel";
-import SessionSummary from "./components/SessionSummary";
+import SessionSummaryPanel from "./components/SessionSummaryPanel";
 import VotePanel from "./components/VotePanel";
 import useSession from "./hooks/useSession";
 
@@ -69,7 +69,7 @@ function SessionPage() {
           <div className="mb-5 flex flex-col flex-wrap items-start justify-around gap-5 md:flex-row">
             {session && (
               <>
-                <SessionSummary
+                <SessionSummaryPanel
                   className="w-full flex-2 md:max-w-lg"
                   session={session}
                   currentParticipantId={participandId}
