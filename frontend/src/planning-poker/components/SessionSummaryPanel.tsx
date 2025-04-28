@@ -1,17 +1,17 @@
 import { useMemo } from "react";
 import type { Session } from "../types/Session";
 
-export type SessionSummaryProps = {
+export type SessionSummaryPanelProps = {
   session: Session;
   currentParticipantId: string | null;
   className?: string;
 };
 
-function SessionSummary({
+export default function SessionSummaryPanel({
   session,
   currentParticipantId,
   className,
-}: SessionSummaryProps) {
+}: SessionSummaryPanelProps) {
   const currentUserName = useMemo(() => {
     if (!currentParticipantId) {
       return null;
@@ -42,5 +42,3 @@ function SessionSummary({
     </div>
   );
 }
-
-export default SessionSummary;
