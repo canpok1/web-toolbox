@@ -84,6 +84,9 @@ export default function RoundSummaryPanel({
                   <div className="stat-value text-primary">
                     {voteCount.count}票
                   </div>
+                  <div className="stat-desc">
+                    {voteCount.participants.map((p) => p.name).join(", ")}
+                  </div>
                 </div>
               ))}
             </div>
