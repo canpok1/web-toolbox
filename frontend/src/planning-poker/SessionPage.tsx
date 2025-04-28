@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useLoading } from "../common/hooks/useLoading";
 import Alert from "./components/Alert";
@@ -11,14 +11,13 @@ import useSession from "./hooks/useSession";
 
 function SessionPage() {
   const [searchParams] = useSearchParams();
-
   const { sessionId = "" } = useParams<{ sessionId: string }>();
   const participandId = searchParams.get("id") ?? "";
-
   const { session, round, myVote, myParticipant, loaded, error, reload } =
     useSession(sessionId, participandId);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const { setShowLoading } = useLoading();
+  const [connected, setConnected] = useState(false);
 
   const showHostPanel = session && participandId === session?.hostId;
 
@@ -26,7 +25,11 @@ function SessionPage() {
     setShowLoading(!loaded);
   }, [setShowLoading, loaded]);
 
-  useEffect(() => {
+  const connectWebSocket = useCallback(() => {
+    if (connected) {
+      return;
+    }
+
     console.log("start websocket");
     try {
       // WebSocket 接続
@@ -35,6 +38,7 @@ function SessionPage() {
 
       ws.onopen = () => {
         console.log("WebSocket connected");
+        setConnected(true);
       };
 
       ws.onmessage = async (event) => {
@@ -44,6 +48,7 @@ function SessionPage() {
 
       ws.onclose = () => {
         console.log("WebSocket disconnected");
+        setConnected(false);
       };
 
       ws.onerror = (error) => {
@@ -59,7 +64,14 @@ function SessionPage() {
       console.error("websocket error: ", error);
       setErrorMessages(["エラーが発生しました。画面を再読み込みして下さい。"]);
     }
-  }, []);
+  }, [connected, setConnected, reload]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      connectWebSocket();
+    }, 3000);
+    return () => clearInterval(id);
+  }, [connectWebSocket]);
 
   useEffect(() => {
     if (error) {

@@ -89,7 +89,9 @@ export default function RoundSummaryPanel({
                   </div>
                   <div className="stat-desc whitespace-pre-line">
                     {voteCount.participants.map((p) => (
-                      <span className="badge badge-sm">{p.name}</span>
+                      <span key={p.participantId} className="badge badge-sm">
+                        {p.name}
+                      </span>
                     ))}
                   </div>
                 </div>
