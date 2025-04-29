@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	model "github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
+	model "github.com/canpok1/web-toolbox/backend/internal/planningpoker/domain/model"
 	gomock "go.uber.org/mock/gomock"
 )
 

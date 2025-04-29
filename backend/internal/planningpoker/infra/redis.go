@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/domain/model"
 	redislib "github.com/redis/go-redis/v9"
 )
 

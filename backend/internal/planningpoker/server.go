@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/domain/model"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
