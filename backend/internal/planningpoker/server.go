@@ -45,16 +45,16 @@ func NewServer(redisClient infra.RedisClient, wsHub infra.WebSocketHub) *Server 
 	return &Server{redis: redisClient, wsHub: wsHub}
 }
 
-func (s *Server) PostApiPlanningPokerSessions(ctx echo.Context) error {
+func (s *Server) PostSessions(ctx echo.Context) error {
 	var req api.CreateSessionRequest
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, api.ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
 	}
-	if err := s.ValidatePostApiPlanningPokerSessions(&req); err != nil {
+	if err := s.ValidatePostSessions(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, api.ErrorResponse{Message: err.Error()})
 	}
 
-	res, err := s.HandlePostApiPlanningPokerSessions(&req)
+	res, err := s.HandlePostSessions(&req)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{Message: err.Error()})
@@ -63,16 +63,16 @@ func (s *Server) PostApiPlanningPokerSessions(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, res)
 }
 
-func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Context, sessionId string) error {
+func (s *Server) PostSessionsSessionIdParticipants(ctx echo.Context, sessionId string) error {
 	var req api.JoinSessionRequest
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, api.ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
 	}
-	if err := s.ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessionId, &req); err != nil {
+	if err := s.ValidatePostSessionsSessionIdParticipants(sessionId, &req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, api.ErrorResponse{Message: fmt.Sprintf("failed to validate request: %v", err)})
 	}
 
-	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionId, &req)
+	res, err := s.HandlePostSessionsSessionIdParticipants(sessionId, &req)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{Message: err.Error()})
@@ -81,8 +81,8 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Cont
 	return ctx.JSON(http.StatusCreated, res)
 }
 
-func (s *Server) GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId string, params api.GetApiPlanningPokerRoundsRoundIdParams) error {
-	res, err := s.HandleGetApiPlanningPokerRoundsRoundId(context.Background(), roundId, params.ParticipantId)
+func (s *Server) GetRoundsRoundId(ctx echo.Context, roundId string, params api.GetApiPlanningPokerRoundsRoundIdParams) error {
+	res, err := s.HandleGetRoundsRoundId(context.Background(), roundId, params.ParticipantId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{Message: err.Error()})
@@ -90,8 +90,8 @@ func (s *Server) GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId stri
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId string) error {
-	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdReveal(context.Background(), roundId)
+func (s *Server) PostRoundsRoundIdReveal(ctx echo.Context, roundId string) error {
+	res, err := s.HandlePostRoundsRoundIdReveal(context.Background(), roundId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{Message: err.Error()})
@@ -99,16 +99,16 @@ func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, round
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundId string) error {
+func (s *Server) PostRoundsRoundIdVotes(ctx echo.Context, roundId string) error {
 	var req api.SendVoteRequest
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, api.ErrorResponse{Message: fmt.Sprintf("failed to bind request body: %v", err)})
 	}
-	if err := s.ValidatePostApiPlanningPokerRoundsRoundIdVotes(roundId, &req); err != nil {
+	if err := s.ValidatePostRoundsRoundIdVotes(roundId, &req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, api.ErrorResponse{Message: fmt.Sprintf("failed to validate request: %v", err)})
 	}
 
-	res, err := s.HandlePostApiPlanningPokerRoundsRoundIdVotes(context.Background(), roundId, &req)
+	res, err := s.HandlePostRoundsRoundIdVotes(context.Background(), roundId, &req)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{Message: err.Error()})
@@ -116,8 +116,8 @@ func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundI
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionId string) error {
-	res, err := s.HandleGetApiPlanningPokerSessionsSessionId(sessionId)
+func (s *Server) GetSessionsSessionId(ctx echo.Context, sessionId string) error {
+	res, err := s.HandleGetSessionsSessionId(sessionId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{Message: err.Error()})
@@ -125,8 +125,8 @@ func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionI
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sessionId string) error {
-	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdEnd(context.Background(), sessionId)
+func (s *Server) PostSessionsSessionIdEnd(ctx echo.Context, sessionId string) error {
+	res, err := s.HandlePostSessionsSessionIdEnd(context.Background(), sessionId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{Message: err.Error()})
@@ -134,8 +134,8 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sess
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId string) error {
-	res, err := s.HandlePostApiPlanningPokerSessionsSessionIdRounds(context.Background(), sessionId)
+func (s *Server) PostSessionsSessionIdRounds(ctx echo.Context, sessionId string) error {
+	res, err := s.HandlePostSessionsSessionIdRounds(context.Background(), sessionId)
 	if err != nil {
 		log.Printf("failed to handle request: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{Message: err.Error()})
@@ -143,7 +143,7 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, s
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (s *Server) ValidatePostApiPlanningPokerSessions(body *api.CreateSessionRequest) error {
+func (s *Server) ValidatePostSessions(body *api.CreateSessionRequest) error {
 	if body == nil {
 		return fmt.Errorf("request body is required")
 	}
@@ -163,7 +163,7 @@ func (s *Server) ValidatePostApiPlanningPokerSessions(body *api.CreateSessionReq
 	return nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerSessions(body *api.CreateSessionRequest) (*api.CreateSessionResponse, error) {
+func (s *Server) HandlePostSessions(body *api.CreateSessionRequest) (*api.CreateSessionResponse, error) {
 	if body == nil {
 		return nil, fmt.Errorf("request body is required")
 	}
@@ -222,7 +222,7 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *api.CreateSessionReque
 	return &res, nil
 }
 
-func (s *Server) ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessionID string, body *api.JoinSessionRequest) error {
+func (s *Server) ValidatePostSessionsSessionIdParticipants(sessionID string, body *api.JoinSessionRequest) error {
 	if body == nil {
 		return fmt.Errorf("request body is required (sessionID: %s)", sessionID)
 	}
@@ -233,7 +233,7 @@ func (s *Server) ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessi
 	return nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionID string, body *api.JoinSessionRequest) (*api.JoinSessionResponse, error) {
+func (s *Server) HandlePostSessionsSessionIdParticipants(sessionID string, body *api.JoinSessionRequest) (*api.JoinSessionResponse, error) {
 	if body == nil {
 		return nil, fmt.Errorf("request body is required (sessionID: %s)", sessionID)
 	}
@@ -276,7 +276,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 	return &res, nil
 }
 
-func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, roundId string, participantId *string) (*api.GetRoundResponse, error) {
+func (s *Server) HandleGetRoundsRoundId(ctx context.Context, roundId string, participantId *string) (*api.GetRoundResponse, error) {
 	redisRound, err := s.redis.GetRound(ctx, roundId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get round from redis: roundID=%s, err=%v", roundId, err)
@@ -430,7 +430,7 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 	return &res, nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx context.Context, roundId string) (*api.RevealRoundResponse, error) {
+func (s *Server) HandlePostRoundsRoundIdReveal(ctx context.Context, roundId string) (*api.RevealRoundResponse, error) {
 	// Retrieve the round from Redis
 	round, err := s.redis.GetRound(ctx, roundId)
 	if err != nil {
@@ -453,7 +453,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx context.Conte
 	return &res, nil
 }
 
-func (s *Server) ValidatePostApiPlanningPokerRoundsRoundIdVotes(roundId string, body *api.SendVoteRequest) error {
+func (s *Server) ValidatePostRoundsRoundIdVotes(roundId string, body *api.SendVoteRequest) error {
 	if body == nil {
 		return fmt.Errorf("request body is required (roundID: %s)", roundId)
 	}
@@ -466,7 +466,7 @@ func (s *Server) ValidatePostApiPlanningPokerRoundsRoundIdVotes(roundId string, 
 	return nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Context, roundId string, body *api.SendVoteRequest) (*api.SendVoteResponse, error) {
+func (s *Server) HandlePostRoundsRoundIdVotes(ctx context.Context, roundId string, body *api.SendVoteRequest) (*api.SendVoteResponse, error) {
 	// Validate request body
 	if body == nil {
 		return nil, fmt.Errorf("request body is required (roundID: %s)", roundId)
@@ -552,7 +552,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 	return &res, nil
 }
 
-func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*api.GetSessionResponse, error) {
+func (s *Server) HandleGetSessionsSessionId(sessionID string) (*api.GetSessionResponse, error) {
 	ctx := context.Background()
 
 	// Retrieve the session from Redis
@@ -609,7 +609,7 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*
 	return &res, nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx context.Context, sessionID string) (*api.EndSessionResponse, error) {
+func (s *Server) HandlePostSessionsSessionIdEnd(ctx context.Context, sessionID string) (*api.EndSessionResponse, error) {
 	// Retrieve the session from Redis
 	session, err := s.redis.GetSession(ctx, sessionID)
 	if err != nil {
@@ -631,7 +631,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx context.Cont
 	return &api.EndSessionResponse{}, nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx context.Context, sessionID string) (*api.StartRoundResponse, error) {
+func (s *Server) HandlePostSessionsSessionIdRounds(ctx context.Context, sessionID string) (*api.StartRoundResponse, error) {
 	// Retrieve the session from Redis
 	session, err := s.redis.GetSession(ctx, sessionID)
 	if err != nil {
@@ -674,6 +674,6 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx context.C
 	return &res, nil
 }
 
-func (s *Server) HandleGetApiPlanningPokerWsSessionId(ctx echo.Context, sessionID string) error {
+func (s *Server) HandleGetWsSessionId(ctx echo.Context, sessionID string) error {
 	return s.wsHub.HandleWebSocket(ctx, sessionID)
 }

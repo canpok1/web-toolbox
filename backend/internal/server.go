@@ -17,37 +17,37 @@ func NewServer(planningpokerServer *planningpoker.Server) *Server {
 }
 
 func (s *Server) PostApiPlanningPokerSessions(ctx echo.Context) error {
-	return s.planningpokerServer.PostApiPlanningPokerSessions(ctx)
+	return s.planningpokerServer.PostSessions(ctx)
 }
 
 func (s *Server) PostApiPlanningPokerSessionsSessionIdParticipants(ctx echo.Context, sessionId string) error {
-	return s.planningpokerServer.PostApiPlanningPokerSessionsSessionIdParticipants(ctx, sessionId)
+	return s.planningpokerServer.PostSessionsSessionIdParticipants(ctx, sessionId)
 }
 
 func (s *Server) GetApiPlanningPokerRoundsRoundId(ctx echo.Context, roundId string, params api.GetApiPlanningPokerRoundsRoundIdParams) error {
-	return s.planningpokerServer.GetApiPlanningPokerRoundsRoundId(ctx, roundId, params)
+	return s.planningpokerServer.GetRoundsRoundId(ctx, roundId, params)
 }
 
 func (s *Server) PostApiPlanningPokerRoundsRoundIdReveal(ctx echo.Context, roundId string) error {
-	return s.planningpokerServer.PostApiPlanningPokerRoundsRoundIdReveal(ctx, roundId)
+	return s.planningpokerServer.PostRoundsRoundIdReveal(ctx, roundId)
 }
 
 func (s *Server) PostApiPlanningPokerRoundsRoundIdVotes(ctx echo.Context, roundId string) error {
-	return s.planningpokerServer.PostApiPlanningPokerRoundsRoundIdVotes(ctx, roundId)
+	return s.planningpokerServer.PostRoundsRoundIdVotes(ctx, roundId)
 }
 
 func (s *Server) GetApiPlanningPokerSessionsSessionId(ctx echo.Context, sessionId string) error {
-	return s.planningpokerServer.GetApiPlanningPokerSessionsSessionId(ctx, sessionId)
+	return s.planningpokerServer.GetSessionsSessionId(ctx, sessionId)
 }
 
 func (s *Server) PostApiPlanningPokerSessionsSessionIdEnd(ctx echo.Context, sessionId string) error {
-	return s.planningpokerServer.PostApiPlanningPokerSessionsSessionIdEnd(ctx, sessionId)
+	return s.planningpokerServer.PostSessionsSessionIdEnd(ctx, sessionId)
 }
 
 func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, sessionId string) error {
-	return s.planningpokerServer.PostApiPlanningPokerSessionsSessionIdRounds(ctx, sessionId)
+	return s.planningpokerServer.PostSessionsSessionIdRounds(ctx, sessionId)
 }
 
 func (s *Server) GetApiPlanningPokerWsSessionId(ctx echo.Context, sessionID string) error {
-	return s.planningpokerServer.HandleGetApiPlanningPokerWsSessionId(ctx, sessionID)
+	return s.planningpokerServer.HandleGetWsSessionId(ctx, sessionID)
 }
