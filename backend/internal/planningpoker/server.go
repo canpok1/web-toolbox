@@ -649,7 +649,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx context.C
 	}
 	roundIdValue := roundId.String()
 
-	round := redis.Round{
+	round := model.Round{
 		SessionId: sessionID,
 		Status:    "voting",
 		CreatedAt: time.Now(),

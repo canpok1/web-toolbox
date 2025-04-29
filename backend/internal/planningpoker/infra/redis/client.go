@@ -13,10 +13,8 @@ import (
 // Client is an interface for interacting with Redis.
 type Client interface {
 	model.SessionRepository
+	model.RoundRepository
 	Close() error
-	CreateRound(ctx context.Context, roundId string, round Round) error
-	GetRound(ctx context.Context, roundId string) (*Round, error)
-	UpdateRound(ctx context.Context, roundId string, round Round) error
 	CreateParticipant(ctx context.Context, participantId string, participant Participant) error
 	GetParticipant(ctx context.Context, participantId string) (*Participant, error)
 	GetVoteIdByRoundIdAndParticipantId(ctx context.Context, roundId, participantId string) (*string, error)
@@ -102,15 +100,9 @@ func (c *client) UpdateSession(ctx context.Context, sessionId string, session mo
 // --- Round ---
 
 // Round represents a round in a planning poker session.
-type Round struct {
-	SessionId string    `json:"sessionId"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-}
 
 // CreateRound creates a new round in Redis.
-func (c *client) CreateRound(ctx context.Context, roundId string, round Round) error {
+func (c *client) CreateRound(ctx context.Context, roundId string, round model.Round) error {
 	round.CreatedAt = time.Now()
 	round.UpdatedAt = time.Now()
 	data, err := json.Marshal(round)
@@ -122,7 +114,7 @@ func (c *client) CreateRound(ctx context.Context, roundId string, round Round) e
 }
 
 // GetRound retrieves a round from Redis.
-func (c *client) GetRound(ctx context.Context, roundId string) (*Round, error) {
+func (c *client) GetRound(ctx context.Context, roundId string) (*model.Round, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s", roundId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil { // redislib.Nil を使用
@@ -130,7 +122,7 @@ func (c *client) GetRound(ctx context.Context, roundId string) (*Round, error) {
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to get round with key %s: %w", key, err)
 	}
-	var round Round
+	var round model.Round
 	err = json.Unmarshal([]byte(data), &round)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal round: %w", err)
@@ -139,7 +131,7 @@ func (c *client) GetRound(ctx context.Context, roundId string) (*Round, error) {
 }
 
 // UpdateRound updates a round in Redis.
-func (c *client) UpdateRound(ctx context.Context, roundId string, round Round) error {
+func (c *client) UpdateRound(ctx context.Context, roundId string, round model.Round) error {
 	round.UpdatedAt = time.Now()
 	data, err := json.Marshal(round)
 	if err != nil {

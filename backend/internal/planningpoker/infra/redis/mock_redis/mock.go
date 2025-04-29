@@ -99,7 +99,7 @@ func (mr *MockClientMockRecorder) CreateParticipant(ctx, participantId, particip
 }
 
 // CreateRound mocks base method.
-func (m *MockClient) CreateRound(ctx context.Context, roundId string, round redis.Round) error {
+func (m *MockClient) CreateRound(ctx context.Context, roundId string, round model.Round) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateRound", ctx, roundId, round)
 	ret0, _ := ret[0].(error)
@@ -171,10 +171,10 @@ func (mr *MockClientMockRecorder) GetParticipantsInSession(ctx, sessionId any) *
 }
 
 // GetRound mocks base method.
-func (m *MockClient) GetRound(ctx context.Context, roundId string) (*redis.Round, error) {
+func (m *MockClient) GetRound(ctx context.Context, roundId string) (*model.Round, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRound", ctx, roundId)
-	ret0, _ := ret[0].(*redis.Round)
+	ret0, _ := ret[0].(*model.Round)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -260,7 +260,7 @@ func (mr *MockClientMockRecorder) UpdateParticipant(ctx, participantId, particip
 }
 
 // UpdateRound mocks base method.
-func (m *MockClient) UpdateRound(ctx context.Context, roundId string, round redis.Round) error {
+func (m *MockClient) UpdateRound(ctx context.Context, roundId string, round model.Round) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateRound", ctx, roundId, round)
 	ret0, _ := ret[0].(error)
