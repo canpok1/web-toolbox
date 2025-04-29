@@ -199,7 +199,7 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *api.CreateSessionReque
 		return nil, fmt.Errorf("failed to save session to redis: %v", err)
 	}
 
-	err = s.redis.CreateParticipant(ctx, hostIdValue, redis.Participant{
+	err = s.redis.CreateParticipant(ctx, hostIdValue, model.Participant{
 		SessionId: sessionIdValue,
 		Name:      body.HostName,
 		IsHost:    true,
@@ -256,7 +256,7 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 	}
 
 	// 参加者登録
-	participant := redis.Participant{
+	participant := model.Participant{
 		SessionId: sessionID,
 		Name:      body.Name,
 		CreatedAt: time.Now(),

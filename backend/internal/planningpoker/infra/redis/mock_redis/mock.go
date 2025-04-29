@@ -85,7 +85,7 @@ func (mr *MockClientMockRecorder) Close() *gomock.Call {
 }
 
 // CreateParticipant mocks base method.
-func (m *MockClient) CreateParticipant(ctx context.Context, participantId string, participant redis.Participant) error {
+func (m *MockClient) CreateParticipant(ctx context.Context, participantId string, participant model.Participant) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateParticipant", ctx, participantId, participant)
 	ret0, _ := ret[0].(error)
@@ -141,10 +141,10 @@ func (mr *MockClientMockRecorder) CreateVote(ctx, voteId, vote any) *gomock.Call
 }
 
 // GetParticipant mocks base method.
-func (m *MockClient) GetParticipant(ctx context.Context, participantId string) (*redis.Participant, error) {
+func (m *MockClient) GetParticipant(ctx context.Context, participantId string) (*model.Participant, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetParticipant", ctx, participantId)
-	ret0, _ := ret[0].(*redis.Participant)
+	ret0, _ := ret[0].(*model.Participant)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -246,7 +246,7 @@ func (mr *MockClientMockRecorder) GetVotesInRound(ctx, roundId any) *gomock.Call
 }
 
 // UpdateParticipant mocks base method.
-func (m *MockClient) UpdateParticipant(ctx context.Context, participantId string, participant redis.Participant) error {
+func (m *MockClient) UpdateParticipant(ctx context.Context, participantId string, participant model.Participant) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateParticipant", ctx, participantId, participant)
 	ret0, _ := ret[0].(error)

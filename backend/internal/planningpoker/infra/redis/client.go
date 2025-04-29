@@ -14,16 +14,12 @@ import (
 type Client interface {
 	model.SessionRepository
 	model.RoundRepository
+	model.ParticipantRepository
 	Close() error
-	CreateParticipant(ctx context.Context, participantId string, participant Participant) error
-	GetParticipant(ctx context.Context, participantId string) (*Participant, error)
 	GetVoteIdByRoundIdAndParticipantId(ctx context.Context, roundId, participantId string) (*string, error)
-	UpdateParticipant(ctx context.Context, participantId string, participant Participant) error
 	CreateVote(ctx context.Context, voteId string, vote Vote) error
 	GetVote(ctx context.Context, voteId string) (*Vote, error)
 	UpdateVote(ctx context.Context, voteId string, vote Vote) error
-	AddParticipantToSession(ctx context.Context, sessionId, participantId string) error
-	GetParticipantsInSession(ctx context.Context, sessionId string) ([]string, error)
 	AddVoteToRound(ctx context.Context, roundId, voteId string) error
 	GetVotesInRound(ctx context.Context, roundId string) ([]string, error)
 }
@@ -143,17 +139,8 @@ func (c *client) UpdateRound(ctx context.Context, roundId string, round model.Ro
 
 // --- Participant ---
 
-// Participant represents a participant in a planning poker session.
-type Participant struct {
-	SessionId string    `json:"sessionId"`
-	Name      string    `json:"name"`
-	IsHost    bool      `json:"isHost"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-}
-
 // CreateParticipant creates a new participant in Redis.
-func (c *client) CreateParticipant(ctx context.Context, participantId string, participant Participant) error {
+func (c *client) CreateParticipant(ctx context.Context, participantId string, participant model.Participant) error {
 	participant.CreatedAt = time.Now()
 	participant.UpdatedAt = time.Now()
 	data, err := json.Marshal(participant)
@@ -165,7 +152,7 @@ func (c *client) CreateParticipant(ctx context.Context, participantId string, pa
 }
 
 // GetParticipant retrieves a participant from Redis.
-func (c *client) GetParticipant(ctx context.Context, participantId string) (*Participant, error) {
+func (c *client) GetParticipant(ctx context.Context, participantId string) (*model.Participant, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:participant:%s", participantId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil {
@@ -173,7 +160,7 @@ func (c *client) GetParticipant(ctx context.Context, participantId string) (*Par
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to get participant %s: %w", participantId, err)
 	}
-	var participant Participant
+	var participant model.Participant
 	err = json.Unmarshal([]byte(data), &participant)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal participant: %w", err)
@@ -201,7 +188,7 @@ func (c *client) GetVoteIdByRoundIdAndParticipantId(ctx context.Context, roundId
 }
 
 // UpdateParticipant updates a participant in Redis.
-func (c *client) UpdateParticipant(ctx context.Context, participantId string, participant Participant) error {
+func (c *client) UpdateParticipant(ctx context.Context, participantId string, participant model.Participant) error {
 	participant.UpdatedAt = time.Now()
 	data, err := json.Marshal(participant)
 	if err != nil {

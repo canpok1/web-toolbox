@@ -447,7 +447,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 				}, nil)
 				mockRedis.EXPECT().GetParticipantsInSession(gomock.Any(), tt.sessionID).Return(tt.participantIDs, nil)
 				for _, participantID := range tt.participantIDs {
-					mockRedis.EXPECT().GetParticipant(gomock.Any(), participantID).Return(&redis.Participant{}, nil)
+					mockRedis.EXPECT().GetParticipant(gomock.Any(), participantID).Return(&model.Participant{}, nil)
 				}
 
 				res, err := server.HandleGetApiPlanningPokerSessionsSessionId(tt.sessionID)
@@ -720,14 +720,14 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&redis.Participant{
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&model.Participant{
 						SessionId: validSessionID,
 						Name:      "Alice",
 						IsHost:    true,
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(&redis.Participant{
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(&model.Participant{
 						SessionId: validSessionID,
 						Name:      "Bob",
 						IsHost:    false,
@@ -781,21 +781,21 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&redis.Participant{
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&model.Participant{
 						SessionId: validSessionID,
 						Name:      "Alice",
 						IsHost:    true,
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(&redis.Participant{
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(&model.Participant{
 						SessionId: validSessionID,
 						Name:      "Bob",
 						IsHost:    false,
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID3).Return(&redis.Participant{
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID3).Return(&model.Participant{
 						SessionId: validSessionID,
 						Name:      "Charlie",
 						IsHost:    false,
@@ -912,14 +912,14 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						ParticipantId: validParticipantID2,
 						Value:         "21",
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&redis.Participant{
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&model.Participant{
 						SessionId: validSessionID,
 						Name:      "Alice",
 						IsHost:    true,
 						CreatedAt: now,
 						UpdatedAt: now,
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(&redis.Participant{
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(&model.Participant{
 						SessionId: validSessionID,
 						Name:      "Bob",
 						IsHost:    false,
@@ -972,7 +972,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						ParticipantId: validParticipantID1,
 						Value:         "5",
 					}, nil)
-					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&redis.Participant{Name: "Alice"}, nil)
+					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&model.Participant{Name: "Alice"}, nil)
 
 					// GetParticipant エラー
 					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&redis.Vote{
@@ -1189,7 +1189,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&model.Participant{}, nil)
 				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(nil, nil)
 				mockRedis.EXPECT().CreateVote(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRedis.EXPECT().AddVoteToRound(gomock.Any(), roundID, gomock.Any()).Return(nil)
@@ -1212,7 +1212,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&model.Participant{}, nil)
 				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(&voteId, nil)
 				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(&redis.Vote{
 					RoundId:       roundID,
@@ -1324,7 +1324,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&model.Participant{}, nil)
 				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(nil, errors.New("redis error"))
 			},
 			expectedError: "failed to get vote id from redis",
@@ -1343,7 +1343,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&model.Participant{}, nil)
 				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(nil, nil)
 				mockRedis.EXPECT().CreateVote(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("redis error"))
 			},
@@ -1363,7 +1363,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&model.Participant{}, nil)
 				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(nil, nil)
 				mockRedis.EXPECT().CreateVote(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRedis.EXPECT().AddVoteToRound(gomock.Any(), roundID, gomock.Any()).Return(errors.New("redis error"))
@@ -1385,7 +1385,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&model.Participant{}, nil)
 				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(&voteId, nil)
 				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(nil, errors.New("redis error"))
 			},
@@ -1406,7 +1406,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				}, nil)
-				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&redis.Participant{}, nil)
+				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&model.Participant{}, nil)
 				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(&voteId, nil)
 				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(&redis.Vote{
 					RoundId:       roundID,
