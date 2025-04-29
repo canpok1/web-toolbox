@@ -16,7 +16,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
+func TestValidatePostSessions(t *testing.T) {
 	tests := []struct {
 		name          string
 		req           *api.CreateSessionRequest
@@ -80,7 +80,7 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 			mockWebSocketHub := mock_infra.NewMockWebSocketHub(ctrl)
 			server := planningpoker.NewServer(mockRedis, mockWebSocketHub)
 
-			err := server.ValidatePostApiPlanningPokerSessions(tt.req)
+			err := server.ValidatePostSessions(tt.req)
 
 			if tt.expectedError != "" {
 				assert.Error(t, err, "Expected an error")
@@ -92,7 +92,7 @@ func TestValidatePostApiPlanningPokerSessions(t *testing.T) {
 	}
 }
 
-func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
+func TestHandlePostSessions(t *testing.T) {
 	t.Run("異常系", func(t *testing.T) {
 		type MockSetting struct {
 			createSessionResult           error
@@ -156,7 +156,7 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(tt.mockSetting.createParticipantResult).AnyTimes()
 				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), gomock.Any(), gomock.Any()).Return(tt.mockSetting.addParticipantToSessionResult).AnyTimes()
 
-				res, err := server.HandlePostApiPlanningPokerSessions(tt.req)
+				res, err := server.HandlePostSessions(tt.req)
 
 				assert.Error(t, err, "Expected an error")
 				assert.Nil(t, res, "Expected nil response on error")
@@ -192,7 +192,7 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 
-				res, err := server.HandlePostApiPlanningPokerSessions(tt.req)
+				res, err := server.HandlePostSessions(tt.req)
 
 				assert.NoError(t, err, "Expected no error")
 				assert.NotNil(t, res, "Expected non-nil response on success")
@@ -203,7 +203,7 @@ func TestHandlePostApiPlanningPokerSessions(t *testing.T) {
 	})
 }
 
-func TestValidatePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
+func TestValidatePostSessionsSessionIdParticipants(t *testing.T) {
 	// Test cases
 	testCases := []struct {
 		name        string
@@ -236,7 +236,7 @@ func TestValidatePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T)
 		t.Run(tc.name, func(t *testing.T) {
 			// Call the function
 			s := &planningpoker.Server{} // Assuming you have a Server struct
-			err := s.ValidatePostApiPlanningPokerSessionsSessionIdParticipants(tc.sessionID, tc.body)
+			err := s.ValidatePostSessionsSessionIdParticipants(tc.sessionID, tc.body)
 
 			// Check for errors
 			if tc.expectedErr == "" && err != nil {
@@ -252,7 +252,7 @@ func TestValidatePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T)
 	}
 }
 
-func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
+func TestHandlePostSessionsSessionIdParticipants(t *testing.T) {
 	tests := []struct {
 		name          string
 		sessionID     string
@@ -341,7 +341,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 			// Create a new sessionID for each test case to avoid conflicts
 			tt.mockSetup(mockRedis, mockWebSocketHub, tt.sessionID)
 
-			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdParticipants(tt.sessionID, tt.req)
+			res, err := server.HandlePostSessionsSessionIdParticipants(tt.sessionID, tt.req)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
@@ -356,7 +356,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 	}
 }
 
-func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
+func TestHandleGetSessionsSessionId(t *testing.T) {
 
 	t.Run("異常系", func(t *testing.T) {
 		tests := []struct {
@@ -393,7 +393,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 
 				mockRedis.EXPECT().GetSession(gomock.Any(), tt.sessionID).Return(tt.getSessionReturnValue, tt.getSessionReturnError)
 
-				res, err := server.HandleGetApiPlanningPokerSessionsSessionId(tt.sessionID)
+				res, err := server.HandleGetSessionsSessionId(tt.sessionID)
 
 				assert.Error(t, err, "Expected an error")
 				assert.Nil(t, res, "Expected nil response on error")
@@ -448,7 +448,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 					mockRedis.EXPECT().GetParticipant(gomock.Any(), participantID).Return(&model.Participant{}, nil)
 				}
 
-				res, err := server.HandleGetApiPlanningPokerSessionsSessionId(tt.sessionID)
+				res, err := server.HandleGetSessionsSessionId(tt.sessionID)
 
 				assert.NoError(t, err, "Expected no error")
 				assert.NotNil(t, res, "Expected non-nil response on success")
@@ -460,7 +460,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 
 }
 
-func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
+func TestHandlePostSessionsSessionIdEnd(t *testing.T) {
 	tests := []struct {
 		name          string
 		sessionID     string
@@ -529,7 +529,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 			tt.mockSetup(mockRedis, mockWebSocketHub, tt.sessionID)
 
 			ctx := context.Background()
-			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx, tt.sessionID)
+			res, err := server.HandlePostSessionsSessionIdEnd(ctx, tt.sessionID)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
@@ -543,7 +543,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 	}
 }
 
-func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
+func TestHandlePostSessionsSessionIdRounds(t *testing.T) {
 	tests := []struct {
 		name          string
 		sessionID     string
@@ -632,7 +632,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 			tt.mockSetup(mockRedis, mockWebSocketHub, tt.sessionID)
 
 			ctx := context.Background()
-			res, err := server.HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx, tt.sessionID)
+			res, err := server.HandlePostSessionsSessionIdRounds(ctx, tt.sessionID)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
@@ -647,7 +647,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 	}
 }
 
-func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
+func TestHandleGetRoundsRoundId(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now()
 
@@ -1023,7 +1023,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 
 				tt.mockSetup(mockRedis)
 
-				res, err := server.HandleGetApiPlanningPokerRoundsRoundId(ctx, tt.roundID, tt.participantID)
+				res, err := server.HandleGetRoundsRoundId(ctx, tt.roundID, tt.participantID)
 
 				if tt.expectedError == "" {
 					assert.NoError(t, err)
@@ -1075,7 +1075,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 
 				tt.mockSetup(mockRedis)
 
-				res, err := server.HandleGetApiPlanningPokerRoundsRoundId(ctx, tt.roundID, tt.participantID)
+				res, err := server.HandleGetRoundsRoundId(ctx, tt.roundID, tt.participantID)
 
 				assert.Error(t, err)
 				assert.Nil(t, res)
@@ -1085,7 +1085,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 	})
 }
 
-func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
+func TestHandlePostRoundsRoundIdReveal(t *testing.T) {
 	tests := []struct {
 		name          string
 		roundID       string
@@ -1150,7 +1150,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
 			tt.mockSetup(mockRedis, mockWebSocketHub, tt.roundID)
 
 			ctx := context.Background()
-			res, err := server.HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx, tt.roundID)
+			res, err := server.HandlePostRoundsRoundIdReveal(ctx, tt.roundID)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
@@ -1164,7 +1164,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdReveal(t *testing.T) {
 	}
 }
 
-func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
+func TestHandlePostRoundsRoundIdVotes(t *testing.T) {
 	tests := []struct {
 		name          string
 		roundID       string
@@ -1430,7 +1430,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 			tt.mockSetup(mockRedis, mockWebSocketHub, tt.roundID, tt.req)
 
 			ctx := context.Background()
-			res, err := server.HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx, tt.roundID, tt.req)
+			res, err := server.HandlePostRoundsRoundIdVotes(ctx, tt.roundID, tt.req)
 
 			if tt.expectedError == "" {
 				assert.NoError(t, err, "Expected no error")
