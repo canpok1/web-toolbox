@@ -9,9 +9,10 @@ import (
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/redis"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/redis/mock_redis"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/websocket/mock_websocket"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/redis"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/redis/mock_redis"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/websocket/mock_websocket"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -268,7 +269,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 				Name: "Test User",
 			},
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_websocket.MockWebSocketHub, sessionID string) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{}, nil)
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&model.Session{}, nil)
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), sessionID, gomock.Any()).Return(nil)
 				mockWebSocketHub.EXPECT().BroadcastParticipantJoined(gomock.Any(), gomock.Any(), gomock.Any()).Return()
@@ -311,7 +312,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 				Name: "Test User",
 			},
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_websocket.MockWebSocketHub, sessionID string) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{}, nil)
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&model.Session{}, nil)
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("create participant error"))
 			},
 			expectedError: "failed to create participant",
@@ -323,7 +324,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdParticipants(t *testing.T) {
 				Name: "Test User",
 			},
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_websocket.MockWebSocketHub, sessionID string) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{}, nil)
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&model.Session{}, nil)
 				mockRedis.EXPECT().CreateParticipant(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				mockRedis.EXPECT().AddParticipantToSession(gomock.Any(), sessionID, gomock.Any()).Return(errors.New("add participant to session error"))
 			},
@@ -363,7 +364,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 		tests := []struct {
 			name                  string
 			sessionID             string
-			getSessionReturnValue *redis.Session
+			getSessionReturnValue *model.Session
 			getSessionReturnError error
 			expectedError         string
 		}{
@@ -435,7 +436,7 @@ func TestHandleGetApiPlanningPokerSessionsSessionId(t *testing.T) {
 				mockWebSocketHub := mock_websocket.NewMockWebSocketHub(ctrl)
 				server := planningpoker.NewServer(mockRedis, mockWebSocketHub)
 
-				mockRedis.EXPECT().GetSession(gomock.Any(), tt.sessionID).Return(&redis.Session{
+				mockRedis.EXPECT().GetSession(gomock.Any(), tt.sessionID).Return(&model.Session{
 					HostId:         tt.hostID,
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -472,7 +473,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 			name:      "success",
 			sessionID: "valid-session-id",
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_websocket.MockWebSocketHub, sessionID string) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&model.Session{
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -504,7 +505,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdEnd(t *testing.T) {
 			name:      "failure - redis update session error",
 			sessionID: "valid-session-id",
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_websocket.MockWebSocketHub, sessionID string) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&model.Session{
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -555,7 +556,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 			name:      "success",
 			sessionID: "valid-session-id",
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_websocket.MockWebSocketHub, sessionID string) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&model.Session{
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -589,7 +590,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 			name:      "failure - redis create round error",
 			sessionID: "valid-session-id",
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_websocket.MockWebSocketHub, sessionID string) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&model.Session{
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},
@@ -606,7 +607,7 @@ func TestHandlePostApiPlanningPokerSessionsSessionIdRounds(t *testing.T) {
 			name:      "failure - redis update session error",
 			sessionID: "valid-session-id",
 			mockSetup: func(mockRedis *mock_redis.MockClient, mockWebSocketHub *mock_websocket.MockWebSocketHub, sessionID string) {
-				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&redis.Session{
+				mockRedis.EXPECT().GetSession(gomock.Any(), sessionID).Return(&model.Session{
 					HostId:         uuid.New().String(),
 					ScaleType:      "fibonacci",
 					CustomScale:    []string{},

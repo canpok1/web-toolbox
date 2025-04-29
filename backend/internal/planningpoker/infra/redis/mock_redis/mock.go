@@ -13,7 +13,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	redis "github.com/canpok1/web-toolbox/backend/internal/planningpoker/redis"
+	redis "github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/redis"
+	model "github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -112,7 +113,7 @@ func (mr *MockClientMockRecorder) CreateRound(ctx, roundId, round any) *gomock.C
 }
 
 // CreateSession mocks base method.
-func (m *MockClient) CreateSession(ctx context.Context, sessionId string, session redis.Session) error {
+func (m *MockClient) CreateSession(ctx context.Context, sessionId string, session model.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSession", ctx, sessionId, session)
 	ret0, _ := ret[0].(error)
@@ -185,10 +186,10 @@ func (mr *MockClientMockRecorder) GetRound(ctx, roundId any) *gomock.Call {
 }
 
 // GetSession mocks base method.
-func (m *MockClient) GetSession(ctx context.Context, sessionId string) (*redis.Session, error) {
+func (m *MockClient) GetSession(ctx context.Context, sessionId string) (*model.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSession", ctx, sessionId)
-	ret0, _ := ret[0].(*redis.Session)
+	ret0, _ := ret[0].(*model.Session)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -273,7 +274,7 @@ func (mr *MockClientMockRecorder) UpdateRound(ctx, roundId, round any) *gomock.C
 }
 
 // UpdateSession mocks base method.
-func (m *MockClient) UpdateSession(ctx context.Context, sessionId string, session redis.Session) error {
+func (m *MockClient) UpdateSession(ctx context.Context, sessionId string, session model.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateSession", ctx, sessionId, session)
 	ret0, _ := ret[0].(error)

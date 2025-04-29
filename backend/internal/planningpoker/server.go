@@ -10,8 +10,9 @@ import (
 	"time"
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/redis"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/websocket"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/redis"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/websocket"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -181,7 +182,7 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *api.CreateSessionReque
 	sessionIdValue := sessionId.String()
 
 	// セッション情報の保存
-	session := redis.Session{
+	session := model.Session{
 		HostId:      hostIdValue,
 		ScaleType:   string(body.ScaleType),
 		CustomScale: []string{},

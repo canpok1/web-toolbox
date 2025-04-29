@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
 	redislib "github.com/redis/go-redis/v9"
 )
 
 // Client is an interface for interacting with Redis.
 type Client interface {
+	model.SessionRepository
 	Close() error
-	CreateSession(ctx context.Context, sessionId string, session Session) error
-	GetSession(ctx context.Context, sessionId string) (*Session, error)
-	UpdateSession(ctx context.Context, sessionId string, session Session) error
 	CreateRound(ctx context.Context, roundId string, round Round) error
 	GetRound(ctx context.Context, roundId string) (*Round, error)
 	UpdateRound(ctx context.Context, roundId string, round Round) error
@@ -63,21 +62,8 @@ func (c *client) Close() error {
 
 // --- Session ---
 
-// Session represents a planning poker session.
-type Session struct {
-	HostId         string    `json:"hostId"`
-	ScaleType      string    `json:"scaleType"`
-	CustomScale    []string  `json:"customScale"`
-	CurrentRoundId string    `json:"currentRoundId"`
-	Status         string    `json:"status"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
-}
-
 // CreateSession creates a new session in Redis.
-func (c *client) CreateSession(ctx context.Context, sessionId string, session Session) error {
-	session.CreatedAt = time.Now()
-	session.UpdatedAt = time.Now()
+func (c *client) CreateSession(ctx context.Context, sessionId string, session model.Session) error {
 	data, err := json.Marshal(session)
 	if err != nil {
 		return fmt.Errorf("failed to marshal session: %w", err)
@@ -87,7 +73,7 @@ func (c *client) CreateSession(ctx context.Context, sessionId string, session Se
 }
 
 // GetSession retrieves a session from Redis.
-func (c *client) GetSession(ctx context.Context, sessionId string) (*Session, error) {
+func (c *client) GetSession(ctx context.Context, sessionId string) (*model.Session, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:session:%s", sessionId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil { // redislib.Nil を使用
@@ -95,7 +81,7 @@ func (c *client) GetSession(ctx context.Context, sessionId string) (*Session, er
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to get session with key %s: %w", key, err)
 	}
-	var session Session
+	var session model.Session
 	err = json.Unmarshal([]byte(data), &session)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal session: %w", err)
@@ -104,8 +90,7 @@ func (c *client) GetSession(ctx context.Context, sessionId string) (*Session, er
 }
 
 // UpdateSession updates a session in Redis.
-func (c *client) UpdateSession(ctx context.Context, sessionId string, session Session) error {
-	session.UpdatedAt = time.Now()
+func (c *client) UpdateSession(ctx context.Context, sessionId string, session model.Session) error {
 	data, err := json.Marshal(session)
 	if err != nil {
 		return fmt.Errorf("failed to marshal session: %w", err)
