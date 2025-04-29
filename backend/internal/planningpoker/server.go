@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/domain"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/domain/model"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra"
 	"github.com/google/uuid"
@@ -168,56 +169,15 @@ func (s *Server) HandlePostSessions(body *api.CreateSessionRequest) (*api.Create
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	hostId, err := uuid.NewUUID()
+	usecase := domain.NewCreateSessionUsecase(s.redis, s.redis)
+	result, err := usecase.Create(string(body.ScaleType), body.CustomScale, body.HostName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate host uuid: %v", err)
-	}
-	hostIdValue := hostId.String()
-
-	sessionId, err := uuid.NewUUID()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate session uuid: %v", err)
-	}
-	sessionIdValue := sessionId.String()
-
-	// セッション情報の保存
-	session := model.Session{
-		HostId:      hostIdValue,
-		ScaleType:   string(body.ScaleType),
-		CustomScale: []string{},
-		Status:      "waiting",
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-	if body.CustomScale != nil {
-		session.CustomScale = *body.CustomScale
+		return nil, fmt.Errorf("failed to create session: %v", err)
 	}
 
-	ctx := context.Background()
-	if err = s.redis.CreateSession(ctx, sessionIdValue, session); err != nil {
-		return nil, fmt.Errorf("failed to save session to redis: %v", err)
-	}
-
-	err = s.redis.CreateParticipant(ctx, hostIdValue, model.Participant{
-		SessionId: sessionIdValue,
-		Name:      body.HostName,
-		IsHost:    true,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to save participant to redis: %v", err)
-	}
-
-	err = s.redis.AddParticipantToSession(ctx, sessionIdValue, hostIdValue)
-	if err != nil {
-		return nil, fmt.Errorf("failed to add participant list to redis: %v", err)
-	}
-
-	// レスポンスの作成
 	res := api.CreateSessionResponse{
-		HostId:    hostIdValue,
-		SessionId: sessionIdValue,
+		HostId:    result.HostId,
+		SessionId: result.SessionId,
 	}
 	return &res, nil
 }
