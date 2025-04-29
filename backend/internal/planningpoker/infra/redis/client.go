@@ -15,13 +15,8 @@ type Client interface {
 	model.SessionRepository
 	model.RoundRepository
 	model.ParticipantRepository
+	model.VoteRepository
 	Close() error
-	GetVoteIdByRoundIdAndParticipantId(ctx context.Context, roundId, participantId string) (*string, error)
-	CreateVote(ctx context.Context, voteId string, vote Vote) error
-	GetVote(ctx context.Context, voteId string) (*Vote, error)
-	UpdateVote(ctx context.Context, voteId string, vote Vote) error
-	AddVoteToRound(ctx context.Context, roundId, voteId string) error
-	GetVotesInRound(ctx context.Context, roundId string) ([]string, error)
 }
 
 // client is a wrapper around the redislib.Client.
@@ -200,17 +195,8 @@ func (c *client) UpdateParticipant(ctx context.Context, participantId string, pa
 
 // --- Vote ---
 
-// Vote represents a vote in a planning poker round.
-type Vote struct {
-	RoundId       string    `json:"roundId"`
-	ParticipantId string    `json:"participantId"`
-	Value         string    `json:"value"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
-}
-
 // CreateVote creates a new vote in Redis.
-func (c *client) CreateVote(ctx context.Context, voteId string, vote Vote) error {
+func (c *client) CreateVote(ctx context.Context, voteId string, vote model.Vote) error {
 	vote.CreatedAt = time.Now()
 	vote.UpdatedAt = time.Now()
 	data, err := json.Marshal(vote)
@@ -222,7 +208,7 @@ func (c *client) CreateVote(ctx context.Context, voteId string, vote Vote) error
 }
 
 // GetVote retrieves a vote from Redis.
-func (c *client) GetVote(ctx context.Context, voteId string) (*Vote, error) {
+func (c *client) GetVote(ctx context.Context, voteId string) (*model.Vote, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:vote:%s", voteId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil {
@@ -230,7 +216,7 @@ func (c *client) GetVote(ctx context.Context, voteId string) (*Vote, error) {
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to get vote %s: %w", voteId, err)
 	}
-	var vote Vote
+	var vote model.Vote
 	err = json.Unmarshal([]byte(data), &vote)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal vote: %w", err)
@@ -239,7 +225,7 @@ func (c *client) GetVote(ctx context.Context, voteId string) (*Vote, error) {
 }
 
 // UpdateVote updates a vote in Redis.
-func (c *client) UpdateVote(ctx context.Context, voteId string, vote Vote) error {
+func (c *client) UpdateVote(ctx context.Context, voteId string, vote model.Vote) error {
 	vote.UpdatedAt = time.Now()
 	data, err := json.Marshal(vote)
 	if err != nil {

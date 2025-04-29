@@ -9,7 +9,6 @@ import (
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/redis"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/redis/mock_redis"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/websocket/mock_websocket"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
@@ -706,14 +705,14 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						UpdatedAt: now,
 					}, nil)
 					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{voteID1, voteID2}, nil)
-					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&model.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID1,
 						Value:         "5",
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
-					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&model.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID2,
 						Value:         "8",
@@ -760,21 +759,21 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 						UpdatedAt: now,
 					}, nil)
 					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{voteID1, voteID2, voteID3}, nil)
-					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&model.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID1,
 						Value:         "5",
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
-					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&model.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID2,
 						Value:         "8",
 						CreatedAt:     now,
 						UpdatedAt:     now,
 					}, nil)
-					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(&model.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID3,
 						Value:         "2",
@@ -897,7 +896,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{voteID1, voteID2, voteID3, voteID4}, nil)
 
 					// 正常な投票
-					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&model.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID1,
 						Value:         "5",
@@ -907,7 +906,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 					// GetVote nil
 					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(nil, nil)
 					// 正常な投票 (エラーの後でも処理される)
-					mockRedis.EXPECT().GetVote(ctx, voteID4).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID4).Return(&model.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID2,
 						Value:         "21",
@@ -967,7 +966,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 					mockRedis.EXPECT().GetVotesInRound(ctx, validRoundID).Return([]string{voteID1, voteID2, voteID3}, nil)
 
 					// 正常な投票
-					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID1).Return(&model.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID1,
 						Value:         "5",
@@ -975,7 +974,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID1).Return(&model.Participant{Name: "Alice"}, nil)
 
 					// GetParticipant エラー
-					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID2).Return(&model.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID2,
 						Value:         "8",
@@ -983,7 +982,7 @@ func TestHandleGetApiPlanningPokerRoundsRoundId(t *testing.T) {
 					mockRedis.EXPECT().GetParticipant(ctx, validParticipantID2).Return(nil, errors.New("get participant error"))
 
 					// GetParticipant nil (Not Found)
-					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(&redis.Vote{
+					mockRedis.EXPECT().GetVote(ctx, voteID3).Return(&model.Vote{
 						RoundId:       validRoundID,
 						ParticipantId: validParticipantID3.String(),
 						Value:         "13",
@@ -1214,7 +1213,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 				}, nil)
 				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&model.Participant{}, nil)
 				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(&voteId, nil)
-				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(&redis.Vote{
+				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(&model.Vote{
 					RoundId:       roundID,
 					ParticipantId: req.ParticipantId,
 					Value:         "5",
@@ -1408,7 +1407,7 @@ func TestHandlePostApiPlanningPokerRoundsRoundIdVotes(t *testing.T) {
 				}, nil)
 				mockRedis.EXPECT().GetParticipant(gomock.Any(), req.ParticipantId).Return(&model.Participant{}, nil)
 				mockRedis.EXPECT().GetVoteIdByRoundIdAndParticipantId(gomock.Any(), roundID, req.ParticipantId).Return(&voteId, nil)
-				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(&redis.Vote{
+				mockRedis.EXPECT().GetVote(gomock.Any(), voteId).Return(&model.Vote{
 					RoundId:       roundID,
 					ParticipantId: req.ParticipantId,
 					Value:         "5",

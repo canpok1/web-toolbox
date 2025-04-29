@@ -514,7 +514,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 			return nil, fmt.Errorf("failed to generate vote uuid: roundID=%s, err=%v", roundId, err)
 		}
 
-		vote := redis.Vote{
+		vote := model.Vote{
 			RoundId:       roundId,
 			ParticipantId: body.ParticipantId,
 			Value:         body.Value,

@@ -13,7 +13,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	redis "github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/redis"
 	model "github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -127,7 +126,7 @@ func (mr *MockClientMockRecorder) CreateSession(ctx, sessionId, session any) *go
 }
 
 // CreateVote mocks base method.
-func (m *MockClient) CreateVote(ctx context.Context, voteId string, vote redis.Vote) error {
+func (m *MockClient) CreateVote(ctx context.Context, voteId string, vote model.Vote) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateVote", ctx, voteId, vote)
 	ret0, _ := ret[0].(error)
@@ -201,10 +200,10 @@ func (mr *MockClientMockRecorder) GetSession(ctx, sessionId any) *gomock.Call {
 }
 
 // GetVote mocks base method.
-func (m *MockClient) GetVote(ctx context.Context, voteId string) (*redis.Vote, error) {
+func (m *MockClient) GetVote(ctx context.Context, voteId string) (*model.Vote, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetVote", ctx, voteId)
-	ret0, _ := ret[0].(*redis.Vote)
+	ret0, _ := ret[0].(*model.Vote)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -288,7 +287,7 @@ func (mr *MockClientMockRecorder) UpdateSession(ctx, sessionId, session any) *go
 }
 
 // UpdateVote mocks base method.
-func (m *MockClient) UpdateVote(ctx context.Context, voteId string, vote redis.Vote) error {
+func (m *MockClient) UpdateVote(ctx context.Context, voteId string, vote model.Vote) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateVote", ctx, voteId, vote)
 	ret0, _ := ret[0].(error)
