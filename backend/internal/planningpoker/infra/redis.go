@@ -1,4 +1,4 @@
-package redis
+package infra
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 )
 
 // Client is an interface for interacting with Redis.
-type Client interface {
+type RedisClient interface {
 	model.SessionRepository
 	model.RoundRepository
 	model.ParticipantRepository
@@ -20,13 +20,13 @@ type Client interface {
 }
 
 // client is a wrapper around the redislib.Client.
-type client struct {
+type redisClient struct {
 	client            *redislib.Client
 	defaultExpiration time.Duration
 }
 
 // NewClient creates a new Redis client.
-func NewClient(addr, password string, db int, defaultExpiration time.Duration) (Client, error) {
+func NewRedisClient(addr, password string, db int, defaultExpiration time.Duration) (RedisClient, error) {
 	rdb := redislib.NewClient(&redislib.Options{
 		Addr:     addr,
 		Password: password,
@@ -41,18 +41,18 @@ func NewClient(addr, password string, db int, defaultExpiration time.Duration) (
 		return nil, fmt.Errorf("failed to connect to Redis at %s: %w", addr, err)
 	}
 
-	return &client{client: rdb, defaultExpiration: defaultExpiration}, nil
+	return &redisClient{client: rdb, defaultExpiration: defaultExpiration}, nil
 }
 
 // Close closes the Redis connection.
-func (c *client) Close() error {
+func (c *redisClient) Close() error {
 	return c.client.Close()
 }
 
 // --- Session ---
 
 // CreateSession creates a new session in Redis.
-func (c *client) CreateSession(ctx context.Context, sessionId string, session model.Session) error {
+func (c *redisClient) CreateSession(ctx context.Context, sessionId string, session model.Session) error {
 	data, err := json.Marshal(session)
 	if err != nil {
 		return fmt.Errorf("failed to marshal session: %w", err)
@@ -62,7 +62,7 @@ func (c *client) CreateSession(ctx context.Context, sessionId string, session mo
 }
 
 // GetSession retrieves a session from Redis.
-func (c *client) GetSession(ctx context.Context, sessionId string) (*model.Session, error) {
+func (c *redisClient) GetSession(ctx context.Context, sessionId string) (*model.Session, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:session:%s", sessionId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil { // redislib.Nil を使用
@@ -79,7 +79,7 @@ func (c *client) GetSession(ctx context.Context, sessionId string) (*model.Sessi
 }
 
 // UpdateSession updates a session in Redis.
-func (c *client) UpdateSession(ctx context.Context, sessionId string, session model.Session) error {
+func (c *redisClient) UpdateSession(ctx context.Context, sessionId string, session model.Session) error {
 	data, err := json.Marshal(session)
 	if err != nil {
 		return fmt.Errorf("failed to marshal session: %w", err)
@@ -90,10 +90,8 @@ func (c *client) UpdateSession(ctx context.Context, sessionId string, session mo
 
 // --- Round ---
 
-// Round represents a round in a planning poker session.
-
 // CreateRound creates a new round in Redis.
-func (c *client) CreateRound(ctx context.Context, roundId string, round model.Round) error {
+func (c *redisClient) CreateRound(ctx context.Context, roundId string, round model.Round) error {
 	round.CreatedAt = time.Now()
 	round.UpdatedAt = time.Now()
 	data, err := json.Marshal(round)
@@ -105,7 +103,7 @@ func (c *client) CreateRound(ctx context.Context, roundId string, round model.Ro
 }
 
 // GetRound retrieves a round from Redis.
-func (c *client) GetRound(ctx context.Context, roundId string) (*model.Round, error) {
+func (c *redisClient) GetRound(ctx context.Context, roundId string) (*model.Round, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s", roundId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil { // redislib.Nil を使用
@@ -122,7 +120,7 @@ func (c *client) GetRound(ctx context.Context, roundId string) (*model.Round, er
 }
 
 // UpdateRound updates a round in Redis.
-func (c *client) UpdateRound(ctx context.Context, roundId string, round model.Round) error {
+func (c *redisClient) UpdateRound(ctx context.Context, roundId string, round model.Round) error {
 	round.UpdatedAt = time.Now()
 	data, err := json.Marshal(round)
 	if err != nil {
@@ -135,7 +133,7 @@ func (c *client) UpdateRound(ctx context.Context, roundId string, round model.Ro
 // --- Participant ---
 
 // CreateParticipant creates a new participant in Redis.
-func (c *client) CreateParticipant(ctx context.Context, participantId string, participant model.Participant) error {
+func (c *redisClient) CreateParticipant(ctx context.Context, participantId string, participant model.Participant) error {
 	participant.CreatedAt = time.Now()
 	participant.UpdatedAt = time.Now()
 	data, err := json.Marshal(participant)
@@ -147,7 +145,7 @@ func (c *client) CreateParticipant(ctx context.Context, participantId string, pa
 }
 
 // GetParticipant retrieves a participant from Redis.
-func (c *client) GetParticipant(ctx context.Context, participantId string) (*model.Participant, error) {
+func (c *redisClient) GetParticipant(ctx context.Context, participantId string) (*model.Participant, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:participant:%s", participantId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil {
@@ -164,7 +162,7 @@ func (c *client) GetParticipant(ctx context.Context, participantId string) (*mod
 }
 
 // GetVoteIdByRoundIdAndParticipantId retrieves a voteId from Redis by roundId and participantId.
-func (c *client) GetVoteIdByRoundIdAndParticipantId(ctx context.Context, roundId, participantId string) (*string, error) {
+func (c *redisClient) GetVoteIdByRoundIdAndParticipantId(ctx context.Context, roundId, participantId string) (*string, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s:votes", roundId)
 	voteIds, err := c.client.SMembers(ctx, key).Result()
 	if err != nil {
@@ -183,7 +181,7 @@ func (c *client) GetVoteIdByRoundIdAndParticipantId(ctx context.Context, roundId
 }
 
 // UpdateParticipant updates a participant in Redis.
-func (c *client) UpdateParticipant(ctx context.Context, participantId string, participant model.Participant) error {
+func (c *redisClient) UpdateParticipant(ctx context.Context, participantId string, participant model.Participant) error {
 	participant.UpdatedAt = time.Now()
 	data, err := json.Marshal(participant)
 	if err != nil {
@@ -196,7 +194,7 @@ func (c *client) UpdateParticipant(ctx context.Context, participantId string, pa
 // --- Vote ---
 
 // CreateVote creates a new vote in Redis.
-func (c *client) CreateVote(ctx context.Context, voteId string, vote model.Vote) error {
+func (c *redisClient) CreateVote(ctx context.Context, voteId string, vote model.Vote) error {
 	vote.CreatedAt = time.Now()
 	vote.UpdatedAt = time.Now()
 	data, err := json.Marshal(vote)
@@ -208,7 +206,7 @@ func (c *client) CreateVote(ctx context.Context, voteId string, vote model.Vote)
 }
 
 // GetVote retrieves a vote from Redis.
-func (c *client) GetVote(ctx context.Context, voteId string) (*model.Vote, error) {
+func (c *redisClient) GetVote(ctx context.Context, voteId string) (*model.Vote, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:vote:%s", voteId)
 	data, err := c.client.Get(ctx, key).Result()
 	if err == redislib.Nil {
@@ -225,7 +223,7 @@ func (c *client) GetVote(ctx context.Context, voteId string) (*model.Vote, error
 }
 
 // UpdateVote updates a vote in Redis.
-func (c *client) UpdateVote(ctx context.Context, voteId string, vote model.Vote) error {
+func (c *redisClient) UpdateVote(ctx context.Context, voteId string, vote model.Vote) error {
 	vote.UpdatedAt = time.Now()
 	data, err := json.Marshal(vote)
 	if err != nil {
@@ -238,7 +236,7 @@ func (c *client) UpdateVote(ctx context.Context, voteId string, vote model.Vote)
 // --- Session Participants ---
 
 // AddParticipantToSession adds a participant to a session's participant list.
-func (c *client) AddParticipantToSession(ctx context.Context, sessionId, participantId string) error {
+func (c *redisClient) AddParticipantToSession(ctx context.Context, sessionId, participantId string) error {
 	key := fmt.Sprintf("web-toolbox:planning-poker:session:%s:participants", sessionId)
 	if err := c.client.SAdd(ctx, key, participantId).Err(); err != nil {
 		return err
@@ -250,7 +248,7 @@ func (c *client) AddParticipantToSession(ctx context.Context, sessionId, partici
 }
 
 // GetParticipantsInSession retrieves all participants in a session.
-func (c *client) GetParticipantsInSession(ctx context.Context, sessionId string) ([]string, error) {
+func (c *redisClient) GetParticipantsInSession(ctx context.Context, sessionId string) ([]string, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:session:%s:participants", sessionId)
 	return c.client.SMembers(ctx, key).Result()
 }
@@ -258,7 +256,7 @@ func (c *client) GetParticipantsInSession(ctx context.Context, sessionId string)
 // --- Round Votes ---
 
 // AddVoteToRound adds a vote to a round's vote list.
-func (c *client) AddVoteToRound(ctx context.Context, roundId, voteId string) error {
+func (c *redisClient) AddVoteToRound(ctx context.Context, roundId, voteId string) error {
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s:votes", roundId)
 	if err := c.client.SAdd(ctx, key, voteId).Err(); err != nil {
 		return err
@@ -270,7 +268,7 @@ func (c *client) AddVoteToRound(ctx context.Context, roundId, voteId string) err
 }
 
 // GetVotesInRound retrieves all votes in a round.
-func (c *client) GetVotesInRound(ctx context.Context, roundId string) ([]string, error) {
+func (c *redisClient) GetVotesInRound(ctx context.Context, roundId string) ([]string, error) {
 	key := fmt.Sprintf("web-toolbox:planning-poker:round:%s:votes", roundId)
 	return c.client.SMembers(ctx, key).Result()
 }

@@ -10,8 +10,7 @@ import (
 	"time"
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/redis"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/websocket"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -38,11 +37,11 @@ var validScaleTypeMap = map[api.ScaleType]struct{}{
 }
 
 type Server struct {
-	redis redis.Client
-	wsHub websocket.WebSocketHub
+	redis infra.RedisClient
+	wsHub infra.WebSocketHub
 }
 
-func NewServer(redisClient redis.Client, wsHub websocket.WebSocketHub) *Server {
+func NewServer(redisClient infra.RedisClient, wsHub infra.WebSocketHub) *Server {
 	return &Server{redis: redisClient, wsHub: wsHub}
 }
 
