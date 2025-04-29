@@ -1,4 +1,4 @@
-package planningpoker
+package websocket
 
 import (
 	"log"

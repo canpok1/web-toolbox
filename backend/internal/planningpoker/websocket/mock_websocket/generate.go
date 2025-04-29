@@ -1,3 +1,3 @@
-package mock_planningpoker
+package mock_websocket
 
 //go:generate mockgen -source=../websocket.go -destination=./mock.go

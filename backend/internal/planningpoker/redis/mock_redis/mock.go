@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	redis "github.com/canpok1/web-toolbox/backend/internal/redis"
+	redis "github.com/canpok1/web-toolbox/backend/internal/planningpoker/redis"
 	gomock "go.uber.org/mock/gomock"
 )
 

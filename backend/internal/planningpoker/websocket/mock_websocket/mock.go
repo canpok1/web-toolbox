@@ -6,8 +6,8 @@
 //	mockgen -source=../websocket.go -destination=./mock.go
 //
 
-// Package mock_planningpoker is a generated GoMock package.
-package mock_planningpoker
+// Package mock_websocket is a generated GoMock package.
+package mock_websocket
 
 import (
 	reflect "reflect"

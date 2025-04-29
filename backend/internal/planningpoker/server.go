@@ -1,4 +1,4 @@
-package api
+package planningpoker
 
 import (
 	"context"
@@ -8,15 +8,18 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/canpok1/web-toolbox/backend/internal/redis"
+	"github.com/canpok1/web-toolbox/backend/internal/api"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/redis"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/websocket"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
-var scaleListMap = map[ScaleType][]string{
-	Fibonacci:  {"0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?"},
-	TShirt:     {"XS", "S", "M", "L", "XL", "XXL", "?"},
-	PowerOfTwo: {"1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "?"},
-	Custom:     {},
+var scaleListMap = map[api.ScaleType][]string{
+	api.Fibonacci:  {"0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?"},
+	api.TShirt:     {"XS", "S", "M", "L", "XL", "XXL", "?"},
+	api.PowerOfTwo: {"1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "?"},
+	api.Custom:     {},
 }
 
 var scaleOrder = []string{
@@ -25,14 +28,23 @@ var scaleOrder = []string{
 	"XS", "S", "M", "L", "XL", "XXL", "?",
 }
 
-var validScaleTypeMap = map[ScaleType]struct{}{
-	Fibonacci:  {},
-	TShirt:     {},
-	PowerOfTwo: {},
-	Custom:     {},
+var validScaleTypeMap = map[api.ScaleType]struct{}{
+	api.Fibonacci:  {},
+	api.TShirt:     {},
+	api.PowerOfTwo: {},
+	api.Custom:     {},
 }
 
-func (s *Server) ValidatePostApiPlanningPokerSessions(body *CreateSessionRequest) error {
+type Server struct {
+	redis redis.Client
+	wsHub websocket.WebSocketHub
+}
+
+func NewServer(redisClient redis.Client, wsHub websocket.WebSocketHub) *Server {
+	return &Server{redis: redisClient, wsHub: wsHub}
+}
+
+func (s *Server) ValidatePostApiPlanningPokerSessions(body *api.CreateSessionRequest) error {
 	if body == nil {
 		return fmt.Errorf("request body is required")
 	}
@@ -42,17 +54,17 @@ func (s *Server) ValidatePostApiPlanningPokerSessions(body *CreateSessionRequest
 	if body.ScaleType == "" {
 		return fmt.Errorf("scaleType is required")
 	}
-	if _, exists := validScaleTypeMap[ScaleType(body.ScaleType)]; !exists {
+	if _, exists := validScaleTypeMap[api.ScaleType(body.ScaleType)]; !exists {
 		return fmt.Errorf("invalid scaleType: %s", body.ScaleType)
 	}
-	if body.ScaleType == Custom && len(*body.CustomScale) == 0 {
+	if body.ScaleType == api.Custom && len(*body.CustomScale) == 0 {
 		return fmt.Errorf("customScale is required when scaleType is custom")
 	}
 
 	return nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) (*CreateSessionResponse, error) {
+func (s *Server) HandlePostApiPlanningPokerSessions(body *api.CreateSessionRequest) (*api.CreateSessionResponse, error) {
 	if body == nil {
 		return nil, fmt.Errorf("request body is required")
 	}
@@ -104,14 +116,14 @@ func (s *Server) HandlePostApiPlanningPokerSessions(body *CreateSessionRequest) 
 	}
 
 	// レスポンスの作成
-	res := CreateSessionResponse{
+	res := api.CreateSessionResponse{
 		HostId:    hostIdValue,
 		SessionId: sessionIdValue,
 	}
 	return &res, nil
 }
 
-func (s *Server) ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessionID string, body *JoinSessionRequest) error {
+func (s *Server) ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessionID string, body *api.JoinSessionRequest) error {
 	if body == nil {
 		return fmt.Errorf("request body is required (sessionID: %s)", sessionID)
 	}
@@ -122,7 +134,7 @@ func (s *Server) ValidatePostApiPlanningPokerSessionsSessionIdParticipants(sessi
 	return nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionID string, body *JoinSessionRequest) (*JoinSessionResponse, error) {
+func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(sessionID string, body *api.JoinSessionRequest) (*api.JoinSessionResponse, error) {
 	if body == nil {
 		return nil, fmt.Errorf("request body is required (sessionID: %s)", sessionID)
 	}
@@ -159,13 +171,13 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdParticipants(session
 
 	s.wsHub.BroadcastParticipantJoined(sessionID, participantId.String(), body.Name)
 
-	res := JoinSessionResponse{
+	res := api.JoinSessionResponse{
 		ParticipantId: participantId.String(),
 	}
 	return &res, nil
 }
 
-func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, roundId string, participantId *string) (*GetRoundResponse, error) {
+func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, roundId string, participantId *string) (*api.GetRoundResponse, error) {
 	redisRound, err := s.redis.GetRound(ctx, roundId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get round from redis: roundID=%s, err=%v", roundId, err)
@@ -174,13 +186,13 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 		return nil, fmt.Errorf("round not found: roundID=%s", roundId)
 	}
 
-	apiRound := Round{
+	apiRound := api.Round{
 		RoundId:   roundId,
 		SessionId: redisRound.SessionId,
-		Status:    RoundStatus(redisRound.Status),
+		Status:    api.RoundStatus(redisRound.Status),
 		CreatedAt: redisRound.CreatedAt,
 		UpdatedAt: redisRound.UpdatedAt,
-		Votes:     []Vote{},
+		Votes:     []api.Vote{},
 		// Summary は後で設定
 	}
 
@@ -192,10 +204,10 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 	}
 
 	numericVotes := []float32{} // 数値として扱える投票値を格納するスライス
-	voteCountMap := map[string]VoteCount{}
+	voteCountMap := map[string]api.VoteCount{}
 
 	if len(voteIDs) > 0 {
-		apiVotes := make([]Vote, 0, len(voteIDs))
+		apiVotes := make([]api.Vote, 0, len(voteIDs))
 		for _, voteID := range voteIDs {
 			redisVote, err := s.redis.GetVote(ctx, voteID)
 			if err != nil {
@@ -218,13 +230,13 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 				continue
 			}
 
-			apiVote := Vote{
+			apiVote := api.Vote{
 				ParticipantId:   redisVote.ParticipantId,
 				ParticipantName: redisParticipant.Name,
 			}
 
 			// 公開時か自身のもののみ投票結果をセット
-			isRevealed := apiRound.Status == Revealed
+			isRevealed := apiRound.Status == api.Revealed
 			isOwnVote := participantId != nil && *participantId == apiVote.ParticipantId
 
 			if isRevealed || isOwnVote {
@@ -234,21 +246,21 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 
 					// revealed 状態の場合、数値変換を試みて集計用スライスに追加
 					if isRevealed {
-						participant := SessionParticipant{
+						participant := api.SessionParticipant{
 							ParticipantId: redisVote.ParticipantId,
 							Name:          redisParticipant.Name,
 						}
 						if voteCount, exist := voteCountMap[redisVote.Value]; exist {
-							voteCountMap[redisVote.Value] = VoteCount{
+							voteCountMap[redisVote.Value] = api.VoteCount{
 								Value:        voteCount.Value,
 								Count:        voteCount.Count + 1,
 								Participants: append(voteCount.Participants, participant),
 							}
 						} else {
-							voteCountMap[redisVote.Value] = VoteCount{
+							voteCountMap[redisVote.Value] = api.VoteCount{
 								Value:        redisVote.Value,
 								Count:        1,
-								Participants: []SessionParticipant{participant},
+								Participants: []api.SessionParticipant{participant},
 							}
 						}
 
@@ -268,9 +280,9 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 	}
 
 	// revealed 状態の場合、サマリーを生成
-	if apiRound.Status == Revealed {
-		summary := RoundSummary{
-			VoteCounts: []VoteCount{},
+	if apiRound.Status == api.Revealed {
+		summary := api.RoundSummary{
+			VoteCounts: []api.VoteCount{},
 		}
 
 		for _, scale := range scaleOrder {
@@ -312,14 +324,14 @@ func (s *Server) HandleGetApiPlanningPokerRoundsRoundId(ctx context.Context, rou
 		apiRound.Summary = &summary
 	}
 
-	res := GetRoundResponse{
+	res := api.GetRoundResponse{
 		Round: apiRound,
 	}
 
 	return &res, nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx context.Context, roundId string) (*RevealRoundResponse, error) {
+func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx context.Context, roundId string) (*api.RevealRoundResponse, error) {
 	// Retrieve the round from Redis
 	round, err := s.redis.GetRound(ctx, roundId)
 	if err != nil {
@@ -338,11 +350,11 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdReveal(ctx context.Conte
 
 	s.wsHub.BroadcastVotesRevealed(round.SessionId, roundId)
 
-	res := RevealRoundResponse{}
+	res := api.RevealRoundResponse{}
 	return &res, nil
 }
 
-func (s *Server) ValidatePostApiPlanningPokerRoundsRoundIdVotes(roundId string, body *SendVoteRequest) error {
+func (s *Server) ValidatePostApiPlanningPokerRoundsRoundIdVotes(roundId string, body *api.SendVoteRequest) error {
 	if body == nil {
 		return fmt.Errorf("request body is required (roundID: %s)", roundId)
 	}
@@ -355,7 +367,7 @@ func (s *Server) ValidatePostApiPlanningPokerRoundsRoundIdVotes(roundId string, 
 	return nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Context, roundId string, body *SendVoteRequest) (*SendVoteResponse, error) {
+func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Context, roundId string, body *api.SendVoteRequest) (*api.SendVoteResponse, error) {
 	// Validate request body
 	if body == nil {
 		return nil, fmt.Errorf("request body is required (roundID: %s)", roundId)
@@ -394,7 +406,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 		return nil, fmt.Errorf("failed to get vote id from redis: roundID=%s, participantID=%s, err=%v", roundId, body.ParticipantId, err)
 	}
 
-	var res SendVoteResponse
+	var res api.SendVoteResponse
 	if voteId == nil {
 		// Create a new vote
 		newVoteId, err := uuid.NewUUID()
@@ -420,7 +432,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 			return nil, fmt.Errorf("failed to add vote to round in redis: roundID=%s, voteID=%s, err=%v", roundId, newVoteId.String(), err)
 		}
 
-		res = SendVoteResponse{VoteId: newVoteId.String()}
+		res = api.SendVoteResponse{VoteId: newVoteId.String()}
 	} else {
 		// Update the existing vote
 		vote, err := s.redis.GetVote(ctx, *voteId)
@@ -433,7 +445,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 		if err := s.redis.UpdateVote(ctx, *voteId, *vote); err != nil {
 			return nil, fmt.Errorf("failed to update vote in redis: roundID=%s, voteID=%s, err=%v", roundId, *voteId, err)
 		}
-		res = SendVoteResponse{VoteId: *voteId}
+		res = api.SendVoteResponse{VoteId: *voteId}
 	}
 
 	s.wsHub.BroadcastVoteSubmitted(round.SessionId, body.ParticipantId)
@@ -441,7 +453,7 @@ func (s *Server) HandlePostApiPlanningPokerRoundsRoundIdVotes(ctx context.Contex
 	return &res, nil
 }
 
-func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*GetSessionResponse, error) {
+func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*api.GetSessionResponse, error) {
 	ctx := context.Background()
 
 	// Retrieve the session from Redis
@@ -458,13 +470,13 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*
 		return nil, fmt.Errorf("failed to get participants in session (sessionID: %s)", sessionID)
 	}
 
-	participants := []SessionParticipant{}
+	participants := []api.SessionParticipant{}
 	for _, participantID := range participantIDs {
 		participant, err := s.redis.GetParticipant(ctx, participantID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get participant from redis: sessionID=%s, participantID=%s, err=%w", sessionID, participantID, err)
 		}
-		participants = append(participants, SessionParticipant{
+		participants = append(participants, api.SessionParticipant{
 			Name:          participant.Name,
 			ParticipantId: participantID,
 		})
@@ -474,15 +486,15 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*
 	if session.ScaleType == "custom" {
 		scales = session.CustomScale
 	} else {
-		scales = scaleListMap[ScaleType(session.ScaleType)]
+		scales = scaleListMap[api.ScaleType(session.ScaleType)]
 	}
 
 	// Convert the redis.Session to GetSessionResponse
-	res := GetSessionResponse{
-		Session: Session{
+	res := api.GetSessionResponse{
+		Session: api.Session{
 			SessionId:      sessionID,
 			HostId:         session.HostId,
-			ScaleType:      ScaleType(session.ScaleType),
+			ScaleType:      api.ScaleType(session.ScaleType),
 			Status:         session.Status,
 			Scales:         scales,
 			CurrentRoundId: nil,
@@ -498,7 +510,7 @@ func (s *Server) HandleGetApiPlanningPokerSessionsSessionId(sessionID string) (*
 	return &res, nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx context.Context, sessionID string) (*EndSessionResponse, error) {
+func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx context.Context, sessionID string) (*api.EndSessionResponse, error) {
 	// Retrieve the session from Redis
 	session, err := s.redis.GetSession(ctx, sessionID)
 	if err != nil {
@@ -517,10 +529,10 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdEnd(ctx context.Cont
 		return nil, fmt.Errorf("failed to update session in redis: sessionID=%s, err=%v", sessionID, err)
 	}
 
-	return &EndSessionResponse{}, nil
+	return &api.EndSessionResponse{}, nil
 }
 
-func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx context.Context, sessionID string) (*StartRoundResponse, error) {
+func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx context.Context, sessionID string) (*api.StartRoundResponse, error) {
 	// Retrieve the session from Redis
 	session, err := s.redis.GetSession(ctx, sessionID)
 	if err != nil {
@@ -559,6 +571,10 @@ func (s *Server) HandlePostApiPlanningPokerSessionsSessionIdRounds(ctx context.C
 
 	s.wsHub.BroadcastRoundStarted(sessionID, roundIdValue)
 
-	res := StartRoundResponse{RoundId: roundIdValue}
+	res := api.StartRoundResponse{RoundId: roundIdValue}
 	return &res, nil
+}
+
+func (s *Server) HandleGetApiPlanningPokerWsSessionId(ctx echo.Context, sessionID string) error {
+	return s.wsHub.HandleWebSocket(ctx, sessionID)
 }
