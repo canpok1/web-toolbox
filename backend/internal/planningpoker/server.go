@@ -211,23 +211,13 @@ func (s *Server) HandleGetRoundsRoundId(ctx context.Context, roundId string, par
 }
 
 func (s *Server) HandlePostRoundsRoundIdReveal(ctx context.Context, roundId string) (*api.RevealRoundResponse, error) {
-	// Retrieve the round from Redis
-	round, err := s.redis.GetRound(ctx, roundId)
+	usecase := domain.NewUpdateRoundStatusUsecase(s.redis)
+	result, err := usecase.Update(ctx, roundId, "revealed")
 	if err != nil {
-		return nil, fmt.Errorf("failed to get round from redis: roundID=%s, err=%v", roundId, err)
-	}
-	if round == nil {
-		return nil, fmt.Errorf("round not found: roundID=%s", roundId)
+		return nil, fmt.Errorf("failed to update round status: %w", err)
 	}
 
-	// Update the round status to "revealed"
-	round.Status = "revealed"
-	round.UpdatedAt = time.Now()
-	if err := s.redis.UpdateRound(ctx, roundId, *round); err != nil {
-		return nil, fmt.Errorf("failed to update round in redis: roundID=%s, err=%v", roundId, err)
-	}
-
-	s.wsHub.BroadcastVotesRevealed(round.SessionId, roundId)
+	s.wsHub.BroadcastVotesRevealed(result.Round.SessionId, roundId)
 
 	res := api.RevealRoundResponse{}
 	return &res, nil
