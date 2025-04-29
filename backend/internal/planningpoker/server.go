@@ -237,88 +237,19 @@ func (s *Server) ValidatePostRoundsRoundIdVotes(roundId string, body *api.SendVo
 }
 
 func (s *Server) HandlePostRoundsRoundIdVotes(ctx context.Context, roundId string, body *api.SendVoteRequest) (*api.SendVoteResponse, error) {
-	// Validate request body
 	if body == nil {
 		return nil, fmt.Errorf("request body is required (roundID: %s)", roundId)
 	}
 
-	// Retrieve the round from Redis
-	round, err := s.redis.GetRound(ctx, roundId)
+	usecase := domain.NewUpsertVoteUsecase(s.redis, s.redis, s.redis)
+	result, err := usecase.Upsert(ctx, roundId, body.ParticipantId, body.Value)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get round from redis: roundID=%s, err=%v", roundId, err)
-	}
-	if round == nil {
-		return nil, fmt.Errorf("round not found: roundID=%s", roundId)
+		return nil, fmt.Errorf("failed to upsert vote: %w", err)
 	}
 
-	// Check if the round is in the "voting" state
-	if round.Status != "voting" {
-		return nil, fmt.Errorf("round is not in voting state: roundID=%s", roundId)
-	}
+	s.wsHub.BroadcastVoteSubmitted(result.Round.SessionId, body.ParticipantId)
 
-	// Check if the participant exists
-	participant, err := s.redis.GetParticipant(ctx, body.ParticipantId)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get participant from redis: roundID=%s, participantID=%s, err=%v", roundId, body.ParticipantId, err)
-	}
-	if participant == nil {
-		return nil, fmt.Errorf(
-			"participant not found: roundID=%s, participantID=%s",
-			roundId,
-			body.ParticipantId,
-		)
-	}
-
-	// Check if the participant has already voted in this round
-	voteId, err := s.redis.GetVoteIdByRoundIdAndParticipantId(ctx, roundId, body.ParticipantId)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get vote id from redis: roundID=%s, participantID=%s, err=%v", roundId, body.ParticipantId, err)
-	}
-
-	var res api.SendVoteResponse
-	if voteId == nil {
-		// Create a new vote
-		newVoteId, err := uuid.NewUUID()
-		if err != nil {
-			return nil, fmt.Errorf("failed to generate vote uuid: roundID=%s, err=%v", roundId, err)
-		}
-
-		vote := model.Vote{
-			RoundId:       roundId,
-			ParticipantId: body.ParticipantId,
-			Value:         body.Value,
-			CreatedAt:     time.Now(),
-			UpdatedAt:     time.Now(),
-		}
-
-		// Save the vote to Redis
-		if err := s.redis.CreateVote(ctx, newVoteId.String(), vote); err != nil {
-			return nil, fmt.Errorf("failed to create vote in redis: roundID=%s, voteID=%s, err=%v", roundId, newVoteId.String(), err)
-		}
-
-		// Add the vote to the round's vote list
-		if err := s.redis.AddVoteToRound(ctx, roundId, newVoteId.String()); err != nil {
-			return nil, fmt.Errorf("failed to add vote to round in redis: roundID=%s, voteID=%s, err=%v", roundId, newVoteId.String(), err)
-		}
-
-		res = api.SendVoteResponse{VoteId: newVoteId.String()}
-	} else {
-		// Update the existing vote
-		vote, err := s.redis.GetVote(ctx, *voteId)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get vote from redis: roundID=%s, voteID=%s, err=%v", roundId, *voteId, err)
-		}
-		vote.Value = body.Value
-		vote.UpdatedAt = time.Now()
-
-		if err := s.redis.UpdateVote(ctx, *voteId, *vote); err != nil {
-			return nil, fmt.Errorf("failed to update vote in redis: roundID=%s, voteID=%s, err=%v", roundId, *voteId, err)
-		}
-		res = api.SendVoteResponse{VoteId: *voteId}
-	}
-
-	s.wsHub.BroadcastVoteSubmitted(round.SessionId, body.ParticipantId)
-
+	res := api.SendVoteResponse{VoteId: result.VoteID}
 	return &res, nil
 }
 
