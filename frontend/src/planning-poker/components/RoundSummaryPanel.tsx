@@ -79,15 +79,12 @@ export default function RoundSummaryPanel({
           <div className="mb-4 pb-4">
             <div className="stats stats-horizontal w-full shadow">
               {summary.voteCounts.map((voteCount) => (
-                <div
-                  className="stat max-w-sm place-items-center"
-                  key={voteCount.value}
-                >
+                <div className="stat place-items-center" key={voteCount.value}>
                   <div className="stat-title">{voteCount.value}</div>
                   <div className="stat-value text-primary">
                     {voteCount.count}票
                   </div>
-                  <div className="stat-desc whitespace-pre-line">
+                  <div className="stat-desc max-w-sm whitespace-pre-line">
                     {voteCount.participants.map((p) => (
                       <span key={p.participantId} className="badge badge-sm">
                         {p.name}
