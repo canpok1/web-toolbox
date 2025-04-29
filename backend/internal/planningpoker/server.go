@@ -9,9 +9,7 @@ import (
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/domain"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/domain/model"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -313,45 +311,15 @@ func (s *Server) HandlePostSessionsSessionIdEnd(ctx context.Context, sessionID s
 }
 
 func (s *Server) HandlePostSessionsSessionIdRounds(ctx context.Context, sessionID string) (*api.StartRoundResponse, error) {
-	// Retrieve the session from Redis
-	session, err := s.redis.GetSession(ctx, sessionID)
+	usecase := domain.NewCreateRoundUsecase(s.redis, s.redis)
+	result, err := usecase.Create(ctx, sessionID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get session from redis: sessionID=%s, err=%v", sessionID, err)
-	}
-	if session == nil {
-		return nil, fmt.Errorf("session not found: sessionID=%s", sessionID)
+		return nil, fmt.Errorf("failed to create round: %w", err)
 	}
 
-	// Create a new round
-	roundId, err := uuid.NewUUID()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate round uuid: sessionID=%s, err=%v", sessionID, err)
-	}
-	roundIdValue := roundId.String()
+	s.wsHub.BroadcastRoundStarted(sessionID, result.RoundId)
 
-	round := model.Round{
-		SessionId: sessionID,
-		Status:    "voting",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	// Save the round to Redis
-	if err := s.redis.CreateRound(ctx, roundIdValue, round); err != nil {
-		return nil, fmt.Errorf("failed to create round in redis: sessionID=%s, roundID=%s, err=%v", sessionID, roundId, err)
-	}
-
-	// Update the session's currentRoundId
-	session.CurrentRoundId = roundIdValue
-	session.Status = "inProgress"
-	session.UpdatedAt = time.Now()
-	if err := s.redis.UpdateSession(ctx, sessionID, *session); err != nil {
-		return nil, fmt.Errorf("failed to update session in redis: sessionID=%s, roundID=%s, err=%v", sessionID, roundId, err)
-	}
-
-	s.wsHub.BroadcastRoundStarted(sessionID, roundIdValue)
-
-	res := api.StartRoundResponse{RoundId: roundIdValue}
+	res := api.StartRoundResponse{RoundId: result.RoundId}
 	return &res, nil
 }
 

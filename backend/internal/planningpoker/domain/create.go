@@ -127,3 +127,57 @@ func (r *CreateParticipantUsecase) Create(sessionID string, participantName stri
 		ParticipantId: participantId.String(),
 	}, nil
 }
+
+type CreateRoundUsecase struct {
+	sessionRepo model.SessionRepository
+	roundRepo   model.RoundRepository
+}
+
+func NewCreateRoundUsecase(sRepo model.SessionRepository, rRepo model.RoundRepository) *CreateRoundUsecase {
+	return &CreateRoundUsecase{sessionRepo: sRepo, roundRepo: rRepo}
+}
+
+type CreateRoundResult struct {
+	RoundId string
+}
+
+func (r *CreateRoundUsecase) Create(ctx context.Context, sessionID string) (*CreateRoundResult, error) {
+	session, err := r.sessionRepo.GetSession(ctx, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session from redis: sessionID=%s, err=%v", sessionID, err)
+	}
+	if session == nil {
+		return nil, fmt.Errorf("session not found: sessionID=%s", sessionID)
+	}
+
+	// Create a new round
+	roundId, err := uuid.NewUUID()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate round uuid: sessionID=%s, err=%v", sessionID, err)
+	}
+	roundIdValue := roundId.String()
+
+	round := model.Round{
+		SessionId: sessionID,
+		Status:    "voting",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	// Save the round to Redis
+	if err := r.roundRepo.CreateRound(ctx, roundIdValue, round); err != nil {
+		return nil, fmt.Errorf("failed to create round in redis: sessionID=%s, roundID=%s, err=%v", sessionID, roundId, err)
+	}
+
+	// Update the session's currentRoundId
+	session.CurrentRoundId = roundIdValue
+	session.Status = "inProgress"
+	session.UpdatedAt = time.Now()
+	if err := r.sessionRepo.UpdateSession(ctx, sessionID, *session); err != nil {
+		return nil, fmt.Errorf("failed to update session in redis: sessionID=%s, roundID=%s, err=%v", sessionID, roundId, err)
+	}
+
+	return &CreateRoundResult{
+		RoundId: roundIdValue,
+	}, nil
+}
