@@ -77,3 +77,53 @@ func (r *CreateSessionUsecase) Create(scaleType string, customScale *[]string, h
 		HostId:    hostIdValue,
 	}, nil
 }
+
+type CreateParticipantUsecase struct {
+	sessionRepo     model.SessionRepository
+	participantRepo model.ParticipantRepository
+}
+
+func NewCreateParticipantUsecase(sRepo model.SessionRepository, pRepo model.ParticipantRepository) *CreateParticipantUsecase {
+	return &CreateParticipantUsecase{
+		sessionRepo:     sRepo,
+		participantRepo: pRepo,
+	}
+}
+
+type CreateParticipantResult struct {
+	ParticipantId string
+}
+
+func (r *CreateParticipantUsecase) Create(sessionID string, participantName string) (*CreateParticipantResult, error) {
+	participantId, err := uuid.NewUUID()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate participant uuid (sessionID: %s): %v", sessionID, err)
+	}
+
+	ctx := context.Background()
+
+	session, err := r.sessionRepo.GetSession(ctx, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session from redis (sessionID: %s): %v", sessionID, err)
+	}
+	if session == nil {
+		return nil, fmt.Errorf("session is not found (sessionID: %s)", sessionID)
+	}
+
+	participant := model.Participant{
+		SessionId: sessionID,
+		Name:      participantName,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	if err := r.participantRepo.CreateParticipant(ctx, participantId.String(), participant); err != nil {
+		return nil, fmt.Errorf("failed to create participant (sessionID: %s): %v", sessionID, err)
+	}
+	if err := r.participantRepo.AddParticipantToSession(ctx, sessionID, participantId.String()); err != nil {
+		return nil, fmt.Errorf("failed to add participant to session (sessionID: %s, participantID: %s): %v", sessionID, participantId.String(), err)
+	}
+
+	return &CreateParticipantResult{
+		ParticipantId: participantId.String(),
+	}, nil
+}

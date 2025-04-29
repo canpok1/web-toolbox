@@ -198,40 +198,16 @@ func (s *Server) HandlePostSessionsSessionIdParticipants(sessionID string, body 
 		return nil, fmt.Errorf("request body is required (sessionID: %s)", sessionID)
 	}
 
-	participantId, err := uuid.NewUUID()
+	usecase := domain.NewCreateParticipantUsecase(s.redis, s.redis)
+	result, err := usecase.Create(sessionID, body.Name)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate participant uuid (sessionID: %s): %v", sessionID, err)
+		return nil, fmt.Errorf("failed to create participant: %w", err)
 	}
 
-	ctx := context.Background()
-
-	// セッションの存在チェック
-	session, err := s.redis.GetSession(ctx, sessionID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get session from redis (sessionID: %s): %v", sessionID, err)
-	}
-	if session == nil {
-		return nil, fmt.Errorf("session is not found (sessionID: %s)", sessionID)
-	}
-
-	// 参加者登録
-	participant := model.Participant{
-		SessionId: sessionID,
-		Name:      body.Name,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-	if err := s.redis.CreateParticipant(ctx, participantId.String(), participant); err != nil {
-		return nil, fmt.Errorf("failed to create participant (sessionID: %s): %v", sessionID, err)
-	}
-	if err := s.redis.AddParticipantToSession(ctx, sessionID, participantId.String()); err != nil {
-		return nil, fmt.Errorf("failed to add participant to session (sessionID: %s, participantID: %s): %v", sessionID, participantId.String(), err)
-	}
-
-	s.wsHub.BroadcastParticipantJoined(sessionID, participantId.String(), body.Name)
+	s.wsHub.BroadcastParticipantJoined(sessionID, result.ParticipantId, body.Name)
 
 	res := api.JoinSessionResponse{
-		ParticipantId: participantId.String(),
+		ParticipantId: result.ParticipantId,
 	}
 	return &res, nil
 }
