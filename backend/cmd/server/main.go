@@ -6,9 +6,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/canpok1/web-toolbox/backend/internal"
 	"github.com/canpok1/web-toolbox/backend/internal/api"
-	"github.com/canpok1/web-toolbox/backend/internal/api/planningpoker"
-	"github.com/canpok1/web-toolbox/backend/internal/redis"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra"
 	"github.com/canpok1/web-toolbox/backend/internal/web"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -28,17 +29,17 @@ func main() {
 	}
 	log.Printf("Static directory found: path=%s", staticDir)
 
-	redisClient, err := redis.NewClient(redisAddress, "", 0, 24*time.Hour)
+	redisClient, err := infra.NewRedisClient(redisAddress, "", 0, 24*time.Hour)
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis: address=%s, error=%v", redisAddress, err)
 	}
 	defer redisClient.Close()
 	log.Printf("Success to connect to Redis: address=%s", redisAddress)
 
-	webSocketHub := planningpoker.NewWebSocketHub()
+	webSocketHub := infra.NewWebSocketHub()
 	go webSocketHub.Run()
 
-	server := api.NewServer(redisClient, webSocketHub)
+	server := internal.NewServer(planningpoker.NewServer(redisClient, webSocketHub))
 	e := echo.New()
 
 	// Middleware

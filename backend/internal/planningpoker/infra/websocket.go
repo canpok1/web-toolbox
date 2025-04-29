@@ -1,4 +1,4 @@
-package planningpoker
+package infra
 
 import (
 	"log"
