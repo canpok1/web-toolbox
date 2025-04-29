@@ -9,8 +9,8 @@ import (
 
 	"github.com/canpok1/web-toolbox/backend/internal/api"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker"
+	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/domain/model"
 	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/infra/mock_infra"
-	"github.com/canpok1/web-toolbox/backend/internal/planningpoker/model"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
