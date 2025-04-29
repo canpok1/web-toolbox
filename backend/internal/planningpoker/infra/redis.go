@@ -134,6 +134,7 @@ func (c *redisClient) UpdateRound(ctx context.Context, roundId string, round mod
 
 // CreateParticipant creates a new participant in Redis.
 func (c *redisClient) CreateParticipant(ctx context.Context, participantId string, participant model.Participant) error {
+	participant.ParticipantId = participantId
 	participant.CreatedAt = time.Now()
 	participant.UpdatedAt = time.Now()
 	data, err := json.Marshal(participant)

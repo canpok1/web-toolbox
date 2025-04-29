@@ -180,3 +180,54 @@ func (r *ReadRoundUsecase) Read(ctx context.Context, roundID string, participant
 		Round: apiRound,
 	}, nil
 }
+
+type ReadSessionUsecase struct {
+	sessionRepo     model.SessionRepository
+	participantRepo model.ParticipantRepository
+}
+
+func NewReadSessionUsecase(sRepo model.SessionRepository, pRepo model.ParticipantRepository) *ReadSessionUsecase {
+	return &ReadSessionUsecase{sessionRepo: sRepo, participantRepo: pRepo}
+}
+
+type ReadSessionResult struct {
+	Session      model.Session
+	Participants []model.Participant
+	Scales       []string
+}
+
+func (r *ReadSessionUsecase) Read(ctx context.Context, sessionID string) (*ReadSessionResult, error) {
+	session, err := r.sessionRepo.GetSession(ctx, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session from redis (sessionID: %s): %v", sessionID, err)
+	}
+	if session == nil {
+		return nil, fmt.Errorf("session not found (sessionID: %s)", sessionID)
+	}
+
+	participantIDs, err := r.participantRepo.GetParticipantsInSession(ctx, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get participants in session (sessionID: %s)", sessionID)
+	}
+
+	participants := []model.Participant{}
+	for _, participantID := range participantIDs {
+		participant, err := r.participantRepo.GetParticipant(ctx, participantID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get participant from redis: sessionID=%s, participantID=%s, err=%w", sessionID, participantID, err)
+		}
+		participants = append(participants, *participant)
+	}
+
+	var scales []string
+	if session.ScaleType == "custom" {
+		scales = session.CustomScale
+	} else {
+		scales = model.ScaleListMap[api.ScaleType(session.ScaleType)]
+	}
+	return &ReadSessionResult{
+		Session:      *session,
+		Participants: participants,
+		Scales:       scales,
+	}, nil
+}

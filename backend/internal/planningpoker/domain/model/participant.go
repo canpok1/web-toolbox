@@ -6,11 +6,12 @@ import (
 )
 
 type Participant struct {
-	SessionId string    `json:"sessionId"`
-	Name      string    `json:"name"`
-	IsHost    bool      `json:"isHost"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ParticipantId string    `json:"participantId"`
+	SessionId     string    `json:"sessionId"`
+	Name          string    `json:"name"`
+	IsHost        bool      `json:"isHost"`
+	CreatedAt     time.Time `json:"createdAt"`
+	UpdatedAt     time.Time `json:"updatedAt"`
 }
 
 type ParticipantRepository interface {

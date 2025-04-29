@@ -256,55 +256,35 @@ func (s *Server) HandlePostRoundsRoundIdVotes(ctx context.Context, roundId strin
 func (s *Server) HandleGetSessionsSessionId(sessionID string) (*api.GetSessionResponse, error) {
 	ctx := context.Background()
 
-	// Retrieve the session from Redis
-	session, err := s.redis.GetSession(ctx, sessionID)
+	usecase := domain.NewReadSessionUsecase(s.redis, s.redis)
+	result, err := usecase.Read(ctx, sessionID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get session from redis (sessionID: %s): %v", sessionID, err)
-	}
-	if session == nil {
-		return nil, fmt.Errorf("session not found (sessionID: %s)", sessionID)
+		return nil, fmt.Errorf("failed to read session: %w", err)
 	}
 
-	participantIDs, err := s.redis.GetParticipantsInSession(ctx, sessionID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get participants in session (sessionID: %s)", sessionID)
-	}
-
-	participants := []api.SessionParticipant{}
-	for _, participantID := range participantIDs {
-		participant, err := s.redis.GetParticipant(ctx, participantID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get participant from redis: sessionID=%s, participantID=%s, err=%w", sessionID, participantID, err)
-		}
+	var participants []api.SessionParticipant
+	for _, participant := range result.Participants {
 		participants = append(participants, api.SessionParticipant{
+			ParticipantId: participant.ParticipantId,
 			Name:          participant.Name,
-			ParticipantId: participantID,
 		})
 	}
 
-	var scales []string
-	if session.ScaleType == "custom" {
-		scales = session.CustomScale
-	} else {
-		scales = model.ScaleListMap[api.ScaleType(session.ScaleType)]
-	}
-
-	// Convert the redis.Session to GetSessionResponse
 	res := api.GetSessionResponse{
 		Session: api.Session{
 			SessionId:      sessionID,
-			HostId:         session.HostId,
-			ScaleType:      api.ScaleType(session.ScaleType),
-			Status:         session.Status,
-			Scales:         scales,
+			HostId:         result.Session.HostId,
+			ScaleType:      api.ScaleType(result.Session.ScaleType),
+			Status:         result.Session.Status,
+			Scales:         result.Scales,
 			CurrentRoundId: nil,
 			Participants:   participants,
-			CreatedAt:      session.CreatedAt,
-			UpdatedAt:      session.UpdatedAt,
+			CreatedAt:      result.Session.CreatedAt,
+			UpdatedAt:      result.Session.UpdatedAt,
 		},
 	}
-	if session.CurrentRoundId != "" {
-		res.Session.CurrentRoundId = &session.CurrentRoundId
+	if result.Session.CurrentRoundId != "" {
+		res.Session.CurrentRoundId = &result.Session.CurrentRoundId
 	}
 
 	return &res, nil
