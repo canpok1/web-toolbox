@@ -1,5 +1,10 @@
 import type React from "react";
 import { useEffect, useState } from "react";
+import FeedbackButtons from "./components/FeedbackButtons";
+import GenreSelector from "./components/GenreSelector";
+import NewThemeButton from "./components/NewThemeButton";
+import NewThemeLink from "./components/NewThemeLink";
+import TalkTheme from "./components/TalkTheme";
 
 const TalkRouletteTopPage = () => {
   const themes = {
@@ -101,14 +106,7 @@ const TalkRouletteTopPage = () => {
       setFeedbackMessage("");
     };
 
-    const newThemeButton = document.getElementById("new-theme-button");
-    newThemeButton?.addEventListener("click", displayTheme);
-
     displayTheme();
-
-    return () => {
-      newThemeButton?.removeEventListener("click", displayTheme);
-    };
   }, [genre]);
 
   const handleLikeClick = () => {
@@ -137,6 +135,15 @@ const TalkRouletteTopPage = () => {
     setGenre(e.target.value);
   };
 
+  const handleNewThemeClick = () => {
+    const genreThemes = themes[genre as keyof typeof themes] || themes.all;
+    const randomIndex = Math.floor(Math.random() * genreThemes.length);
+    setTheme(genreThemes[randomIndex]);
+    setLiked(false);
+    setDisliked(false);
+    setFeedbackMessage("");
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-md rounded-lg bg-white p-8 text-center shadow-xl">
@@ -144,79 +151,24 @@ const TalkRouletteTopPage = () => {
           今日のトークテーマ
         </h1>
 
-        <div
-          id="theme-display"
-          className="mb-6 flex min-h-[3rem] items-center justify-center rounded-md bg-blue-50/50 p-4 font-semibold text-blue-800 text-xl transition-all duration-300"
-        >
-          {theme}
-        </div>
+        <TalkTheme theme={theme} />
 
         <div className="mt-6 space-y-4">
-          <div className="flex items-center justify-center gap-8">
-            <button
-              type="button"
-              id="like-button"
-              className={`feedback-button text-gray-600 hover:text-green-500 ${
-                liked ? "liked" : ""
-              }`}
-              aria-label="良いテーマ"
-              onClick={handleLikeClick}
-            >
-              <i className="fas fa-thumbs-up text-2xl" />
-            </button>
-            <button
-              type="button"
-              id="dislike-button"
-              className={`feedback-button text-gray-600 hover:text-red-500 ${
-                disliked ? "disliked" : ""
-              }`}
-              aria-label="悪いテーマ"
-              onClick={handleDislikeClick}
-            >
-              <i className="fas fa-thumbs-down text-2xl" />
-            </button>
-          </div>
+          <FeedbackButtons
+            liked={liked}
+            disliked={disliked}
+            handleLikeClick={handleLikeClick}
+            handleDislikeClick={handleDislikeClick}
+          />
           <p id="feedback-message" className="text-gray-500 text-sm">
             {feedbackMessage}
           </p>
 
-          <div>
-            <label
-              htmlFor="genre-select"
-              className="mb-2 block font-bold text-gray-700 text-sm"
-            >
-              ジャンルを選択:
-            </label>
-            <select
-              id="genre-select"
-              className="w-full appearance-none rounded border px-4 py-3 text-gray-700 leading-tight shadow focus:shadow-outline focus:outline-none"
-              value={genre}
-              onChange={handleGenreChange}
-            >
-              <option value="all">すべて</option>
-              <option value="general">一般</option>
-              <option value="hobby">趣味</option>
-              <option value="food">食べ物</option>
-              <option value="travel">旅行</option>
-            </select>
-          </div>
+          <GenreSelector genre={genre} handleGenreChange={handleGenreChange} />
 
-          <button
-            type="button"
-            id="new-theme-button"
-            className="rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-3 font-semibold text-white shadow-md transition duration-300 ease-in-out hover:scale-105 hover:from-blue-700 hover:to-blue-800"
-          >
-            別のテーマを引く
-          </button>
+          <NewThemeButton onClick={handleNewThemeClick} />
 
-          <a
-            href="https://forms.gle/your-google-form-url"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 block font-semibold text-blue-600 text-sm transition-colors duration-200 hover:text-blue-800"
-          >
-            新しいトークテーマを投稿する
-          </a>
+          <NewThemeLink />
           <p className="mt-1 text-gray-500 text-xs">
             良いテーマを思いついたら、ぜひ投稿してください！
           </p>
