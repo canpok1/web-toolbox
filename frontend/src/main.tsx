@@ -9,6 +9,7 @@ import CreateSessionPage from "./planning-poker/CreateSessionPage";
 import JoinSessionPage from "./planning-poker/JoinSessionPage";
 import PlanningPokerTopPage from "./planning-poker/PlanningPokerTopPage";
 import SessionPage from "./planning-poker/SessionPage";
+import TalkRouletteTopPage from "./talk-roulette/TalkRouletteTopPage";
 
 const rootElement = document.getElementById("root");
 
@@ -64,6 +65,7 @@ if (rootElement) {
                 </>
               }
             />
+            <Route path="/talk-roulette" element={<TalkRouletteTopPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
