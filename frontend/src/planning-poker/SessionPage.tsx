@@ -120,8 +120,13 @@ function SessionPage() {
                   console.log("clicked HostPanel, event:", event);
                   reload();
                 }}
-                onError={(event: HostPanelEvent, _error: unknown): void => {
-                  console.log("error on HostPanel, event:", event, "error:");
+                onError={(event: HostPanelEvent, error: unknown): void => {
+                  console.log(
+                    "error on HostPanel, event:",
+                    event,
+                    "error:",
+                    error,
+                  );
                 }}
               />
             )}
