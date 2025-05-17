@@ -138,7 +138,7 @@ const TalkRouletteTopPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-gray-100 to-gray-300 p-4">
+    <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-md rounded-lg bg-white p-8 text-center shadow-xl">
         <h1 className="mb-6 font-semibold text-2xl text-gray-700">
           今日のトークテーマ
