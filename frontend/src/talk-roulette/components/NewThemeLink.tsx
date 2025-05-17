@@ -2,7 +2,7 @@ const NewThemeLink = () => {
   return (
     <>
       <a
-        href="https://forms.gle/your-google-form-url"
+        href="https://forms.gle/gpbmH1Vo8pCp35Uv5"
         target="_blank"
         rel="noopener noreferrer"
         className="mt-2 block font-semibold text-blue-600 text-sm transition-colors duration-200 hover:text-blue-800"

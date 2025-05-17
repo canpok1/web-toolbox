@@ -169,9 +169,6 @@ const TalkRouletteTopPage = () => {
           <NewThemeButton onClick={handleNewThemeClick} />
 
           <NewThemeLink />
-          <p className="mt-1 text-gray-500 text-xs">
-            良いテーマを思いついたら、ぜひ投稿してください！
-          </p>
         </div>
       </div>
     </div>
