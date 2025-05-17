@@ -41,7 +41,7 @@ function SessionPage() {
         setConnected(true);
       };
 
-      ws.onmessage = async (event) => {
+      ws.onmessage = async (event: MessageEvent) => {
         console.log("Received message:", event.data);
         await reload();
       };
@@ -51,7 +51,7 @@ function SessionPage() {
         setConnected(false);
       };
 
-      ws.onerror = (error) => {
+      ws.onerror = (error: Event) => {
         console.error("WebSocket error:", error);
       };
 
@@ -64,7 +64,7 @@ function SessionPage() {
       console.error("websocket error: ", error);
       setErrorMessages(["エラーが発生しました。画面を再読み込みして下さい。"]);
     }
-  }, [connected, setConnected, reload]);
+  }, [connected, reload, sessionId]);
 
   useEffect(() => {
     const id = setInterval(() => {
