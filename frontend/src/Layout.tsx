@@ -37,6 +37,15 @@ const Layout = () => {
                         プランニングポーカー
                       </Link>
                     </li>
+                    <li>
+                      <Link
+                        to="/talk-roulette"
+                        className="text-primary-content"
+                        onClick={closeDropdown}
+                      >
+                        トークルーレット
+                      </Link>
+                    </li>
                   </ul>
                 </details>
               </li>
