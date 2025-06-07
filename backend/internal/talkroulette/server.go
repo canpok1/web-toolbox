@@ -8,12 +8,15 @@ import (
 	"time"
 )
 
+// init関数はパッケージの初期化時に一度だけ実行されます。
+// ここで乱数ジェネレータのシードを設定します。
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 // GetTalkRouletteThemesLogic はテーマ取得のコアロジックを含みます。
 func GetTalkRouletteThemesLogic(queryGenre *string, queryMaxCount *int) ([]TalkRouletteTheme, error) {
-	// 通常、randのシードはアプリケーション起動時に一度だけ行うのが望ましいです。
-	// しかし、この特定のハンドラ構造では、ここでシードすることにより、このロジックが呼び出された際に確実にシードされることを保証します。
-	// この関数がメソッドを持つ構造体の一部であれば、構造体の初期化時にシードを行うことができます。
-	rand.Seed(time.Now().UnixNano())
+	// 乱数シードはinit()関数で初期化時に設定されます。
 
 	maxCount := 20 // openapi.yml からのデフォルト値
 	if queryMaxCount != nil {

@@ -16,7 +16,7 @@ paths:
             type: string
         - name: maxCount
           in: query
-          description: '取得するテーマの最大件数。デフォルトは20件です。'
+          description: "取得するテーマの最大件数。デフォルトは20件です。"
           required: false
           schema:
             type: integer
@@ -692,7 +692,6 @@ components:
         id:
           type: string
           description: テーマID
-          format: uuid
         genre:
           type: string
           description: テーマのジャンル
