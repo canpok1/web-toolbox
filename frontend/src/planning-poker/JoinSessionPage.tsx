@@ -1,7 +1,7 @@
 import { Users } from "lucide-react";
 import { type ChangeEvent, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ApiClient } from "../api/ApiClient";
+import { PlanningPokerClient } from "../api/PlanningPokerClient";
 import Alert from "./components/Alert";
 import { ExtractErrorMessage } from "./utils/error";
 
@@ -16,7 +16,7 @@ function JoinSessionPage() {
 
   const navigate = useNavigate();
 
-  const client = new ApiClient();
+  const client = new PlanningPokerClient();
   const shouldSubmit = sessionId.trim() !== "" && userName.trim() !== "";
 
   const handleSessionIdChange = (event: ChangeEvent<HTMLInputElement>) => {

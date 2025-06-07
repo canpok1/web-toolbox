@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ApiClient } from "../../api/ApiClient";
+import { PlanningPokerClient } from "../../api/PlanningPokerClient";
 import Alert from "./Alert";
 
 export type VotePanelProps = {
@@ -24,7 +24,7 @@ function VotePanel({
   const handleClick = async (option: string) => {
     setErrorMessages([]);
     try {
-      const client = new ApiClient();
+      const client = new PlanningPokerClient();
       await client.vote(roundId, {
         participantId,
         value: option,

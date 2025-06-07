@@ -1,7 +1,7 @@
 import { LogIn } from "lucide-react";
 import { type ChangeEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ApiClient } from "../api/ApiClient";
+import { PlanningPokerClient } from "../api/PlanningPokerClient";
 import Alert from "./components/Alert";
 import { isScaleType } from "./types/ScaleType";
 import { ExtractErrorMessage } from "./utils/error";
@@ -13,7 +13,7 @@ function CreateSessionPage() {
 
   const navigate = useNavigate();
 
-  const client = new ApiClient();
+  const client = new PlanningPokerClient();
   const shouldSubmit = userName !== "";
 
   const handleUserNameChange = (event: ChangeEvent<HTMLInputElement>) => {

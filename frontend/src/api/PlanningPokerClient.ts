@@ -1,7 +1,7 @@
 import createClient from "openapi-fetch";
 import type { paths } from "./types/api.gen";
 
-export class ApiClient {
+export class PlanningPokerClient {
   readonly client;
 
   constructor() {
