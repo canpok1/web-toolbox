@@ -5,20 +5,18 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
-	"sync"
 	"time"
 )
 
-var seedOnce sync.Once
+// init関数はパッケージの初期化時に一度だけ実行されます。
+// ここで乱数ジェネレータのシードを設定します。
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 // GetTalkRouletteThemesLogic はテーマ取得のコアロジックを含みます。
 func GetTalkRouletteThemesLogic(queryGenre *string, queryMaxCount *int) ([]TalkRouletteTheme, error) {
-	// randのシードはアプリケーション全体で一度だけ実行されるようにします。
-	// sync.Onceを使用して、この関数が複数回呼び出された場合でも、
-	// rand.Seedが一度だけ実行されることを保証します。
-	seedOnce.Do(func() {
-		rand.Seed(time.Now().UnixNano())
-	})
+	// 乱数シードはinit()関数で初期化時に設定されます。
 
 	maxCount := 20 // openapi.yml からのデフォルト値
 	if queryMaxCount != nil {
