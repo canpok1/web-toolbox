@@ -10,7 +10,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // Defines values for RoundStatus.
@@ -198,7 +197,7 @@ type TalkRouletteTheme struct {
 	Genre string `json:"genre"`
 
 	// Id テーマID
-	Id openapi_types.UUID `json:"id"`
+	Id string `json:"id"`
 
 	// Theme テーマの内容
 	Theme string `json:"theme"`

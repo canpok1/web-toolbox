@@ -835,10 +835,7 @@ export interface components {
         SessionEndedPayload: Record<string, never>;
         /** @description トークルーレットのテーマ情報 */
         TalkRouletteTheme: {
-            /**
-             * Format: uuid
-             * @description テーマID
-             */
+            /** @description テーマID */
             id: string;
             /** @description テーマのジャンル */
             genre: string;
