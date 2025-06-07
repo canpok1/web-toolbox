@@ -4,6 +4,68 @@
  */
 
 export interface paths {
+    "/api/talk-roulette/themes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * トークルーレットのテーマ情報を取得する
+         * @description 指定された条件に基づいてトークルーレットのテーマ情報をランダムに取得します。
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description テーマのジャンル (例: "趣味", "仕事")。省略した場合は全ジャンルからランダムに選ばれます。 */
+                    genre?: string;
+                    /** @description 取得するテーマの最大件数。デフォルトは20件です。 */
+                    maxCount?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description テーマ情報取得成功 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TalkRouletteThemeResponse"];
+                    };
+                };
+                /** @description 不正なリクエスト */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description サーバーエラー */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/planning-poker/ws/{sessionId}": {
         parameters: {
             query?: never;
@@ -771,6 +833,23 @@ export interface components {
         };
         /** @description sessionEndedイベントのペイロード */
         SessionEndedPayload: Record<string, never>;
+        /** @description トークルーレットのテーマ情報 */
+        TalkRouletteTheme: {
+            /**
+             * Format: uuid
+             * @description テーマID
+             */
+            id: string;
+            /** @description テーマのジャンル */
+            genre: string;
+            /** @description テーマの内容 */
+            theme: string;
+        };
+        /** @description トークルーレットのテーマ情報レスポンス */
+        TalkRouletteThemeResponse: {
+            /** @description テーマ情報のリスト */
+            themes: components["schemas"]["TalkRouletteTheme"][];
+        };
     };
     responses: never;
     parameters: never;

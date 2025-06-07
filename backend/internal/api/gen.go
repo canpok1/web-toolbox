@@ -10,6 +10,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // Defines values for RoundStatus.
@@ -191,6 +192,24 @@ type StartRoundResponse struct {
 	RoundId string `json:"roundId"`
 }
 
+// TalkRouletteTheme トークルーレットのテーマ情報
+type TalkRouletteTheme struct {
+	// Genre テーマのジャンル
+	Genre string `json:"genre"`
+
+	// Id テーマID
+	Id openapi_types.UUID `json:"id"`
+
+	// Theme テーマの内容
+	Theme string `json:"theme"`
+}
+
+// TalkRouletteThemeResponse トークルーレットのテーマ情報レスポンス
+type TalkRouletteThemeResponse struct {
+	// Themes テーマ情報のリスト
+	Themes []TalkRouletteTheme `json:"themes"`
+}
+
 // Vote 投票情報
 type Vote struct {
 	// ParticipantId 参加者のID
@@ -219,6 +238,15 @@ type VoteCount struct {
 type GetApiPlanningPokerRoundsRoundIdParams struct {
 	// ParticipantId 取得したい投票情報の参加者ID。指定しない場合は、revealed状態であれば全参加者の投票情報を返す。
 	ParticipantId *string `form:"participantId,omitempty" json:"participantId,omitempty"`
+}
+
+// GetApiTalkRouletteThemesParams defines parameters for GetApiTalkRouletteThemes.
+type GetApiTalkRouletteThemesParams struct {
+	// Genre テーマのジャンル (例: "趣味", "仕事")。省略した場合は全ジャンルからランダムに選ばれます。
+	Genre *string `form:"genre,omitempty" json:"genre,omitempty"`
+
+	// MaxCount 取得するテーマの最大件数。デフォルトは20件です。
+	MaxCount *int `form:"maxCount,omitempty" json:"maxCount,omitempty"`
 }
 
 // PostApiPlanningPokerRoundsRoundIdVotesJSONRequestBody defines body for PostApiPlanningPokerRoundsRoundIdVotes for application/json ContentType.
@@ -259,6 +287,9 @@ type ServerInterface interface {
 	// リアルタイム更新のための WebSocket エンドポイント
 	// (GET /api/planning-poker/ws/{sessionId})
 	GetApiPlanningPokerWsSessionId(ctx echo.Context, sessionId string) error
+	// トークルーレットのテーマ情報を取得する
+	// (GET /api/talk-roulette/themes)
+	GetApiTalkRouletteThemes(ctx echo.Context, params GetApiTalkRouletteThemesParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -412,6 +443,31 @@ func (w *ServerInterfaceWrapper) GetApiPlanningPokerWsSessionId(ctx echo.Context
 	return err
 }
 
+// GetApiTalkRouletteThemes converts echo context to params.
+func (w *ServerInterfaceWrapper) GetApiTalkRouletteThemes(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetApiTalkRouletteThemesParams
+	// ------------- Optional query parameter "genre" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "genre", ctx.QueryParams(), &params.Genre)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter genre: %s", err))
+	}
+
+	// ------------- Optional query parameter "maxCount" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "maxCount", ctx.QueryParams(), &params.MaxCount)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter maxCount: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetApiTalkRouletteThemes(ctx, params)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -449,5 +505,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/participants", wrapper.PostApiPlanningPokerSessionsSessionIdParticipants)
 	router.POST(baseURL+"/api/planning-poker/sessions/:sessionId/rounds", wrapper.PostApiPlanningPokerSessionsSessionIdRounds)
 	router.GET(baseURL+"/api/planning-poker/ws/:sessionId", wrapper.GetApiPlanningPokerWsSessionId)
+	router.GET(baseURL+"/api/talk-roulette/themes", wrapper.GetApiTalkRouletteThemes)
 
 }
