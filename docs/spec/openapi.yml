@@ -7,41 +7,41 @@ paths:
     get:
       summary: トークルーレットのテーマ情報を取得する
       description: 指定された条件に基づいてトークルーレットのテーマ情報をランダムに取得します。
-      parameters: # 6 spaces
-        - name: genre # 8 spaces for the dash part
-          in: query # 10 spaces for the key
-          description: 'テーマのジャンル (例: "趣味", "仕事")。省略した場合は全ジャンルからランダムに選ばれます。' # 10 spaces for the key
-          required: false # 10 spaces for the key
-          schema: # 10 spaces for the key
-            type: string # 12 spaces for the key
-        - name: maxCount # 8 spaces for the dash part
-          in: query # 10 spaces for the key
-          description: '取得するテーマの最大件数。デフォルトは20件です。' # 10 spaces for the key
-          required: false # 10 spaces for the key
-          schema: # 10 spaces for the key
-            type: integer # 12 spaces for the key
-            default: 20 # 12 spaces for the key
-            minimum: 1 # 12 spaces for the key
-            maximum: 100 # 12 spaces for the key
-      responses: # 6 spaces
-        "200": # 8 spaces
-          description: テーマ情報取得成功 # 10 spaces
-          content: # 10 spaces
-            application/json: # 12 spaces
-              schema: # 14 spaces
-                $ref: "#/components/schemas/TalkRouletteThemeResponse" # 16 spaces
-        "400": # 8 spaces
-          description: 不正なリクエスト # 10 spaces
-          content: # 10 spaces
-            application/json: # 12 spaces
-              schema: # 14 spaces
-                $ref: "#/components/schemas/ErrorResponse" # 16 spaces
-        "500": # 8 spaces
-          description: サーバーエラー # 10 spaces
-          content: # 10 spaces
-            application/json: # 12 spaces
-              schema: # 14 spaces
-                $ref: "#/components/schemas/ErrorResponse" # 16 spaces
+      parameters:
+        - name: genre
+          in: query
+          description: 'テーマのジャンル (例: "趣味", "仕事")。省略した場合は全ジャンルからランダムに選ばれます。'
+          required: false
+          schema:
+            type: string
+        - name: maxCount
+          in: query
+          description: '取得するテーマの最大件数。デフォルトは20件です。'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: テーマ情報取得成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TalkRouletteThemeResponse"
+        "400":
+          description: 不正なリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/planning-poker/ws/{sessionId}:
     get:
       summary: リアルタイム更新のための WebSocket エンドポイント
