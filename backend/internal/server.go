@@ -51,3 +51,9 @@ func (s *Server) PostApiPlanningPokerSessionsSessionIdRounds(ctx echo.Context, s
 func (s *Server) GetApiPlanningPokerWsSessionId(ctx echo.Context, sessionID string) error {
 	return s.planningpokerServer.HandleGetWsSessionId(ctx, sessionID)
 }
+
+// GetApiTalkRouletteThemes implements api.ServerInterface.
+func (s *Server) GetApiTalkRouletteThemes(ctx echo.Context, params api.GetApiTalkRouletteThemesParams) error {
+	// TODO: Implement
+	return nil
+}
