@@ -1,10 +1,7 @@
 package talkroulette
 
 import (
-	"encoding/json"
 	"math/rand"
-	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -56,39 +53,4 @@ func GetTalkRouletteThemesLogic(queryGenre *string, queryMaxCount *int) ([]TalkR
 	}
 
 	return selectedThemes, nil
-}
-
-// GetTalkRouletteThemesHandler はトークルーレットテーマのHTTPリクエストを処理します。
-func GetTalkRouletteThemesHandler(w http.ResponseWriter, r *http.Request) {
-	var queryGenrePtr *string
-	if genreVal := r.URL.Query().Get("genre"); genreVal != "" {
-		queryGenrePtr = &genreVal
-	}
-
-	var queryMaxCountPtr *int
-	if maxCountValStr := r.URL.Query().Get("maxCount"); maxCountValStr != "" {
-		parsedMaxCount, err := strconv.Atoi(maxCountValStr)
-		if err == nil { // パースが成功した場合のみ使用します。
-			queryMaxCountPtr = &parsedMaxCount
-		}
-	}
-
-	selectedThemes, errLogic := GetTalkRouletteThemesLogic(queryGenrePtr, queryMaxCountPtr)
-	if errLogic != nil {
-		// このサンプルロジックはまだエラーを生成しませんが、もしエラーが発生した場合：
-		http.Error(w, "テーマの取得に失敗しました: "+errLogic.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	response := struct {
-		Themes []TalkRouletteTheme `json:"themes"`
-	}{
-		Themes: selectedThemes,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, "テーマのJSONへのエンコードに失敗しました", http.StatusInternalServerError)
-		return
-	}
 }
