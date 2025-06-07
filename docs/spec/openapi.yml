@@ -10,13 +10,13 @@ paths:
       parameters: # 6 spaces
         - name: genre # 8 spaces for the dash part
           in: query # 10 spaces for the key
-          description: テーマのジャンル (例: "趣味", "仕事")。省略した場合は全ジャンルからランダムに選ばれます。 # 10 spaces for the key
+          description: 'テーマのジャンル (例: "趣味", "仕事")。省略した場合は全ジャンルからランダムに選ばれます。' # 10 spaces for the key
           required: false # 10 spaces for the key
           schema: # 10 spaces for the key
             type: string # 12 spaces for the key
         - name: maxCount # 8 spaces for the dash part
           in: query # 10 spaces for the key
-          description: 取得するテーマの最大件数。デフォルトは20件です。 # 10 spaces for the key
+          description: '取得するテーマの最大件数。デフォルトは20件です。' # 10 spaces for the key
           required: false # 10 spaces for the key
           schema: # 10 spaces for the key
             type: integer # 12 spaces for the key
