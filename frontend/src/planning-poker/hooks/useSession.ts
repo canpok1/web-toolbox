@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ApiClient } from "../../api/ApiClient";
+import { PlanningPokerClient } from "../../api/PlanningPokerClient";
 import type { SessionParticipant } from "../types/Participant";
 import type { Round } from "../types/Round";
 import { type Session, isSessionStatus } from "../types/Session";
@@ -36,7 +36,7 @@ export default function useSession(
 
   const reload = useCallback(async () => {
     try {
-      const apiClient = new ApiClient();
+      const apiClient = new PlanningPokerClient();
 
       const session = await fetchSession(apiClient, sessionId);
       setSession(session);
@@ -73,7 +73,7 @@ export default function useSession(
   }, [sessionId, participantId]);
 
   const fetchSession = async (
-    apiClient: ApiClient,
+    apiClient: PlanningPokerClient,
     sessionId: string,
   ): Promise<Session | null> => {
     const response = await apiClient.fetchSession(sessionId);
@@ -91,12 +91,18 @@ export default function useSession(
       );
     }
 
-    const participants = response.session.participants.map((participant) => {
-      return {
-        id: participant.participantId,
-        name: participant.name,
-      };
-    });
+    const participants: SessionParticipant[] =
+      response.session.participants.map(
+        (participant: {
+          participantId: string;
+          name: string;
+        }): SessionParticipant => {
+          return {
+            id: participant.participantId,
+            name: participant.name,
+          };
+        },
+      );
 
     return {
       sessionId: response.session.sessionId,
@@ -110,7 +116,7 @@ export default function useSession(
   };
 
   const fetchRound = async (
-    apiClient: ApiClient,
+    apiClient: PlanningPokerClient,
     session: Session,
     participantId: string,
   ): Promise<Round | null> => {
@@ -126,13 +132,19 @@ export default function useSession(
     }
     const round = response.round;
 
-    const votes = round.votes.map((vote) => {
-      return {
-        participantId: vote.participantId,
-        participantName: vote.participantName,
-        vote: vote.value ?? null,
-      };
-    });
+    const votes: Vote[] = round.votes.map(
+      (vote: {
+        participantId: string;
+        participantName: string;
+        value?: string | null;
+      }) => {
+        return {
+          participantId: vote.participantId,
+          participantName: vote.participantName,
+          vote: vote.value ?? null,
+        };
+      },
+    );
 
     return {
       ...round,

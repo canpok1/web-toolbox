@@ -1,5 +1,5 @@
 import { CheckCircle2, Play } from "lucide-react";
-import { ApiClient } from "../../api/ApiClient";
+import { PlanningPokerClient } from "../../api/PlanningPokerClient";
 import type { Round } from "../types/Round";
 import type { Session } from "../types/Session";
 
@@ -28,7 +28,7 @@ export default function HostPanel({
       if (!session) {
         return;
       }
-      const client = new ApiClient();
+      const client = new PlanningPokerClient();
       await client.startRound(session.sessionId);
       onClick("startRound");
     } catch (error) {
@@ -41,7 +41,7 @@ export default function HostPanel({
       if (!round) {
         return;
       }
-      const client = new ApiClient();
+      const client = new PlanningPokerClient();
       await client.revealRound(round.roundId);
       onClick("revealVotes");
     } catch (error) {
