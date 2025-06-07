@@ -5,15 +5,20 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 )
 
+var seedOnce sync.Once
+
 // GetTalkRouletteThemesLogic はテーマ取得のコアロジックを含みます。
 func GetTalkRouletteThemesLogic(queryGenre *string, queryMaxCount *int) ([]TalkRouletteTheme, error) {
-	// 通常、randのシードはアプリケーション起動時に一度だけ行うのが望ましいです。
-	// しかし、この特定のハンドラ構造では、ここでシードすることにより、このロジックが呼び出された際に確実にシードされることを保証します。
-	// この関数がメソッドを持つ構造体の一部であれば、構造体の初期化時にシードを行うことができます。
-	rand.Seed(time.Now().UnixNano())
+	// randのシードはアプリケーション全体で一度だけ実行されるようにします。
+	// sync.Onceを使用して、この関数が複数回呼び出された場合でも、
+	// rand.Seedが一度だけ実行されることを保証します。
+	seedOnce.Do(func() {
+		rand.Seed(time.Now().UnixNano())
+	})
 
 	maxCount := 20 // openapi.yml からのデフォルト値
 	if queryMaxCount != nil {
