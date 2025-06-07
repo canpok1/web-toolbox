@@ -8,21 +8,21 @@ paths:
       summary: トークルーレットのテーマ情報を取得する
       description: 指定された条件に基づいてトークルーレットのテーマ情報をランダムに取得します。
       parameters: # 6 spaces
-        - name: genre # 8 spaces (key: value is on one line, starting at 8)
-          in: query # 8 spaces
-          description: テーマのジャンル (例: "趣味", "仕事")。省略した場合は全ジャンルからランダムに選ばれます。 # 8 spaces
-          required: false # 8 spaces
-          schema: # 8 spaces
-            type: string # 10 spaces
-        - name: maxCount # 8 spaces
-          in: query # 8 spaces
-          description: 取得するテーマの最大件数。デフォルトは20件です。 # 8 spaces
-          required: false # 8 spaces
-          schema: # 8 spaces
-            type: integer # 10 spaces
-            default: 20 # 10 spaces
-            minimum: 1 # 10 spaces
-            maximum: 100 # 10 spaces
+        - name: genre # 8 spaces for the dash part
+          in: query # 10 spaces for the key
+          description: テーマのジャンル (例: "趣味", "仕事")。省略した場合は全ジャンルからランダムに選ばれます。 # 10 spaces for the key
+          required: false # 10 spaces for the key
+          schema: # 10 spaces for the key
+            type: string # 12 spaces for the key
+        - name: maxCount # 8 spaces for the dash part
+          in: query # 10 spaces for the key
+          description: 取得するテーマの最大件数。デフォルトは20件です。 # 10 spaces for the key
+          required: false # 10 spaces for the key
+          schema: # 10 spaces for the key
+            type: integer # 12 spaces for the key
+            default: 20 # 12 spaces for the key
+            minimum: 1 # 12 spaces for the key
+            maximum: 100 # 12 spaces for the key
       responses: # 6 spaces
         "200": # 8 spaces
           description: テーマ情報取得成功 # 10 spaces
