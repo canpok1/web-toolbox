@@ -2,6 +2,9 @@
 setup:
 	make -C frontend setup
 	make -C backend setup
+
+.PHONY: setup-e2e
+setup-e2e:
 	make -C e2e setup
 
 .PHONY: run-front
