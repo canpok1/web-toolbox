@@ -23,6 +23,10 @@ test:
 test-e2e: build-front
 	make -C e2e test
 
+.PHONY: show-e2e-report
+show-e2e-report: test-e2e
+	make -C e2e show-report
+
 .PHONY: check
 check:
 	make -C frontend check
