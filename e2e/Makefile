@@ -10,3 +10,7 @@ test:
 .PHONY: show-report
 show-report:
 	npm run show-report
+
+.PHONY: format
+format:
+	npm run check:fix

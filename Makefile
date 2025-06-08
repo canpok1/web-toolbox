@@ -47,6 +47,7 @@ build-back:
 .PHONY: format
 format:
 	make -C frontend format
+	make -C e2e format
 
 .PHONY: generate
 generate:
