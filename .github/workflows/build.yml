@@ -19,6 +19,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: "backend/go.mod"
+          cache-dependency-path: "backend/go.sum"
 
       - uses: actions/setup-node@v4
         with:
@@ -66,7 +67,7 @@ jobs:
   test-e2e:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:latest
+      image: mcr.microsoft.com/playwright
     needs: [check]
 
     services:
@@ -84,6 +85,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: "backend/go.mod"
+          cache-dependency-path: "backend/go.sum"
 
       - uses: actions/setup-node@v4
         with:
