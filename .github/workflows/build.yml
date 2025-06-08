@@ -68,7 +68,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright
-      options: --user 1001
     needs: [check]
 
     services:
@@ -103,6 +102,8 @@ jobs:
         run: make build-front
 
       - name: Run e2e test
+        env:
+          HOME: /root
         run: |
           make test-e2e
 
