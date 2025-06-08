@@ -93,6 +93,8 @@ jobs:
 
       - name: Setup
         run: |
+          apt update
+          apt install make
           make setup
           make setup-e2e
 
