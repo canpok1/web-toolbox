@@ -1,0 +1,23 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "setup": "playwright install-deps",
+    "test": "playwright test",
+    "show-report": "playwright show-report --host 0.0.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.30"
+  },
+  "dependencies": {
+    "@playwright/browser-chromium": "^1.52.0",
+    "@playwright/browser-firefox": "^1.52.0",
+    "@playwright/browser-webkit": "^1.52.0"
+  }
+}
