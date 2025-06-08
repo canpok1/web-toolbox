@@ -21,8 +21,8 @@
 go.work
 go.work.sum
 
-# binary files
-backend/build/release/server
+# backend
+build/
 
 # frontend
 node_modules/
