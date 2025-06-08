@@ -21,11 +21,8 @@
 go.work
 go.work.sum
 
-# env file
-.env
-
-# binary files
-backend/build/release/server
+# backend
+build/
 
 # frontend
 node_modules/

@@ -1,0 +1,28 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "setup": "playwright install-deps",
+    "test": "playwright test",
+    "test:debug": "playwright test --ui-host 0.0.0.0",
+    "show-report": "playwright show-report --host 0.0.0.0",
+    "check": "tsc --noEmit && biome check ./tests",
+    "check:fix": "biome check --write --unsafe ./tests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.30",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@playwright/browser-chromium": "^1.52.0",
+    "@playwright/browser-firefox": "^1.52.0",
+    "@playwright/browser-webkit": "^1.52.0"
+  }
+}
