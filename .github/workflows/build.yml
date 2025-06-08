@@ -68,6 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright
+      options: --user 1001
     needs: [check]
 
     services:
