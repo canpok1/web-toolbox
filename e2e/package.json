@@ -5,6 +5,7 @@
   "scripts": {
     "setup": "playwright install-deps",
     "test": "playwright test",
+    "test:debug": "playwright test --ui-host 0.0.0.0",
     "show-report": "playwright show-report --host 0.0.0.0",
     "check": "tsc --noEmit && biome check ./tests",
     "check:fix": "biome check --write --unsafe ./tests"

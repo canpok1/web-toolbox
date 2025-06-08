@@ -7,6 +7,10 @@ setup:
 test:
 	npm test
 
+.PHONY: test-debug
+test-debug:
+	npm run test:debug
+
 .PHONY: show-report
 show-report:
 	npm run show-report

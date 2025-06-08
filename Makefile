@@ -23,8 +23,12 @@ test:
 test-e2e: build-front
 	make -C e2e test
 
+.PHONY: test-e2e-debug
+test-e2e-debug: build-front
+	make -C e2e test-debug
+
 .PHONY: show-e2e-report
-show-e2e-report: test-e2e
+show-e2e-report:
 	make -C e2e show-report
 
 .PHONY: check
