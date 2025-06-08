@@ -4,6 +4,7 @@
     - `make test`
     - `make check`
     - `make build`
+    - `make test-e2e`
 - 下記コマンドでファイルが更新される場合は必ずコミットすること
     - `make generate`
 - コード中のコメントは日本語で記載すること

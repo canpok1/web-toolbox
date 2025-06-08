@@ -20,7 +20,7 @@ test:
 	make -C backend test
 
 .PHONY: test-e2e
-test-e2e:
+test-e2e: build-front
 	make -C e2e test
 
 .PHONY: check
