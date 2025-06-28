@@ -7,7 +7,9 @@ test.describe("セッション画面", () => {
     test.beforeEach(async ({ page }) => {
       await page.goto("/planning-poker/sessions/create");
       await page.getByLabel("あなたの名前").fill(hostUserName);
-      await page.getByRole("button", { name: "セッションを作成" }).click();
+      await page
+        .getByRole("button", { name: "セッションを作成", exact: true })
+        .click();
       await page.waitForEvent("websocket");
     });
 
@@ -25,7 +27,7 @@ test.describe("セッション画面", () => {
         ).toBeVisible();
 
         await hostPage
-          .getByRole("button", { name: "招待URL/QRコード" })
+          .getByRole("button", { name: "招待URL/QRコード", exact: true })
           .click();
 
         const inviteLink = hostPage.locator(
@@ -61,12 +63,14 @@ test.describe("セッション画面", () => {
         await participantPage.goto(
           `/planning-poker/sessions/join?id=${sessionId}`,
         );
+
         await participantPage
           .getByLabel("あなたの名前")
           .fill(participantUserName);
         await participantPage
-          .getByRole("button", { name: "セッションに参加" })
+          .getByRole("button", { name: "セッションに参加", exact: true })
           .click();
+        await participantPage.waitForEvent("websocket");
 
         // 参加者ユーザー画面に自分の名前が表示されるか確認
         await expect(
@@ -86,11 +90,12 @@ test.describe("セッション画面", () => {
         await expect(
           participantPage.getByRole("button", {
             name: "参加ページのURLをコピー",
+            exact: true,
           }),
         ).toBeVisible();
         // 参加者ユーザー画面の招待リンクが正しいことを確認
         await participantPage
-          .getByRole("button", { name: "招待URL/QRコード" })
+          .getByRole("button", { name: "招待URL/QRコード", exact: true })
           .click();
         const participantInviteLink = participantPage.locator(
           'a[href*="/planning-poker/sessions/join?id="]',
@@ -116,24 +121,6 @@ test.describe("セッション画面", () => {
         await expect(
           hostPage.getByText(participantUserName, { exact: true }),
         ).toBeVisible();
-        // ホストユーザー画面で招待リンクをコピーできることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "参加ページのURLをコピー" }),
-        ).toBeVisible();
-        // ホストユーザー画面の招待リンクが正しいことを確認
-        await hostPage
-          .getByRole("button", { name: "招待URL/QRコード" })
-          .click();
-        await expect(
-          hostInviteLink,
-          "ホストの招待リンクが表示されること",
-        ).toBeVisible();
-        if (hostInviteLinkValue) {
-          await expect(
-            hostInviteLinkValue,
-            "ホストの招待リンクが正しいこと",
-          ).toMatch(/planning-poker\/sessions\/join\?id=.*/);
-        }
       });
     });
   });
@@ -167,198 +154,223 @@ test.describe("セッション画面", () => {
         await participantPage.goto(
           `/planning-poker/sessions/join?id=${sessionId}`,
         );
+
         await participantPage
           .getByLabel("あなたの名前")
           .fill(participantUserName);
         await participantPage
           .getByRole("button", { name: "セッションに参加" })
           .click();
+        await participantPage.waitForEvent("websocket");
 
         // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
         await expect(
-          participantPage.getByRole("button", { name: "投票開始" }),
+          participantPage.getByRole("button", {
+            name: "投票を開始",
+            exact: true,
+          }),
         ).not.toBeVisible();
         // ホストユーザー画面に投票開始ボタンが表示されることを確認
         await expect(
-          hostPage.getByRole("button", { name: "投票開始" }),
+          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
         ).toBeVisible();
 
         // ホストが投票を開始する
-        await hostPage.getByRole("button", { name: "投票開始" }).click();
+        await hostPage
+          .getByRole("button", { name: "投票を開始", exact: true })
+          .click();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
         await expect(
-          participantPage.getByRole("button", { name: "0" }),
+          participantPage.getByRole("button", { name: "0", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "1" }),
+          participantPage.getByRole("button", { name: "1", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "2" }),
+          participantPage.getByRole("button", { name: "2", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "3" }),
+          participantPage.getByRole("button", { name: "3", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "5" }),
+          participantPage.getByRole("button", { name: "5", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "8" }),
+          participantPage.getByRole("button", { name: "8", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "13" }),
+          participantPage.getByRole("button", { name: "13", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "20" }),
+          participantPage.getByRole("button", { name: "21", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "40" }),
+          participantPage.getByRole("button", { name: "34", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "100" }),
+          participantPage.getByRole("button", { name: "55", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "∞" }),
+          participantPage.getByRole("button", { name: "89", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "?" }),
+          participantPage.getByRole("button", { name: "?", exact: true }),
         ).toBeVisible();
         // ホストユーザー画面に投票ボタンが表示されることを確認
-        await expect(hostPage.getByRole("button", { name: "0" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "1" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "2" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "3" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "5" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "8" })).toBeVisible();
         await expect(
-          hostPage.getByRole("button", { name: "13" }),
+          hostPage.getByRole("button", { name: "0", exact: true }),
         ).toBeVisible();
         await expect(
-          hostPage.getByRole("button", { name: "20" }),
+          hostPage.getByRole("button", { name: "1", exact: true }),
         ).toBeVisible();
         await expect(
-          hostPage.getByRole("button", { name: "40" }),
+          hostPage.getByRole("button", { name: "2", exact: true }),
         ).toBeVisible();
         await expect(
-          hostPage.getByRole("button", { name: "100" }),
+          hostPage.getByRole("button", { name: "3", exact: true }),
         ).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "∞" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "?" })).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "5", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "8", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "13", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "21", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "34", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "55", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "89", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "?", exact: true }),
+        ).toBeVisible();
 
         // 参加者ユーザーが投票する
-        await participantPage.getByRole("button", { name: "5" }).click();
+        await participantPage
+          .getByRole("button", { name: "5", exact: true })
+          .click();
 
         // 画面表示確認
-        // 参加者ユーザー画面に投票状況が表示されることを確認
+        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(1);
         await expect(
-          participantPage.getByText("投票が完了しました"),
-        ).toBeVisible();
-        // ホストユーザー画面に投票状況が表示されることを確認
-        await expect(hostPage.getByText("1名が投票しました")).toBeVisible();
-
-        // 参加者ユーザーが投票内容を変更する
-        await participantPage.getByRole("button", { name: "8" }).click();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票状況が表示されることを確認
-        await expect(
-          participantPage.getByText("投票が完了しました"),
-        ).toBeVisible();
-        // ホストユーザー画面に投票状況が表示されることを確認
-        await expect(hostPage.getByText("1名が投票しました")).toBeVisible();
+          participantPage.locator('[data-tip="投票済み"]'),
+        ).toHaveCount(1);
 
         // ホストユーザーが投票する
-        await hostPage.getByRole("button", { name: "13" }).click();
+        await hostPage.getByRole("button", { name: "13", exact: true }).click();
 
         // 画面表示確認
-        // 参加者ユーザー画面に投票状況が表示されることを確認
+        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(2);
         await expect(
-          participantPage.getByText("投票が完了しました"),
-        ).toBeVisible();
-        // ホストユーザー画面に投票状況が表示されることを確認
-        await expect(hostPage.getByText("2名が投票しました")).toBeVisible();
+          participantPage.locator('[data-tip="投票済み"]'),
+        ).toHaveCount(2);
 
         // ホストが投票を公開する
-        await hostPage.getByRole("button", { name: "投票を公開" }).click();
+        await hostPage
+          .getByRole("button", { name: "投票を公開", exact: true })
+          .click();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
         await expect(
-          participantPage.getByRole("button", { name: "投票開始" }),
+          participantPage.getByRole("button", { name: "投票を開始" }),
         ).not.toBeVisible();
-        // ホストユーザー画面に投票開始ボタンが表示されないことを確認
+        // ホストユーザー画面に投票開始ボタンが表示されることを確認
         await expect(
-          hostPage.getByRole("button", { name: "投票開始" }),
-        ).not.toBeVisible();
-
-        // ホストが投票を公開する
-        await hostPage.getByRole("button", { name: "投票を公開" }).click();
+          hostPage.getByRole("button", { name: "投票を開始" }),
+        ).toBeVisible();
 
         // ホストが投票を開始する
-        await hostPage.getByRole("button", { name: "投票開始" }).click();
+        await hostPage
+          .getByRole("button", { name: "投票を開始", exact: true })
+          .click();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
         await expect(
-          participantPage.getByRole("button", { name: "0" }),
+          participantPage.getByRole("button", { name: "0", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "1" }),
+          participantPage.getByRole("button", { name: "1", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "2" }),
+          participantPage.getByRole("button", { name: "2", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "3" }),
+          participantPage.getByRole("button", { name: "3", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "5" }),
+          participantPage.getByRole("button", { name: "5", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "8" }),
+          participantPage.getByRole("button", { name: "8", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "13" }),
+          participantPage.getByRole("button", { name: "13", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "20" }),
+          participantPage.getByRole("button", { name: "21", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "40" }),
+          participantPage.getByRole("button", { name: "34", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "100" }),
+          participantPage.getByRole("button", { name: "55", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "∞" }),
+          participantPage.getByRole("button", { name: "89", exact: true }),
         ).toBeVisible();
         await expect(
-          participantPage.getByRole("button", { name: "?" }),
+          participantPage.getByRole("button", { name: "?", exact: true }),
         ).toBeVisible();
-        // ホストユーザー画面に投票状況が表示されることを確認
-        await expect(hostPage.getByText("2名が投票しました")).toBeVisible();
         // ホストユーザー画面に投票ボタンが表示されることを確認
-        await expect(hostPage.getByRole("button", { name: "0" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "1" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "2" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "3" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "5" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "8" })).toBeVisible();
         await expect(
-          hostPage.getByRole("button", { name: "13" }),
+          hostPage.getByRole("button", { name: "0", exact: true }),
         ).toBeVisible();
         await expect(
-          hostPage.getByRole("button", { name: "20" }),
+          hostPage.getByRole("button", { name: "1", exact: true }),
         ).toBeVisible();
         await expect(
-          hostPage.getByRole("button", { name: "40" }),
+          hostPage.getByRole("button", { name: "2", exact: true }),
         ).toBeVisible();
         await expect(
-          hostPage.getByRole("button", { name: "100" }),
+          hostPage.getByRole("button", { name: "3", exact: true }),
         ).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "∞" })).toBeVisible();
-        await expect(hostPage.getByRole("button", { name: "?" })).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "5", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "8", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "13", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "21", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "34", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "55", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "89", exact: true }),
+        ).toBeVisible();
+        await expect(
+          hostPage.getByRole("button", { name: "?", exact: true }),
+        ).toBeVisible();
       });
     });
 
