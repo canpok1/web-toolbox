@@ -34,7 +34,7 @@ export class SessionPagePom {
     await this.getInviteUrlButton().click();
   }
 
-  public async copyInviteUrl(): Promise<string | null> {
+  public async getInviteLink(): Promise<string | null> {
     const inviteLink = this.page.locator(
       'a[href*="/planning-poker/sessions/join?id="]',
     );
@@ -64,7 +64,7 @@ export class SessionPagePom {
   public async joinAsParticipant(participantName: string): Promise<Page> {
     // 招待URLを取得
     await this.clickInviteUrlButton();
-    const inviteLink = await this.copyInviteUrl();
+    const inviteLink = await this.getInviteLink();
     expect(inviteLink).not.toBeNull();
 
     // 新しいページで参加者として参加

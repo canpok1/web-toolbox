@@ -145,7 +145,7 @@ test.describe("セッション画面", () => {
 
         const pom = new SessionPagePom(hostPage);
         await pom.clickInviteUrlButton();
-        const inviteLinkValue = await pom.copyInviteUrl();
+        const inviteLinkValue = await pom.getInviteLink();
         await expect(inviteLinkValue).toMatch(
           /planning-poker\/sessions\/join\?id=.*/,
         );
@@ -182,7 +182,7 @@ test.describe("セッション画面", () => {
 
         // 参加者ユーザー画面の招待リンクが正しいことを確認
         await participantPom.clickInviteUrlButton();
-        const participantInviteLinkValue = await participantPom.copyInviteUrl();
+        const participantInviteLinkValue = await participantPom.getInviteLink();
 
         await expect(participantInviteLinkValue).toMatch(
           /planning-poker\/sessions\/join\?id=.*/,
