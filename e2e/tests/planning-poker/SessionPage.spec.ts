@@ -1,18 +1,15 @@
 import { type Page, expect, test } from "@playwright/test";
 import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPage";
+import { SessionPagePom } from "../../pom/planning-poker/SessionPage";
 
 async function joinAsParticipant(
   hostPage: Page,
   participantName: string,
 ): Promise<Page> {
   // 招待URLを取得
-  await hostPage
-    .getByRole("button", { name: "招待URL/QRコード", exact: true })
-    .click();
-  const inviteLinkLocator = hostPage.locator(
-    'a[href*="/planning-poker/sessions/join?id="]',
-  );
-  const inviteLink = await inviteLinkLocator.getAttribute("href");
+  const pom = new SessionPagePom(hostPage);
+  await pom.clickInviteUrlButton();
+  const inviteLink = await pom.copyInviteUrl();
   expect(inviteLink).not.toBeNull();
 
   // 新しいページで参加者として参加
@@ -53,15 +50,9 @@ test.describe("セッション画面", () => {
           }),
         ).toBeVisible();
 
-        await hostPage
-          .getByRole("button", { name: "招待URL/QRコード", exact: true })
-          .click();
-
-        const inviteLink = hostPage.locator(
-          'a[href*="/planning-poker/sessions/join?id="]',
-        );
-        await expect(inviteLink).toBeVisible();
-        const inviteLinkValue = await inviteLink.getAttribute("href");
+        const pom = new SessionPagePom(hostPage);
+        await pom.clickInviteUrlButton();
+        const inviteLinkValue = await pom.copyInviteUrl();
         await expect(inviteLinkValue).toMatch(
           /planning-poker\/sessions\/join\?id=.*/,
         );
@@ -97,16 +88,12 @@ test.describe("セッション画面", () => {
             exact: true,
           }),
         ).toBeVisible();
+
         // 参加者ユーザー画面の招待リンクが正しいことを確認
-        await participantPage
-          .getByRole("button", { name: "招待URL/QRコード", exact: true })
-          .click();
-        const participantInviteLink = participantPage.locator(
-          'a[href*="/planning-poker/sessions/join?id="]',
-        );
-        await expect(participantInviteLink).toBeVisible();
-        const participantInviteLinkValue =
-          await participantInviteLink.getAttribute("href");
+        const pom = new SessionPagePom(participantPage);
+        await pom.clickInviteUrlButton();
+        const participantInviteLinkValue = await pom.copyInviteUrl();
+
         await expect(participantInviteLinkValue).toMatch(
           /planning-poker\/sessions\/join\?id=.*/,
         );
@@ -151,9 +138,8 @@ test.describe("セッション画面", () => {
         ).toBeVisible();
 
         // ホストが投票を開始する
-        await hostPage
-          .getByRole("button", { name: "投票を開始", exact: true })
-          .click();
+        const hostPom = new SessionPagePom(hostPage);
+        await hostPom.clickStartVoteButton();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
@@ -187,9 +173,8 @@ test.describe("セッション画面", () => {
         }
 
         // 参加者ユーザーが投票する
-        await participantPage
-          .getByRole("button", { name: "5", exact: true })
-          .click();
+        const participantPom = new SessionPagePom(participantPage);
+        await participantPom.clickVoteButton("5");
 
         // 画面表示確認
         await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(1);
@@ -198,7 +183,7 @@ test.describe("セッション画面", () => {
         ).toHaveCount(1);
 
         // ホストユーザーが投票する
-        await hostPage.getByRole("button", { name: "13", exact: true }).click();
+        await hostPom.clickVoteButton("13");
 
         // 画面表示確認
         await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(2);
@@ -207,9 +192,7 @@ test.describe("セッション画面", () => {
         ).toHaveCount(2);
 
         // ホストが投票を公開する
-        await hostPage
-          .getByRole("button", { name: "投票を公開", exact: true })
-          .click();
+        await hostPom.clickOpenVoteButton();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
@@ -225,9 +208,7 @@ test.describe("セッション画面", () => {
         ).toBeVisible();
 
         // ホストが投票を開始する
-        await hostPage
-          .getByRole("button", { name: "投票を開始", exact: true })
-          .click();
+        await hostPom.clickStartVoteButton();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
@@ -275,9 +256,8 @@ test.describe("セッション画面", () => {
         ).toBeVisible();
 
         // ホストが投票を開始する
-        await hostPage
-          .getByRole("button", { name: "投票を開始", exact: true })
-          .click();
+        const hostPom = new SessionPagePom(hostPage);
+        await hostPom.clickStartVoteButton();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
@@ -298,9 +278,8 @@ test.describe("セッション画面", () => {
         }
 
         // 参加者ユーザーが投票する
-        await participantPage
-          .getByRole("button", { name: "M", exact: true })
-          .click();
+        const participantPom = new SessionPagePom(participantPage);
+        await participantPom.clickVoteButton("M");
 
         // 画面表示確認
         await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(1);
@@ -309,7 +288,7 @@ test.describe("セッション画面", () => {
         ).toHaveCount(1);
 
         // ホストユーザーが投票する
-        await hostPage.getByRole("button", { name: "L", exact: true }).click();
+        await hostPom.clickVoteButton("L");
 
         // 画面表示確認
         await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(2);
@@ -318,9 +297,7 @@ test.describe("セッション画面", () => {
         ).toHaveCount(2);
 
         // ホストが投票を公開する
-        await hostPage
-          .getByRole("button", { name: "投票を公開", exact: true })
-          .click();
+        await hostPom.clickOpenVoteButton();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
@@ -336,9 +313,7 @@ test.describe("セッション画面", () => {
         ).toBeVisible();
 
         // ホストが投票を開始する
-        await hostPage
-          .getByRole("button", { name: "投票を開始", exact: true })
-          .click();
+        await hostPom.clickStartVoteButton();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
@@ -386,9 +361,8 @@ test.describe("セッション画面", () => {
         ).toBeVisible();
 
         // ホストが投票を開始する
-        await hostPage
-          .getByRole("button", { name: "投票を開始", exact: true })
-          .click();
+        const hostPom = new SessionPagePom(hostPage);
+        await hostPom.clickStartVoteButton();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
@@ -422,9 +396,8 @@ test.describe("セッション画面", () => {
         }
 
         // 参加者ユーザーが投票する
-        await participantPage
-          .getByRole("button", { name: "8", exact: true })
-          .click();
+        const participantPom = new SessionPagePom(participantPage);
+        await participantPom.clickVoteButton("8");
 
         // 画面表示確認
         await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(1);
@@ -433,7 +406,7 @@ test.describe("セッション画面", () => {
         ).toHaveCount(1);
 
         // ホストユーザーが投票する
-        await hostPage.getByRole("button", { name: "32", exact: true }).click();
+        await hostPom.clickVoteButton("32");
 
         // 画面表示確認
         await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(2);
@@ -442,9 +415,7 @@ test.describe("セッション画面", () => {
         ).toHaveCount(2);
 
         // ホストが投票を公開する
-        await hostPage
-          .getByRole("button", { name: "投票を公開", exact: true })
-          .click();
+        await hostPom.clickOpenVoteButton();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
@@ -460,9 +431,7 @@ test.describe("セッション画面", () => {
         ).toBeVisible();
 
         // ホストが投票を開始する
-        await hostPage
-          .getByRole("button", { name: "投票を開始", exact: true })
-          .click();
+        await hostPom.clickStartVoteButton();
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
