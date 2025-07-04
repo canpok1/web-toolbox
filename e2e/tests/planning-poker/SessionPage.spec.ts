@@ -163,6 +163,21 @@ test.describe("セッション画面", () => {
   });
 
   test.describe("ホスト用ボタンと投票ボタンと投票結果", () => {
+    test.beforeEach(async ({ page }, testInfo) => {
+      const pom = new CreateSessionPagePom(page);
+      await pom.goto();
+      let scaleType: "fibonacci" | "t-shirt" | "power-of-two";
+      if (testInfo.titlePath.includes("フィボナッチ")) {
+        scaleType = "fibonacci";
+      } else if (testInfo.titlePath.includes("Tシャツサイズ")) {
+        scaleType = "t-shirt";
+      } else if (testInfo.titlePath.includes("2の累乗")) {
+        scaleType = "power-of-two";
+      } else {
+        throw new Error("Unknown scale type");
+      }
+      await pom.createSession(hostUserName, scaleType);
+    });
     test.describe("フィボナッチ", () => {
       test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
@@ -199,11 +214,6 @@ test.describe("セッション画面", () => {
     });
 
     test.describe("Tシャツサイズ", () => {
-      test.beforeEach(async ({ page }) => {
-        const pom = new CreateSessionPagePom(page);
-        await pom.goto();
-        await pom.createSession(hostUserName, "t-shirt");
-      });
 
       test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
@@ -227,11 +237,6 @@ test.describe("セッション画面", () => {
     });
 
     test.describe("2の累乗", () => {
-      test.beforeEach(async ({ page }) => {
-        const pom = new CreateSessionPagePom(page);
-        await pom.goto();
-        await pom.createSession(hostUserName, "power-of-two");
-      });
 
       test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
