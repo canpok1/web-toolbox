@@ -1,5 +1,6 @@
 import { type Page, expect, test } from "@playwright/test";
 import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPage";
+import { JoinSessionPagePom } from "../../pom/planning-poker/JoinSessionPage";
 import { SessionPagePom } from "../../pom/planning-poker/SessionPage";
 
 async function joinAsParticipant(
@@ -15,11 +16,8 @@ async function joinAsParticipant(
   // 新しいページで参加者として参加
   const participantPage = await hostPage.context().newPage();
   await participantPage.goto(inviteLink!);
-  await participantPage.getByLabel("あなたの名前").fill(participantName);
-  await participantPage
-    .getByRole("button", { name: "セッションに参加", exact: true })
-    .click();
-  await participantPage.waitForEvent("websocket");
+  const participantPom = new JoinSessionPagePom(participantPage);
+  await participantPom.createSession(participantName);
 
   return participantPage;
 }
