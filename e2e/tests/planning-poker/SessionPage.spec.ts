@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page, expect, test } from "@playwright/test";
+import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPage";
 
 async function joinAsParticipant(
   hostPage: Page,
@@ -30,12 +31,9 @@ test.describe("セッション画面", () => {
   const hostUserName = "ホストユーザー";
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/planning-poker/sessions/create");
-    await page.getByLabel("あなたの名前").fill(hostUserName);
-    await page
-      .getByRole("button", { name: "セッションを作成", exact: true })
-      .click();
-    await page.waitForEvent("websocket");
+    const pom = new CreateSessionPagePom(page);
+    await pom.goto();
+    await pom.createSession(hostUserName, "fibonacci");
   });
 
   test.describe("参加者一覧と招待リンク", () => {
@@ -49,7 +47,10 @@ test.describe("セッション画面", () => {
           hostPage.getByText(hostUserName, { exact: true }),
         ).toBeVisible();
         await expect(
-          hostPage.getByRole("button", { name: "参加ページのURLをコピー", exact: true }),
+          hostPage.getByRole("button", {
+            name: "参加ページのURLをコピー",
+            exact: true,
+          }),
         ).toBeVisible();
 
         await hostPage
@@ -213,7 +214,10 @@ test.describe("セッション画面", () => {
         // 画面表示確認
         // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
         await expect(
-          participantPage.getByRole("button", { name: "投票を開始", exact: true }),
+          participantPage.getByRole("button", {
+            name: "投票を開始",
+            exact: true,
+          }),
         ).not.toBeVisible();
         // ホストユーザー画面に投票開始ボタンが表示されることを確認
         await expect(
@@ -246,13 +250,9 @@ test.describe("セッション画面", () => {
 
     test.describe("Tシャツサイズ", () => {
       test.beforeEach(async ({ page }) => {
-        await page.goto("/planning-poker/sessions/create");
-        await page.getByLabel("スケール").selectOption("t-shirt");
-        await page.getByLabel("あなたの名前").fill(hostUserName);
-        await page
-          .getByRole("button", { name: "セッションを作成", exact: true })
-          .click();
-        await page.waitForEvent("websocket");
+        const pom = new CreateSessionPagePom(page);
+        await pom.goto();
+        await pom.createSession(hostUserName, "t-shirt");
       });
 
       test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
@@ -325,7 +325,10 @@ test.describe("セッション画面", () => {
         // 画面表示確認
         // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
         await expect(
-          participantPage.getByRole("button", { name: "投票を開始", exact: true }),
+          participantPage.getByRole("button", {
+            name: "投票を開始",
+            exact: true,
+          }),
         ).not.toBeVisible();
         // ホストユーザー画面に投票開始ボタンが表示されることを確認
         await expect(
@@ -358,13 +361,9 @@ test.describe("セッション画面", () => {
 
     test.describe("2の累乗", () => {
       test.beforeEach(async ({ page }) => {
-        await page.goto("/planning-poker/sessions/create");
-        await page.getByLabel("スケール").selectOption("power-of-two");
-        await page.getByLabel("あなたの名前").fill(hostUserName);
-        await page
-          .getByRole("button", { name: "セッションを作成", exact: true })
-          .click();
-        await page.waitForEvent("websocket");
+        const pom = new CreateSessionPagePom(page);
+        await pom.goto();
+        await pom.createSession(hostUserName, "power-of-two");
       });
 
       test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
@@ -450,7 +449,10 @@ test.describe("セッション画面", () => {
         // 画面表示確認
         // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
         await expect(
-          participantPage.getByRole("button", { name: "投票を開始", exact: true }),
+          participantPage.getByRole("button", {
+            name: "投票を開始",
+            exact: true,
+          }),
         ).not.toBeVisible();
         // ホストユーザー画面に投票開始ボタンが表示されることを確認
         await expect(
