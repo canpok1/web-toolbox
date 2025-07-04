@@ -3,6 +3,38 @@ import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPage
 import { JoinSessionPagePom } from "../../pom/planning-poker/JoinSessionPage";
 import { SessionPagePom } from "../../pom/planning-poker/SessionPage";
 
+const fibonacciVoteButtons = [
+  "0",
+  "1",
+  "2",
+  "3",
+  "5",
+  "8",
+  "13",
+  "21",
+  "34",
+  "55",
+  "89",
+  "?",
+];
+
+const tShirtVoteButtons = ["XS", "S", "M", "L", "XL", "?"];
+
+const powerOfTwoVoteButtons = [
+  "1",
+  "2",
+  "4",
+  "8",
+  "16",
+  "32",
+  "64",
+  "128",
+  "256",
+  "512",
+  "1024",
+  "?",
+];
+
 async function checkVoteButtonsVisibility(page: Page, buttons: string[]) {
   for (const voteButton of buttons) {
     await expect(
@@ -187,26 +219,12 @@ test.describe("セッション画面", () => {
         );
         const participantPom = new SessionPagePom(participantPage);
 
-        const voteButtons = [
-          "0",
-          "1",
-          "2",
-          "3",
-          "5",
-          "8",
-          "13",
-          "21",
-          "34",
-          "55",
-          "89",
-          "?",
-        ];
         await performVotingFlow(
           hostPage,
           participantPage,
           hostPom,
           participantPom,
-          voteButtons,
+          fibonacciVoteButtons,
           "13",
           "5",
         );
@@ -223,13 +241,12 @@ test.describe("セッション画面", () => {
         );
         const participantPom = new SessionPagePom(participantPage);
 
-        const voteButtons = ["XS", "S", "M", "L", "XL", "?"];
         await performVotingFlow(
           hostPage,
           participantPage,
           hostPom,
           participantPom,
-          voteButtons,
+          tShirtVoteButtons,
           "L",
           "M",
         );
@@ -246,26 +263,12 @@ test.describe("セッション画面", () => {
         );
         const participantPom = new SessionPagePom(participantPage);
 
-        const voteButtons = [
-          "1",
-          "2",
-          "4",
-          "8",
-          "16",
-          "32",
-          "64",
-          "128",
-          "256",
-          "512",
-          "1024",
-          "?",
-        ];
         await performVotingFlow(
           hostPage,
           participantPage,
           hostPom,
           participantPom,
-          voteButtons,
+          powerOfTwoVoteButtons,
           "32",
           "8",
         );
