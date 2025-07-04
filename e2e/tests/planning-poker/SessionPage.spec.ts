@@ -23,7 +23,7 @@ test.describe("セッション画面", () => {
           hostPage.getByText(hostUserName, { exact: true }),
         ).toBeVisible();
         await expect(
-          hostPage.getByRole("button", { name: "参加ページのURLをコピー" }),
+          hostPage.getByRole("button", { name: "参加ページのURLをコピー", exact: true }),
         ).toBeVisible();
 
         await hostPage
@@ -46,7 +46,7 @@ test.describe("セッション画面", () => {
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
         // 招待URLを取得
         await hostPage
-          .getByRole("button", { name: "招待URL/QRコード" })
+          .getByRole("button", { name: "招待URL/QRコード", exact: true })
           .click();
         const hostInviteLink = hostPage.locator(
           'a[href*="/planning-poker/sessions/join?id="]',
@@ -130,14 +130,14 @@ test.describe("セッション画面", () => {
       test.beforeEach(async ({ page }) => {
         await page.goto("/planning-poker/sessions/create");
         await page.getByLabel("あなたの名前").fill(hostUserName);
-        await page.getByRole("button", { name: "セッションを作成" }).click();
+        await page.getByRole("button", { name: "セッションを作成", exact: true }).click();
         await page.waitForEvent("websocket");
       });
 
       test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
         // 招待URLを取得
         await hostPage
-          .getByRole("button", { name: "招待URL/QRコード" })
+          .getByRole("button", { name: "招待URL/QRコード", exact: true })
           .click();
         const hostInviteLink = hostPage.locator(
           'a[href*="/planning-poker/sessions/join?id="]',
@@ -159,7 +159,7 @@ test.describe("セッション画面", () => {
           .getByLabel("あなたの名前")
           .fill(participantUserName);
         await participantPage
-          .getByRole("button", { name: "セッションに参加" })
+          .getByRole("button", { name: "セッションに参加", exact: true })
           .click();
         await participantPage.waitForEvent("websocket");
 
@@ -284,11 +284,11 @@ test.describe("セッション画面", () => {
         // 画面表示確認
         // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
         await expect(
-          participantPage.getByRole("button", { name: "投票を開始" }),
+          participantPage.getByRole("button", { name: "投票を開始", exact: true }),
         ).not.toBeVisible();
         // ホストユーザー画面に投票開始ボタンが表示されることを確認
         await expect(
-          hostPage.getByRole("button", { name: "投票を開始" }),
+          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
         ).toBeVisible();
 
         // ホストが投票を開始する
