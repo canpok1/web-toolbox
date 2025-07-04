@@ -117,14 +117,15 @@ async function performVotingFlow(
 test.describe("セッション画面", () => {
   const hostUserName = "ホストユーザー";
 
-  test.beforeEach(async ({ page }) => {
-    const pom = new CreateSessionPagePom(page);
-    await pom.goto();
-    await pom.createSession(hostUserName, "fibonacci");
-  });
+  
 
   test.describe("参加者一覧と招待リンク", () => {
     test.describe("ホストのみ", () => {
+      test.beforeEach(async ({ page }) => {
+        const pom = new CreateSessionPagePom(page);
+        await pom.goto();
+        await pom.createSession(hostUserName, "fibonacci");
+      });
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
 
@@ -147,6 +148,11 @@ test.describe("セッション画面", () => {
 
     test.describe("参加者が複数", () => {
       const participantUserName = "参加者ユーザー";
+      test.beforeEach(async ({ page }) => {
+        const pom = new CreateSessionPagePom(page);
+        await pom.goto();
+        await pom.createSession(hostUserName, "fibonacci");
+      });
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
         const participantPage = await hostPom.joinAsParticipant(
@@ -210,6 +216,7 @@ test.describe("セッション画面", () => {
       }
       await pom.createSession(hostUserName, scaleType);
     });
+    
     test.describe("フィボナッチ", () => {
       test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
