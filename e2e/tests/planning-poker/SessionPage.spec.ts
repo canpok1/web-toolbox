@@ -115,6 +115,14 @@ async function performVotingFlow(
 }
 
 test.describe("セッション画面", () => {
+  async function joinAsParticipantAndGetPom(
+    hostPom: SessionPagePom,
+    participantUserName: string,
+  ): Promise<{ participantPage: Page; participantPom: SessionPagePom }> {
+    const participantPage = await hostPom.joinAsParticipant(participantUserName);
+    const participantPom = new SessionPagePom(participantPage);
+    return { participantPage, participantPom };
+  }
   const hostUserName = "ホストユーザー";
 
   
@@ -155,10 +163,10 @@ test.describe("セッション画面", () => {
       });
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
-        const participantPage = await hostPom.joinAsParticipant(
+        const { participantPage, participantPom } = await joinAsParticipantAndGetPom(
+          hostPom,
           participantUserName,
         );
-        const participantPom = new SessionPagePom(participantPage);
 
         // 参加者ユーザー画面に自分の名前が表示されるか確認
         await expect(
@@ -221,10 +229,10 @@ test.describe("セッション画面", () => {
       test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
-        const participantPage = await hostPom.joinAsParticipant(
+        const { participantPage, participantPom } = await joinAsParticipantAndGetPom(
+          hostPom,
           participantUserName,
         );
-        const participantPom = new SessionPagePom(participantPage);
 
         await performVotingFlow(
           hostPage,
@@ -243,10 +251,10 @@ test.describe("セッション画面", () => {
       test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
-        const participantPage = await hostPom.joinAsParticipant(
+        const { participantPage, participantPom } = await joinAsParticipantAndGetPom(
+          hostPom,
           participantUserName,
         );
-        const participantPom = new SessionPagePom(participantPage);
 
         await performVotingFlow(
           hostPage,
@@ -265,10 +273,10 @@ test.describe("セッション画面", () => {
       test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
-        const participantPage = await hostPom.joinAsParticipant(
+        const { participantPage, participantPom } = await joinAsParticipantAndGetPom(
+          hostPom,
           participantUserName,
         );
-        const participantPom = new SessionPagePom(participantPage);
 
         await performVotingFlow(
           hostPage,
