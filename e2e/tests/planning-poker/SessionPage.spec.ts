@@ -1,66 +1,189 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page, expect, test } from "@playwright/test";
+import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPage";
+import { SessionPagePom } from "../../pom/planning-poker/SessionPage";
 
-async function joinAsParticipant(
+const fibonacciVoteButtons = [
+  "0",
+  "1",
+  "2",
+  "3",
+  "5",
+  "8",
+  "13",
+  "21",
+  "34",
+  "55",
+  "89",
+  "?",
+];
+
+const tShirtVoteButtons = ["XS", "S", "M", "L", "XL", "?"];
+
+const powerOfTwoVoteButtons = [
+  "1",
+  "2",
+  "4",
+  "8",
+  "16",
+  "32",
+  "64",
+  "128",
+  "256",
+  "512",
+  "1024",
+  "?",
+];
+
+async function checkVoteButtonsVisibility(page: Page, buttons: string[]) {
+  for (const voteButton of buttons) {
+    await expect(
+      page.getByRole("button", {
+        name: voteButton,
+        exact: true,
+      }),
+    ).toBeVisible();
+  }
+}
+
+async function performVotingFlow(
   hostPage: Page,
-  participantName: string,
-): Promise<Page> {
-  // 招待URLを取得
-  await hostPage
-    .getByRole("button", { name: "招待URL/QRコード", exact: true })
-    .click();
-  const inviteLinkLocator = hostPage.locator(
-    'a[href*="/planning-poker/sessions/join?id="]',
-  );
-  const inviteLink = await inviteLinkLocator.getAttribute("href");
-  expect(inviteLink).not.toBeNull();
+  participantPage: Page,
+  hostPom: SessionPagePom,
+  participantPom: SessionPagePom,
+  voteButtons: string[],
+  hostVote: string,
+  participantVote: string,
+) {
+  // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
+  await expect(
+    participantPage.getByRole("button", {
+      name: "投票を開始",
+      exact: true,
+    }),
+  ).not.toBeVisible();
+  // ホストユーザー画面に投票開始ボタンが表示されることを確認
+  await expect(
+    hostPage.getByRole("button", { name: "投票を開始", exact: true }),
+  ).toBeVisible();
 
-  // 新しいページで参加者として参加
-  const participantPage = await hostPage.context().newPage();
-  await participantPage.goto(inviteLink!);
-  await participantPage.getByLabel("あなたの名前").fill(participantName);
-  await participantPage
-    .getByRole("button", { name: "セッションに参加", exact: true })
-    .click();
-  await participantPage.waitForEvent("websocket");
+  // ホストが投票を開始する
+  await hostPom.clickStartVoteButton();
 
-  return participantPage;
+  // 画面表示確認
+  // 参加者ユーザー画面に投票ボタンが表示されることを確認
+  await checkVoteButtonsVisibility(participantPage, voteButtons);
+  await checkVoteButtonsVisibility(hostPage, voteButtons);
+
+  // 参加者ユーザーが投票する
+  await participantPom.clickVoteButton(participantVote);
+
+  // 画面表示確認
+  await expect(hostPom.getVotedIndicator()).toHaveCount(1);
+  await expect(participantPom.getVotedIndicator()).toHaveCount(1);
+
+  // ホストユーザーが投票する
+  await hostPom.clickVoteButton(hostVote);
+
+  // 画面表示確認
+  await expect(hostPom.getVotedIndicator()).toHaveCount(2);
+  await expect(participantPom.getVotedIndicator()).toHaveCount(2);
+
+  // ホストが投票を公開する
+  await hostPom.clickOpenVoteButton();
+
+  // 画面表示確認
+  // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
+  await expect(
+    participantPage.getByRole("button", {
+      name: "投票を開始",
+      exact: true,
+    }),
+  ).not.toBeVisible();
+  // ホストユーザー画面に投票開始ボタンが表示されることを確認
+  await expect(
+    hostPage.getByRole("button", { name: "投票を開始", exact: true }),
+  ).toBeVisible();
+
+  // ホストが投票を開始する
+  await hostPom.clickStartVoteButton();
+
+  // 画面表示確認
+  // 参加者ユーザー画面に投票ボタンが表示されることを確認
+  await checkVoteButtonsVisibility(participantPage, voteButtons);
+  await checkVoteButtonsVisibility(hostPage, voteButtons);
+}
+
+function createVotingFlowTests(
+  scaleName: string,
+  scaleType: "fibonacci" | "t-shirt" | "power-of-two",
+  voteButtons: string[],
+  hostVote: string,
+  participantVote: string,
+  hostUserName: string,
+  joinAsParticipantAndGetPom: (
+    hostPom: SessionPagePom,
+    participantUserName: string,
+  ) => Promise<{ participantPage: Page; participantPom: SessionPagePom }>,
+) {
+  test.describe(scaleName, () => {
+    test.beforeEach(async ({ page }) => {
+      const pom = new CreateSessionPagePom(page);
+      await pom.goto();
+      await pom.createSession(hostUserName, scaleType);
+    });
+
+    test("投票フロー", async ({ page: hostPage }) => {
+      const hostPom = new SessionPagePom(hostPage);
+      const participantUserName = "参加者ユーザー";
+      const { participantPage, participantPom } =
+        await joinAsParticipantAndGetPom(hostPom, participantUserName);
+
+      await performVotingFlow(
+        hostPage,
+        participantPage,
+        hostPom,
+        participantPom,
+        voteButtons,
+        hostVote,
+        participantVote,
+      );
+    });
+  });
 }
 
 test.describe("セッション画面", () => {
+  async function joinAsParticipantAndGetPom(
+    hostPom: SessionPagePom,
+    participantUserName: string,
+  ): Promise<{ participantPage: Page; participantPom: SessionPagePom }> {
+    const participantPage =
+      await hostPom.joinAsParticipant(participantUserName);
+    const participantPom = new SessionPagePom(participantPage);
+    return { participantPage, participantPom };
+  }
   const hostUserName = "ホストユーザー";
-
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/planning-poker/sessions/create");
-    await page.getByLabel("あなたの名前").fill(hostUserName);
-    await page
-      .getByRole("button", { name: "セッションを作成", exact: true })
-      .click();
-    await page.waitForEvent("websocket");
-  });
 
   test.describe("参加者一覧と招待リンク", () => {
     test.describe("ホストのみ", () => {
+      test.beforeEach(async ({ page }) => {
+        const pom = new CreateSessionPagePom(page);
+        await pom.goto();
+        await pom.createSession(hostUserName, "fibonacci");
+      });
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
-        await expect(
-          hostPage.getByText(`あなたの名前: ${hostUserName}`),
-        ).toBeVisible();
-        await expect(hostPage.getByText(/参加者 \(1名\):\s*/)).toBeVisible();
+        const hostPom = new SessionPagePom(hostPage);
+
+        // ホストユーザー画面に自分の名前が表示されるか確認
+        await expect(hostPom.getNameElement(hostUserName)).toBeVisible();
+        await expect(hostPom.getParticipantNameElement(1)).toBeVisible();
         await expect(
           hostPage.getByText(hostUserName, { exact: true }),
         ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "参加ページのURLをコピー", exact: true }),
-        ).toBeVisible();
+        await expect(hostPom.getInviteUrlCopyButton()).toBeVisible();
 
-        await hostPage
-          .getByRole("button", { name: "招待URL/QRコード", exact: true })
-          .click();
-
-        const inviteLink = hostPage.locator(
-          'a[href*="/planning-poker/sessions/join?id="]',
-        );
-        await expect(inviteLink).toBeVisible();
-        const inviteLinkValue = await inviteLink.getAttribute("href");
+        const pom = new SessionPagePom(hostPage);
+        await pom.clickInviteUrlButton();
+        const inviteLinkValue = await pom.getInviteLink();
         await expect(inviteLinkValue).toMatch(
           /planning-poker\/sessions\/join\?id=.*/,
         );
@@ -69,20 +192,23 @@ test.describe("セッション画面", () => {
 
     test.describe("参加者が複数", () => {
       const participantUserName = "参加者ユーザー";
+      test.beforeEach(async ({ page }) => {
+        const pom = new CreateSessionPagePom(page);
+        await pom.goto();
+        await pom.createSession(hostUserName, "fibonacci");
+      });
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
-        const participantPage = await joinAsParticipant(
-          hostPage,
-          participantUserName,
-        );
+        const hostPom = new SessionPagePom(hostPage);
+        const { participantPage, participantPom } =
+          await joinAsParticipantAndGetPom(hostPom, participantUserName);
 
         // 参加者ユーザー画面に自分の名前が表示されるか確認
         await expect(
-          participantPage.getByText(`あなたの名前: ${participantUserName}`),
+          participantPom.getNameElement(participantUserName),
         ).toBeVisible();
+
         // 参加者ユーザー画面に参加者一覧が表示されるか確認
-        await expect(
-          participantPage.getByText(/参加者 \(2名\):\s*/),
-        ).toBeVisible();
+        await expect(participantPom.getParticipantNameElement(2)).toBeVisible();
         await expect(
           participantPage.getByText(participantUserName, { exact: true }),
         ).toBeVisible();
@@ -90,22 +216,12 @@ test.describe("セッション画面", () => {
           participantPage.getByText(hostUserName, { exact: true }),
         ).toBeVisible();
         // 参加者ユーザー画面で招待リンクをコピーできることを確認
-        await expect(
-          participantPage.getByRole("button", {
-            name: "参加ページのURLをコピー",
-            exact: true,
-          }),
-        ).toBeVisible();
+        await expect(participantPom.getInviteUrlCopyButton()).toBeVisible();
+
         // 参加者ユーザー画面の招待リンクが正しいことを確認
-        await participantPage
-          .getByRole("button", { name: "招待URL/QRコード", exact: true })
-          .click();
-        const participantInviteLink = participantPage.locator(
-          'a[href*="/planning-poker/sessions/join?id="]',
-        );
-        await expect(participantInviteLink).toBeVisible();
-        const participantInviteLinkValue =
-          await participantInviteLink.getAttribute("href");
+        await participantPom.clickInviteUrlButton();
+        const participantInviteLinkValue = await participantPom.getInviteLink();
+
         await expect(participantInviteLinkValue).toMatch(
           /planning-poker\/sessions\/join\?id=.*/,
         );
@@ -113,11 +229,9 @@ test.describe("セッション画面", () => {
         await hostPage.bringToFront();
 
         // ホストユーザー画面に自分の名前が表示されるか確認
-        await expect(
-          hostPage.getByText(`あなたの名前: ${hostUserName}`),
-        ).toBeVisible();
+        await expect(hostPom.getNameElement(hostUserName)).toBeVisible();
         // ホストユーザー画面に参加者一覧が表示されるか確認
-        await expect(hostPage.getByText(/参加者 \(2名\):\s*/)).toBeVisible();
+        await expect(hostPom.getParticipantNameElement(2)).toBeVisible();
         await expect(
           hostPage.getByText(hostUserName, { exact: true }),
         ).toBeVisible();
@@ -129,127 +243,8 @@ test.describe("セッション画面", () => {
   });
 
   test.describe("ホスト用ボタンと投票ボタンと投票結果", () => {
-    test.describe("フィボナッチ", () => {
-      test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
-        const participantUserName = "参加者ユーザー";
-        const participantPage = await joinAsParticipant(
-          hostPage,
-          participantUserName,
-        );
-
-        // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
-        await expect(
-          participantPage.getByRole("button", {
-            name: "投票を開始",
-            exact: true,
-          }),
-        ).not.toBeVisible();
-        // ホストユーザー画面に投票開始ボタンが表示されることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
-        ).toBeVisible();
-
-        // ホストが投票を開始する
-        await hostPage
-          .getByRole("button", { name: "投票を開始", exact: true })
-          .click();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        const voteButtons = [
-          "0",
-          "1",
-          "2",
-          "3",
-          "5",
-          "8",
-          "13",
-          "21",
-          "34",
-          "55",
-          "89",
-          "?",
-        ];
-        for (const voteButton of voteButtons) {
-          await expect(
-            participantPage.getByRole("button", {
-              name: voteButton,
-              exact: true,
-            }),
-          ).toBeVisible();
-        }
-        // ホストユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            hostPage.getByRole("button", { name: voteButton, exact: true }),
-          ).toBeVisible();
-        }
-
-        // 参加者ユーザーが投票する
-        await participantPage
-          .getByRole("button", { name: "5", exact: true })
-          .click();
-
-        // 画面表示確認
-        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(1);
-        await expect(
-          participantPage.locator('[data-tip="投票済み"]'),
-        ).toHaveCount(1);
-
-        // ホストユーザーが投票する
-        await hostPage.getByRole("button", { name: "13", exact: true }).click();
-
-        // 画面表示確認
-        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(2);
-        await expect(
-          participantPage.locator('[data-tip="投票済み"]'),
-        ).toHaveCount(2);
-
-        // ホストが投票を公開する
-        await hostPage
-          .getByRole("button", { name: "投票を公開", exact: true })
-          .click();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
-        await expect(
-          participantPage.getByRole("button", { name: "投票を開始", exact: true }),
-        ).not.toBeVisible();
-        // ホストユーザー画面に投票開始ボタンが表示されることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
-        ).toBeVisible();
-
-        // ホストが投票を開始する
-        await hostPage
-          .getByRole("button", { name: "投票を開始", exact: true })
-          .click();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            participantPage.getByRole("button", {
-              name: voteButton,
-              exact: true,
-            }),
-          ).toBeVisible();
-        }
-        // ホストユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            hostPage.getByRole("button", { name: voteButton, exact: true }),
-          ).toBeVisible();
-        }
-      });
-    });
-
-    test.describe("Tシャツサイズ", () => {
-      // TODO 実装
-    });
-
-    test.describe("2の累乗", () => {
-      // TODO 実装
-    });
+    createVotingFlowTests("フィボナッチ", "fibonacci", fibonacciVoteButtons, "13", "5", hostUserName, joinAsParticipantAndGetPom);
+    createVotingFlowTests("Tシャツサイズ", "t-shirt", tShirtVoteButtons, "L", "M", hostUserName, joinAsParticipantAndGetPom);
+    createVotingFlowTests("2の累乗", "power-of-two", powerOfTwoVoteButtons, "32", "8", hostUserName, joinAsParticipantAndGetPom);
   });
 });
