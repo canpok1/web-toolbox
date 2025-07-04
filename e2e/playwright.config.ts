@@ -79,5 +79,7 @@ export default defineConfig({
     command: 'make run-back',
     url: 'http://localhost:8080',
     reuseExistingServer: true,
+    stdout: 'ignore',
+    stderr: 'ignore'
   },
 });

@@ -34,6 +34,7 @@ show-e2e-report:
 .PHONY: check
 check:
 	make -C frontend check
+	make -C e2e check
 
 .PHONY: build
 build:

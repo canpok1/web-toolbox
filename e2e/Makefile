@@ -15,6 +15,10 @@ test-debug:
 show-report:
 	npm run show-report
 
+.PHONY: check
+check:
+	npm run check
+
 .PHONY: format
 format:
 	npm run check:fix
