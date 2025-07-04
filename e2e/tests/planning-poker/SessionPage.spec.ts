@@ -14,6 +14,74 @@ async function checkVoteButtonsVisibility(page: Page, buttons: string[]) {
   }
 }
 
+async function performVotingFlow(
+  hostPage: Page,
+  participantPage: Page,
+  hostPom: SessionPagePom,
+  participantPom: SessionPagePom,
+  voteButtons: string[],
+  hostVote: string,
+  participantVote: string,
+) {
+  // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
+  await expect(
+    participantPage.getByRole("button", {
+      name: "投票を開始",
+      exact: true,
+    }),
+  ).not.toBeVisible();
+  // ホストユーザー画面に投票開始ボタンが表示されることを確認
+  await expect(
+    hostPage.getByRole("button", { name: "投票を開始", exact: true }),
+  ).toBeVisible();
+
+  // ホストが投票を開始する
+  await hostPom.clickStartVoteButton();
+
+  // 画面表示確認
+  // 参加者ユーザー画面に投票ボタンが表示されることを確認
+  await checkVoteButtonsVisibility(participantPage, voteButtons);
+  await checkVoteButtonsVisibility(hostPage, voteButtons);
+
+  // 参加者ユーザーが投票する
+  await participantPom.clickVoteButton(participantVote);
+
+  // 画面表示確認
+  await expect(hostPom.getVotedIndicator()).toHaveCount(1);
+  await expect(participantPom.getVotedIndicator()).toHaveCount(1);
+
+  // ホストユーザーが投票する
+  await hostPom.clickVoteButton(hostVote);
+
+  // 画面表示確認
+  await expect(hostPom.getVotedIndicator()).toHaveCount(2);
+  await expect(participantPom.getVotedIndicator()).toHaveCount(2);
+
+  // ホストが投票を公開する
+  await hostPom.clickOpenVoteButton();
+
+  // 画面表示確認
+  // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
+  await expect(
+    participantPage.getByRole("button", {
+      name: "投票を開始",
+      exact: true,
+    }),
+  ).not.toBeVisible();
+  // ホストユーザー画面に投票開始ボタンが表示されることを確認
+  await expect(
+    hostPage.getByRole("button", { name: "投票を開始", exact: true }),
+  ).toBeVisible();
+
+  // ホストが投票を開始する
+  await hostPom.clickStartVoteButton();
+
+  // 画面表示確認
+  // 参加者ユーザー画面に投票ボタンが表示されることを確認
+  await checkVoteButtonsVisibility(participantPage, voteButtons);
+  await checkVoteButtonsVisibility(hostPage, voteButtons);
+}
+
 test.describe("セッション画面", () => {
   const hostUserName = "ホストユーザー";
 
@@ -102,24 +170,8 @@ test.describe("セッション画面", () => {
         const participantPage = await hostPom.joinAsParticipant(
           participantUserName,
         );
+        const participantPom = new SessionPagePom(participantPage);
 
-        // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
-        await expect(
-          participantPage.getByRole("button", {
-            name: "投票を開始",
-            exact: true,
-          }),
-        ).not.toBeVisible();
-        // ホストユーザー画面に投票開始ボタンが表示されることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
-        ).toBeVisible();
-
-        // ホストが投票を開始する
-        await hostPom.clickStartVoteButton();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票ボタンが表示されることを確認
         const voteButtons = [
           "0",
           "1",
@@ -134,47 +186,15 @@ test.describe("セッション画面", () => {
           "89",
           "?",
         ];
-        await checkVoteButtonsVisibility(participantPage, voteButtons);
-        await checkVoteButtonsVisibility(hostPage, voteButtons);
-
-        // 参加者ユーザーが投票する
-        const participantPom = new SessionPagePom(participantPage);
-        await participantPom.clickVoteButton("5");
-
-        // 画面表示確認
-        await expect(hostPom.getVotedIndicator()).toHaveCount(1);
-        await expect(participantPom.getVotedIndicator()).toHaveCount(1);
-
-        // ホストユーザーが投票する
-        await hostPom.clickVoteButton("13");
-
-        // 画面表示確認
-        await expect(hostPom.getVotedIndicator()).toHaveCount(2);
-        await expect(participantPom.getVotedIndicator()).toHaveCount(2);
-
-        // ホストが投票を公開する
-        await hostPom.clickOpenVoteButton();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
-        await expect(
-          participantPage.getByRole("button", {
-            name: "投票を開始",
-            exact: true,
-          }),
-        ).not.toBeVisible();
-        // ホストユーザー画面に投票開始ボタンが表示されることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
-        ).toBeVisible();
-
-        // ホストが投票を開始する
-        await hostPom.clickStartVoteButton();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        await checkVoteButtonsVisibility(participantPage, voteButtons);
-        await checkVoteButtonsVisibility(hostPage, voteButtons);
+        await performVotingFlow(
+          hostPage,
+          participantPage,
+          hostPom,
+          participantPom,
+          voteButtons,
+          "13",
+          "5",
+        );
       });
     });
 
@@ -191,66 +211,18 @@ test.describe("セッション画面", () => {
         const participantPage = await hostPom.joinAsParticipant(
           participantUserName,
         );
-
-        // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
-        await expect(
-          participantPage.getByRole("button", {
-            name: "投票を開始",
-            exact: true,
-          }),
-        ).not.toBeVisible();
-        // ホストユーザー画面に投票開始ボタンが表示されることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
-        ).toBeVisible();
-
-        // ホストが投票を開始する
-        await hostPom.clickStartVoteButton();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        const voteButtons = ["XS", "S", "M", "L", "XL", "?"];
-        await checkVoteButtonsVisibility(participantPage, voteButtons);
-        await checkVoteButtonsVisibility(hostPage, voteButtons);
-
-        // 参加者ユーザーが投票する
         const participantPom = new SessionPagePom(participantPage);
-        await participantPom.clickVoteButton("M");
 
-        // 画面表示確認
-        await expect(hostPom.getVotedIndicator()).toHaveCount(1);
-        await expect(participantPom.getVotedIndicator()).toHaveCount(1);
-
-        // ホストユーザーが投票する
-        await hostPom.clickVoteButton("L");
-
-        // 画面表示確認
-        await expect(hostPom.getVotedIndicator()).toHaveCount(2);
-        await expect(participantPom.getVotedIndicator()).toHaveCount(2);
-
-        // ホストが投票を公開する
-        await hostPom.clickOpenVoteButton();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
-        await expect(
-          participantPage.getByRole("button", {
-            name: "投票を開始",
-            exact: true,
-          }),
-        ).not.toBeVisible();
-        // ホストユーザー画面に投票開始ボタンが表示されることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
-        ).toBeVisible();
-
-        // ホストが投票を開始する
-        await hostPom.clickStartVoteButton();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        await checkVoteButtonsVisibility(participantPage, voteButtons);
-        await checkVoteButtonsVisibility(hostPage, voteButtons);
+        const voteButtons = ["XS", "S", "M", "L", "XL", "?"];
+        await performVotingFlow(
+          hostPage,
+          participantPage,
+          hostPom,
+          participantPom,
+          voteButtons,
+          "L",
+          "M",
+        );
       });
     });
 
@@ -267,24 +239,8 @@ test.describe("セッション画面", () => {
         const participantPage = await hostPom.joinAsParticipant(
           participantUserName,
         );
+        const participantPom = new SessionPagePom(participantPage);
 
-        // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
-        await expect(
-          participantPage.getByRole("button", {
-            name: "投票を開始",
-            exact: true,
-          }),
-        ).not.toBeVisible();
-        // ホストユーザー画面に投票開始ボタンが表示されることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
-        ).toBeVisible();
-
-        // ホストが投票を開始する
-        await hostPom.clickStartVoteButton();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票ボタンが表示されることを確認
         const voteButtons = [
           "1",
           "2",
@@ -299,47 +255,15 @@ test.describe("セッション画面", () => {
           "1024",
           "?",
         ];
-        await checkVoteButtonsVisibility(participantPage, voteButtons);
-        await checkVoteButtonsVisibility(hostPage, voteButtons);
-
-        // 参加者ユーザーが投票する
-        const participantPom = new SessionPagePom(participantPage);
-        await participantPom.clickVoteButton("8");
-
-        // 画面表示確認
-        await expect(hostPom.getVotedIndicator()).toHaveCount(1);
-        await expect(participantPom.getVotedIndicator()).toHaveCount(1);
-
-        // ホストユーザーが投票する
-        await hostPom.clickVoteButton("32");
-
-        // 画面表示確認
-        await expect(hostPom.getVotedIndicator()).toHaveCount(2);
-        await expect(participantPom.getVotedIndicator()).toHaveCount(2);
-
-        // ホストが投票を公開する
-        await hostPom.clickOpenVoteButton();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
-        await expect(
-          participantPage.getByRole("button", {
-            name: "投票を開始",
-            exact: true,
-          }),
-        ).not.toBeVisible();
-        // ホストユーザー画面に投票開始ボタンが表示されることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
-        ).toBeVisible();
-
-        // ホストが投票を開始する
-        await hostPom.clickStartVoteButton();
-
-        // 画面表示確認
-        // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        await checkVoteButtonsVisibility(participantPage, voteButtons);
-        await checkVoteButtonsVisibility(hostPage, voteButtons);
+        await performVotingFlow(
+          hostPage,
+          participantPage,
+          hostPom,
+          participantPom,
+          voteButtons,
+          "32",
+          "8",
+        );
       });
     });
   });
