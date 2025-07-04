@@ -182,79 +182,34 @@ test.describe("セッション画面", () => {
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        await expect(
-          participantPage.getByRole("button", { name: "0", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "1", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "2", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "3", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "5", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "8", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "13", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "21", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "34", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "55", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "89", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "?", exact: true }),
-        ).toBeVisible();
+        const voteButtons = [
+          "0",
+          "1",
+          "2",
+          "3",
+          "5",
+          "8",
+          "13",
+          "21",
+          "34",
+          "55",
+          "89",
+          "?",
+        ];
+        for (const voteButton of voteButtons) {
+          await expect(
+            participantPage.getByRole("button", {
+              name: voteButton,
+              exact: true,
+            }),
+          ).toBeVisible();
+        }
         // ホストユーザー画面に投票ボタンが表示されることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "0", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "1", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "2", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "3", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "5", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "8", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "13", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "21", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "34", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "55", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "89", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "?", exact: true }),
-        ).toBeVisible();
+        for (const voteButton of voteButtons) {
+          await expect(
+            hostPage.getByRole("button", { name: voteButton, exact: true }),
+          ).toBeVisible();
+        }
 
         // 参加者ユーザーが投票する
         await participantPage
@@ -298,79 +253,34 @@ test.describe("セッション画面", () => {
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        await expect(
-          participantPage.getByRole("button", { name: "0", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "1", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "2", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "3", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "5", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "8", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "13", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "21", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "34", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "55", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "89", exact: true }),
-        ).toBeVisible();
-        await expect(
-          participantPage.getByRole("button", { name: "?", exact: true }),
-        ).toBeVisible();
+        const voteButtons = [
+          "0",
+          "1",
+          "2",
+          "3",
+          "5",
+          "8",
+          "13",
+          "21",
+          "34",
+          "55",
+          "89",
+          "?",
+        ];
+        for (const voteButton of voteButtons) {
+          await expect(
+            participantPage.getByRole("button", {
+              name: voteButton,
+              exact: true,
+            }),
+          ).toBeVisible();
+        }
         // ホストユーザー画面に投票ボタンが表示されることを確認
-        await expect(
-          hostPage.getByRole("button", { name: "0", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "1", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "2", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "3", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "5", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "8", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "13", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "21", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "34", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "55", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "89", exact: true }),
-        ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", { name: "?", exact: true }),
-        ).toBeVisible();
+        for (const voteButton of voteButtons) {
+          await expect(
+            hostPage.getByRole("button", { name: voteButton, exact: true }),
+          ).toBeVisible();
+        }
       });
     });
 
