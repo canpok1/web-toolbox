@@ -1,6 +1,5 @@
 import { type Page, expect, test } from "@playwright/test";
 import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPage";
-import { JoinSessionPagePom } from "../../pom/planning-poker/JoinSessionPage";
 import { SessionPagePom } from "../../pom/planning-poker/SessionPage";
 
 const fibonacciVoteButtons = [
@@ -119,13 +118,12 @@ test.describe("セッション画面", () => {
     hostPom: SessionPagePom,
     participantUserName: string,
   ): Promise<{ participantPage: Page; participantPom: SessionPagePom }> {
-    const participantPage = await hostPom.joinAsParticipant(participantUserName);
+    const participantPage =
+      await hostPom.joinAsParticipant(participantUserName);
     const participantPom = new SessionPagePom(participantPage);
     return { participantPage, participantPom };
   }
   const hostUserName = "ホストユーザー";
-
-  
 
   test.describe("参加者一覧と招待リンク", () => {
     test.describe("ホストのみ", () => {
@@ -163,10 +161,8 @@ test.describe("セッション画面", () => {
       });
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
-        const { participantPage, participantPom } = await joinAsParticipantAndGetPom(
-          hostPom,
-          participantUserName,
-        );
+        const { participantPage, participantPom } =
+          await joinAsParticipantAndGetPom(hostPom, participantUserName);
 
         // 参加者ユーザー画面に自分の名前が表示されるか確認
         await expect(
@@ -224,15 +220,13 @@ test.describe("セッション画面", () => {
       }
       await pom.createSession(hostUserName, scaleType);
     });
-    
+
     test.describe("フィボナッチ", () => {
       test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
-        const { participantPage, participantPom } = await joinAsParticipantAndGetPom(
-          hostPom,
-          participantUserName,
-        );
+        const { participantPage, participantPom } =
+          await joinAsParticipantAndGetPom(hostPom, participantUserName);
 
         await performVotingFlow(
           hostPage,
@@ -247,14 +241,11 @@ test.describe("セッション画面", () => {
     });
 
     test.describe("Tシャツサイズ", () => {
-
       test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
-        const { participantPage, participantPom } = await joinAsParticipantAndGetPom(
-          hostPom,
-          participantUserName,
-        );
+        const { participantPage, participantPom } =
+          await joinAsParticipantAndGetPom(hostPom, participantUserName);
 
         await performVotingFlow(
           hostPage,
@@ -269,14 +260,11 @@ test.describe("セッション画面", () => {
     });
 
     test.describe("2の累乗", () => {
-
       test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
-        const { participantPage, participantPom } = await joinAsParticipantAndGetPom(
-          hostPom,
-          participantUserName,
-        );
+        const { participantPage, participantPom } =
+          await joinAsParticipantAndGetPom(hostPom, participantUserName);
 
         await performVotingFlow(
           hostPage,
