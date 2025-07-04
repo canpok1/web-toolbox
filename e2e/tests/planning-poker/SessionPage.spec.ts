@@ -22,6 +22,17 @@ async function joinAsParticipant(
   return participantPage;
 }
 
+async function checkVoteButtonsVisibility(page: Page, buttons: string[]) {
+  for (const voteButton of buttons) {
+    await expect(
+      page.getByRole("button", {
+        name: voteButton,
+        exact: true,
+      }),
+    ).toBeVisible();
+  }
+}
+
 test.describe("セッション画面", () => {
   const hostUserName = "ホストユーザー";
 
@@ -145,20 +156,8 @@ test.describe("セッション画面", () => {
           "89",
           "?",
         ];
-        for (const voteButton of voteButtons) {
-          await expect(
-            participantPage.getByRole("button", {
-              name: voteButton,
-              exact: true,
-            }),
-          ).toBeVisible();
-        }
-        // ホストユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            hostPage.getByRole("button", { name: voteButton, exact: true }),
-          ).toBeVisible();
-        }
+        await checkVoteButtonsVisibility(participantPage, voteButtons);
+        await checkVoteButtonsVisibility(hostPage, voteButtons);
 
         // 参加者ユーザーが投票する
         const participantPom = new SessionPagePom(participantPage);
@@ -196,20 +195,8 @@ test.describe("セッション画面", () => {
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            participantPage.getByRole("button", {
-              name: voteButton,
-              exact: true,
-            }),
-          ).toBeVisible();
-        }
-        // ホストユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            hostPage.getByRole("button", { name: voteButton, exact: true }),
-          ).toBeVisible();
-        }
+        await checkVoteButtonsVisibility(participantPage, voteButtons);
+        await checkVoteButtonsVisibility(hostPage, voteButtons);
       });
     });
 
@@ -246,20 +233,8 @@ test.describe("セッション画面", () => {
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
         const voteButtons = ["XS", "S", "M", "L", "XL", "?"];
-        for (const voteButton of voteButtons) {
-          await expect(
-            participantPage.getByRole("button", {
-              name: voteButton,
-              exact: true,
-            }),
-          ).toBeVisible();
-        }
-        // ホストユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            hostPage.getByRole("button", { name: voteButton, exact: true }),
-          ).toBeVisible();
-        }
+        await checkVoteButtonsVisibility(participantPage, voteButtons);
+        await checkVoteButtonsVisibility(hostPage, voteButtons);
 
         // 参加者ユーザーが投票する
         const participantPom = new SessionPagePom(participantPage);
@@ -297,20 +272,8 @@ test.describe("セッション画面", () => {
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            participantPage.getByRole("button", {
-              name: voteButton,
-              exact: true,
-            }),
-          ).toBeVisible();
-        }
-        // ホストユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            hostPage.getByRole("button", { name: voteButton, exact: true }),
-          ).toBeVisible();
-        }
+        await checkVoteButtonsVisibility(participantPage, voteButtons);
+        await checkVoteButtonsVisibility(hostPage, voteButtons);
       });
     });
 
@@ -360,20 +323,8 @@ test.describe("セッション画面", () => {
           "1024",
           "?",
         ];
-        for (const voteButton of voteButtons) {
-          await expect(
-            participantPage.getByRole("button", {
-              name: voteButton,
-              exact: true,
-            }),
-          ).toBeVisible();
-        }
-        // ホストユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            hostPage.getByRole("button", { name: voteButton, exact: true }),
-          ).toBeVisible();
-        }
+        await checkVoteButtonsVisibility(participantPage, voteButtons);
+        await checkVoteButtonsVisibility(hostPage, voteButtons);
 
         // 参加者ユーザーが投票する
         const participantPom = new SessionPagePom(participantPage);
@@ -411,20 +362,8 @@ test.describe("セッション画面", () => {
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            participantPage.getByRole("button", {
-              name: voteButton,
-              exact: true,
-            }),
-          ).toBeVisible();
-        }
-        // ホストユーザー画面に投票ボタンが表示されることを確認
-        for (const voteButton of voteButtons) {
-          await expect(
-            hostPage.getByRole("button", { name: voteButton, exact: true }),
-          ).toBeVisible();
-        }
+        await checkVoteButtonsVisibility(participantPage, voteButtons);
+        await checkVoteButtonsVisibility(hostPage, voteButtons);
       });
     });
   });
