@@ -3,25 +3,6 @@ import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPage
 import { JoinSessionPagePom } from "../../pom/planning-poker/JoinSessionPage";
 import { SessionPagePom } from "../../pom/planning-poker/SessionPage";
 
-async function joinAsParticipant(
-  hostPage: Page,
-  participantName: string,
-): Promise<Page> {
-  // 招待URLを取得
-  const pom = new SessionPagePom(hostPage);
-  await pom.clickInviteUrlButton();
-  const inviteLink = await pom.copyInviteUrl();
-  expect(inviteLink).not.toBeNull();
-
-  // 新しいページで参加者として参加
-  const participantPage = await hostPage.context().newPage();
-  await participantPage.goto(inviteLink!);
-  const participantPom = new JoinSessionPagePom(participantPage);
-  await participantPom.createSession(participantName);
-
-  return participantPage;
-}
-
 async function checkVoteButtonsVisibility(page: Page, buttons: string[]) {
   for (const voteButton of buttons) {
     await expect(
@@ -67,12 +48,10 @@ test.describe("セッション画面", () => {
     test.describe("参加者が複数", () => {
       const participantUserName = "参加者ユーザー";
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
-        const participantPage = await joinAsParticipant(
-          hostPage,
+        const hostPom = new SessionPagePom(hostPage);
+        const participantPage = await hostPom.joinAsParticipant(
           participantUserName,
         );
-
-        const hostPom = new SessionPagePom(hostPage);
         const participantPom = new SessionPagePom(participantPage);
 
         // 参加者ユーザー画面に自分の名前が表示されるか確認
@@ -118,9 +97,9 @@ test.describe("セッション画面", () => {
   test.describe("ホスト用ボタンと投票ボタンと投票結果", () => {
     test.describe("フィボナッチ", () => {
       test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
+        const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
-        const participantPage = await joinAsParticipant(
-          hostPage,
+        const participantPage = await hostPom.joinAsParticipant(
           participantUserName,
         );
 
@@ -137,7 +116,6 @@ test.describe("セッション画面", () => {
         ).toBeVisible();
 
         // ホストが投票を開始する
-        const hostPom = new SessionPagePom(hostPage);
         await hostPom.clickStartVoteButton();
 
         // 画面表示確認
@@ -208,9 +186,9 @@ test.describe("セッション画面", () => {
       });
 
       test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
+        const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
-        const participantPage = await joinAsParticipant(
-          hostPage,
+        const participantPage = await hostPom.joinAsParticipant(
           participantUserName,
         );
 
@@ -227,7 +205,6 @@ test.describe("セッション画面", () => {
         ).toBeVisible();
 
         // ホストが投票を開始する
-        const hostPom = new SessionPagePom(hostPage);
         await hostPom.clickStartVoteButton();
 
         // 画面表示確認
@@ -285,9 +262,9 @@ test.describe("セッション画面", () => {
       });
 
       test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
+        const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
-        const participantPage = await joinAsParticipant(
-          hostPage,
+        const participantPage = await hostPom.joinAsParticipant(
           participantUserName,
         );
 
@@ -304,7 +281,6 @@ test.describe("セッション画面", () => {
         ).toBeVisible();
 
         // ホストが投票を開始する
-        const hostPom = new SessionPagePom(hostPage);
         await hostPom.clickStartVoteButton();
 
         // 画面表示確認

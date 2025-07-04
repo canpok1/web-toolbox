@@ -1,4 +1,5 @@
-import type { Locator, Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
+import { JoinSessionPagePom } from "./JoinSessionPage";
 
 export class SessionPagePom {
   private page: Page;
@@ -12,7 +13,7 @@ export class SessionPagePom {
   }
 
   public getParticipantNameElement(count: number): Locator {
-    return this.page.getByText(new RegExp(`参加者 \\(${count}名\\):\\s*`));
+    return this.page.getByText(`参加者 (${count}名):`);
   }
 
   public getInviteUrlButton(): Locator {
@@ -58,5 +59,20 @@ export class SessionPagePom {
 
   public getVotedIndicator(): Locator {
     return this.page.locator('[data-tip="投票済み"]');
+  }
+
+  public async joinAsParticipant(participantName: string): Promise<Page> {
+    // 招待URLを取得
+    await this.clickInviteUrlButton();
+    const inviteLink = await this.copyInviteUrl();
+    expect(inviteLink).not.toBeNull();
+
+    // 新しいページで参加者として参加
+    const participantPage = await this.page.context().newPage();
+    await participantPage.goto(inviteLink!);
+    const participantPom = new JoinSessionPagePom(participantPage);
+    await participantPom.joinSession(participantName);
+
+    return participantPage;
   }
 }

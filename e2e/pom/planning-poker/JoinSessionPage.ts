@@ -18,7 +18,7 @@ export class JoinSessionPagePom {
     await this.page.waitForEvent("websocket");
   }
 
-  public async createSession(userName: string): Promise<void> {
+  public async joinSession(userName: string): Promise<void> {
     await this.inputUserName(userName);
     await this.clickJoinButton();
   }
