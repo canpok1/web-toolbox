@@ -1,4 +1,30 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function joinAsParticipant(
+  hostPage: Page,
+  participantName: string,
+): Promise<Page> {
+  // 招待URLを取得
+  await hostPage
+    .getByRole("button", { name: "招待URL/QRコード", exact: true })
+    .click();
+  const inviteLinkLocator = hostPage.locator(
+    'a[href*="/planning-poker/sessions/join?id="]',
+  );
+  const inviteLink = await inviteLinkLocator.getAttribute("href");
+  expect(inviteLink).not.toBeNull();
+
+  // 新しいページで参加者として参加
+  const participantPage = await hostPage.context().newPage();
+  await participantPage.goto(inviteLink!);
+  await participantPage.getByLabel("あなたの名前").fill(participantName);
+  await participantPage
+    .getByRole("button", { name: "セッションに参加", exact: true })
+    .click();
+  await participantPage.waitForEvent("websocket");
+
+  return participantPage;
+}
 
 test.describe("セッション画面", () => {
   const hostUserName = "ホストユーザー";
@@ -44,34 +70,10 @@ test.describe("セッション画面", () => {
     test.describe("参加者が複数", () => {
       const participantUserName = "参加者ユーザー";
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
-        // 招待URLを取得
-        await hostPage
-          .getByRole("button", { name: "招待URL/QRコード", exact: true })
-          .click();
-        const hostInviteLink = hostPage.locator(
-          'a[href*="/planning-poker/sessions/join?id="]',
+        const participantPage = await joinAsParticipant(
+          hostPage,
+          participantUserName,
         );
-        await expect(hostInviteLink).toBeVisible();
-        const hostInviteLinkValue = await hostInviteLink.getAttribute("href");
-        let sessionId = "";
-        if (hostInviteLinkValue) {
-          const url = new URL(hostInviteLinkValue, "http://localhost");
-          sessionId = url.searchParams.get("id") ?? "";
-        }
-
-        // 参加者としてセッションに参加
-        const participantPage = await hostPage.context().newPage();
-        await participantPage.goto(
-          `/planning-poker/sessions/join?id=${sessionId}`,
-        );
-
-        await participantPage
-          .getByLabel("あなたの名前")
-          .fill(participantUserName);
-        await participantPage
-          .getByRole("button", { name: "セッションに参加", exact: true })
-          .click();
-        await participantPage.waitForEvent("websocket");
 
         // 参加者ユーザー画面に自分の名前が表示されるか確認
         await expect(
@@ -129,34 +131,11 @@ test.describe("セッション画面", () => {
   test.describe("ホスト用ボタンと投票ボタンと投票結果", () => {
     test.describe("フィボナッチ", () => {
       test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
-        // 招待URLを取得
-        await hostPage
-          .getByRole("button", { name: "招待URL/QRコード", exact: true })
-          .click();
-        const hostInviteLink = hostPage.locator(
-          'a[href*="/planning-poker/sessions/join?id="]',
-        );
-        const hostInviteLinkValue = await hostInviteLink.getAttribute("href");
-        let sessionId = "";
-        if (hostInviteLinkValue) {
-          const url = new URL(hostInviteLinkValue, "http://localhost");
-          sessionId = url.searchParams.get("id") ?? "";
-        }
-
-        // 画面表示確認
         const participantUserName = "参加者ユーザー";
-        const participantPage = await hostPage.context().newPage();
-        await participantPage.goto(
-          `/planning-poker/sessions/join?id=${sessionId}`,
+        const participantPage = await joinAsParticipant(
+          hostPage,
+          participantUserName,
         );
-
-        await participantPage
-          .getByLabel("あなたの名前")
-          .fill(participantUserName);
-        await participantPage
-          .getByRole("button", { name: "セッションに参加", exact: true })
-          .click();
-        await participantPage.waitForEvent("websocket");
 
         // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
         await expect(
