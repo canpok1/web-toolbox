@@ -3,16 +3,16 @@ import { expect, test } from "@playwright/test";
 test.describe("セッション画面", () => {
   const hostUserName = "ホストユーザー";
 
-  test.describe("参加者一覧と招待リンク", () => {
-    test.beforeEach(async ({ page }) => {
-      await page.goto("/planning-poker/sessions/create");
-      await page.getByLabel("あなたの名前").fill(hostUserName);
-      await page
-        .getByRole("button", { name: "セッションを作成", exact: true })
-        .click();
-      await page.waitForEvent("websocket");
-    });
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/planning-poker/sessions/create");
+    await page.getByLabel("あなたの名前").fill(hostUserName);
+    await page
+      .getByRole("button", { name: "セッションを作成", exact: true })
+      .click();
+    await page.waitForEvent("websocket");
+  });
 
+  test.describe("参加者一覧と招待リンク", () => {
     test.describe("ホストのみ", () => {
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
         await expect(
@@ -128,13 +128,6 @@ test.describe("セッション画面", () => {
 
   test.describe("ホスト用ボタンと投票ボタンと投票結果", () => {
     test.describe("フィボナッチ", () => {
-      test.beforeEach(async ({ page }) => {
-        await page.goto("/planning-poker/sessions/create");
-        await page.getByLabel("あなたの名前").fill(hostUserName);
-        await page.getByRole("button", { name: "セッションを作成", exact: true }).click();
-        await page.waitForEvent("websocket");
-      });
-
       test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
         // 招待URLを取得
         await hostPage
