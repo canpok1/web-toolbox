@@ -55,4 +55,8 @@ export class SessionPagePom {
       .getByRole("button", { name: "投票を公開", exact: true })
       .click();
   }
+
+  public getVotedIndicator(): Locator {
+    return this.page.locator('[data-tip="投票済み"]');
+  }
 }

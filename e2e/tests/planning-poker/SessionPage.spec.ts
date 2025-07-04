@@ -165,19 +165,15 @@ test.describe("セッション画面", () => {
         await participantPom.clickVoteButton("5");
 
         // 画面表示確認
-        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(1);
-        await expect(
-          participantPage.locator('[data-tip="投票済み"]'),
-        ).toHaveCount(1);
+        await expect(hostPom.getVotedIndicator()).toHaveCount(1);
+        await expect(participantPom.getVotedIndicator()).toHaveCount(1);
 
         // ホストユーザーが投票する
         await hostPom.clickVoteButton("13");
 
         // 画面表示確認
-        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(2);
-        await expect(
-          participantPage.locator('[data-tip="投票済み"]'),
-        ).toHaveCount(2);
+        await expect(hostPom.getVotedIndicator()).toHaveCount(2);
+        await expect(participantPom.getVotedIndicator()).toHaveCount(2);
 
         // ホストが投票を公開する
         await hostPom.clickOpenVoteButton();
@@ -270,19 +266,15 @@ test.describe("セッション画面", () => {
         await participantPom.clickVoteButton("M");
 
         // 画面表示確認
-        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(1);
-        await expect(
-          participantPage.locator('[data-tip="投票済み"]'),
-        ).toHaveCount(1);
+        await expect(hostPom.getVotedIndicator()).toHaveCount(1);
+        await expect(participantPom.getVotedIndicator()).toHaveCount(1);
 
         // ホストユーザーが投票する
         await hostPom.clickVoteButton("L");
 
         // 画面表示確認
-        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(2);
-        await expect(
-          participantPage.locator('[data-tip="投票済み"]'),
-        ).toHaveCount(2);
+        await expect(hostPom.getVotedIndicator()).toHaveCount(2);
+        await expect(participantPom.getVotedIndicator()).toHaveCount(2);
 
         // ホストが投票を公開する
         await hostPom.clickOpenVoteButton();
@@ -388,19 +380,15 @@ test.describe("セッション画面", () => {
         await participantPom.clickVoteButton("8");
 
         // 画面表示確認
-        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(1);
-        await expect(
-          participantPage.locator('[data-tip="投票済み"]'),
-        ).toHaveCount(1);
+        await expect(hostPom.getVotedIndicator()).toHaveCount(1);
+        await expect(participantPom.getVotedIndicator()).toHaveCount(1);
 
         // ホストユーザーが投票する
         await hostPom.clickVoteButton("32");
 
         // 画面表示確認
-        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(2);
-        await expect(
-          participantPage.locator('[data-tip="投票済み"]'),
-        ).toHaveCount(2);
+        await expect(hostPom.getVotedIndicator()).toHaveCount(2);
+        await expect(participantPom.getVotedIndicator()).toHaveCount(2);
 
         // ホストが投票を公開する
         await hostPom.clickOpenVoteButton();
