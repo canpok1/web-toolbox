@@ -245,7 +245,115 @@ test.describe("セッション画面", () => {
     });
 
     test.describe("Tシャツサイズ", () => {
-      // TODO 実装
+      test.beforeEach(async ({ page }) => {
+        await page.goto("/planning-poker/sessions/create");
+        await page.getByLabel("スケール").selectOption("t-shirt");
+        await page.getByLabel("あなたの名前").fill(hostUserName);
+        await page
+          .getByRole("button", { name: "セッションを作成", exact: true })
+          .click();
+        await page.waitForEvent("websocket");
+      });
+
+      test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
+        const participantUserName = "参加者ユーザー";
+        const participantPage = await joinAsParticipant(
+          hostPage,
+          participantUserName,
+        );
+
+        // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
+        await expect(
+          participantPage.getByRole("button", {
+            name: "投票を開始",
+            exact: true,
+          }),
+        ).not.toBeVisible();
+        // ホストユーザー画面に投票開始ボタンが表示されることを確認
+        await expect(
+          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
+        ).toBeVisible();
+
+        // ホストが投票を開始する
+        await hostPage
+          .getByRole("button", { name: "投票を開始", exact: true })
+          .click();
+
+        // 画面表示確認
+        // 参加者ユーザー画面に投票ボタンが表示されることを確認
+        const voteButtons = ["XS", "S", "M", "L", "XL", "?"];
+        for (const voteButton of voteButtons) {
+          await expect(
+            participantPage.getByRole("button", {
+              name: voteButton,
+              exact: true,
+            }),
+          ).toBeVisible();
+        }
+        // ホストユーザー画面に投票ボタンが表示されることを確認
+        for (const voteButton of voteButtons) {
+          await expect(
+            hostPage.getByRole("button", { name: voteButton, exact: true }),
+          ).toBeVisible();
+        }
+
+        // 参加者ユーザーが投票する
+        await participantPage
+          .getByRole("button", { name: "M", exact: true })
+          .click();
+
+        // 画面表示確認
+        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(1);
+        await expect(
+          participantPage.locator('[data-tip="投票済み"]'),
+        ).toHaveCount(1);
+
+        // ホストユーザーが投票する
+        await hostPage.getByRole("button", { name: "L", exact: true }).click();
+
+        // 画面表示確認
+        await expect(hostPage.locator('[data-tip="投票済み"]')).toHaveCount(2);
+        await expect(
+          participantPage.locator('[data-tip="投票済み"]'),
+        ).toHaveCount(2);
+
+        // ホストが投票を公開する
+        await hostPage
+          .getByRole("button", { name: "投票を公開", exact: true })
+          .click();
+
+        // 画面表示確認
+        // 参加者ユーザー画面に投票開始ボタンが表示されないことを確認
+        await expect(
+          participantPage.getByRole("button", { name: "投票を開始", exact: true }),
+        ).not.toBeVisible();
+        // ホストユーザー画面に投票開始ボタンが表示されることを確認
+        await expect(
+          hostPage.getByRole("button", { name: "投票を開始", exact: true }),
+        ).toBeVisible();
+
+        // ホストが投票を開始する
+        await hostPage
+          .getByRole("button", { name: "投票を開始", exact: true })
+          .click();
+
+        // 画面表示確認
+        // 参加者ユーザー画面に投票ボタンが表示されることを確認
+        for (const voteButton of voteButtons) {
+          await expect(
+            participantPage.getByRole("button", {
+              name: voteButton,
+              exact: true,
+            }),
+          ).toBeVisible();
+        }
+        // ホストユーザー画面に投票ボタンが表示されることを確認
+        for (const voteButton of voteButtons) {
+          await expect(
+            hostPage.getByRole("button", { name: voteButton, exact: true }),
+          ).toBeVisible();
+        }
+      });
     });
 
     test.describe("2の累乗", () => {
