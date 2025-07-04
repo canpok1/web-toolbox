@@ -34,19 +34,15 @@ test.describe("セッション画面", () => {
   test.describe("参加者一覧と招待リンク", () => {
     test.describe("ホストのみ", () => {
       test("表示内容が正しいこと", async ({ page: hostPage }) => {
-        await expect(
-          hostPage.getByText(`あなたの名前: ${hostUserName}`),
-        ).toBeVisible();
-        await expect(hostPage.getByText(/参加者 \(1名\):\s*/)).toBeVisible();
+        const hostPom = new SessionPagePom(hostPage);
+
+        // ホストユーザー画面に自分の名前が表示されるか確認
+        await expect(hostPom.getNameElement(hostUserName)).toBeVisible();
+        await expect(hostPom.getParticipantNameElement(1)).toBeVisible();
         await expect(
           hostPage.getByText(hostUserName, { exact: true }),
         ).toBeVisible();
-        await expect(
-          hostPage.getByRole("button", {
-            name: "参加ページのURLをコピー",
-            exact: true,
-          }),
-        ).toBeVisible();
+        await expect(hostPom.getInviteUrlCopyButton()).toBeVisible();
 
         const pom = new SessionPagePom(hostPage);
         await pom.clickInviteUrlButton();
@@ -65,14 +61,16 @@ test.describe("セッション画面", () => {
           participantUserName,
         );
 
+        const hostPom = new SessionPagePom(hostPage);
+        const participantPom = new SessionPagePom(participantPage);
+
         // 参加者ユーザー画面に自分の名前が表示されるか確認
         await expect(
-          participantPage.getByText(`あなたの名前: ${participantUserName}`),
+          participantPom.getNameElement(participantUserName),
         ).toBeVisible();
+
         // 参加者ユーザー画面に参加者一覧が表示されるか確認
-        await expect(
-          participantPage.getByText(/参加者 \(2名\):\s*/),
-        ).toBeVisible();
+        await expect(participantPom.getParticipantNameElement(2)).toBeVisible();
         await expect(
           participantPage.getByText(participantUserName, { exact: true }),
         ).toBeVisible();
@@ -80,17 +78,11 @@ test.describe("セッション画面", () => {
           participantPage.getByText(hostUserName, { exact: true }),
         ).toBeVisible();
         // 参加者ユーザー画面で招待リンクをコピーできることを確認
-        await expect(
-          participantPage.getByRole("button", {
-            name: "参加ページのURLをコピー",
-            exact: true,
-          }),
-        ).toBeVisible();
+        await expect(participantPom.getInviteUrlCopyButton()).toBeVisible();
 
         // 参加者ユーザー画面の招待リンクが正しいことを確認
-        const pom = new SessionPagePom(participantPage);
-        await pom.clickInviteUrlButton();
-        const participantInviteLinkValue = await pom.copyInviteUrl();
+        await participantPom.clickInviteUrlButton();
+        const participantInviteLinkValue = await participantPom.copyInviteUrl();
 
         await expect(participantInviteLinkValue).toMatch(
           /planning-poker\/sessions\/join\?id=.*/,
@@ -99,11 +91,9 @@ test.describe("セッション画面", () => {
         await hostPage.bringToFront();
 
         // ホストユーザー画面に自分の名前が表示されるか確認
-        await expect(
-          hostPage.getByText(`あなたの名前: ${hostUserName}`),
-        ).toBeVisible();
+        await expect(hostPom.getNameElement(hostUserName)).toBeVisible();
         // ホストユーザー画面に参加者一覧が表示されるか確認
-        await expect(hostPage.getByText(/参加者 \(2名\):\s*/)).toBeVisible();
+        await expect(hostPom.getParticipantNameElement(2)).toBeVisible();
         await expect(
           hostPage.getByText(hostUserName, { exact: true }),
         ).toBeVisible();

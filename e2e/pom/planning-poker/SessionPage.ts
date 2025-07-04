@@ -1,4 +1,4 @@
-import { type Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 export class SessionPagePom {
   private page: Page;
@@ -7,10 +7,30 @@ export class SessionPagePom {
     this.page = page;
   }
 
+  public getNameElement(name: string): Locator {
+    return this.page.getByText(`あなたの名前: ${name}`);
+  }
+
+  public getParticipantNameElement(count: number): Locator {
+    return this.page.getByText(new RegExp(`参加者 \\(${count}名\\):\\s*`));
+  }
+
+  public getInviteUrlButton(): Locator {
+    return this.page.getByRole("button", {
+      name: "招待URL/QRコード",
+      exact: true,
+    });
+  }
+
+  public getInviteUrlCopyButton(): Locator {
+    return this.page.getByRole("button", {
+      name: "参加ページのURLをコピー",
+      exact: true,
+    });
+  }
+
   public async clickInviteUrlButton(): Promise<void> {
-    await this.page
-      .getByRole("button", { name: "招待URL/QRコード", exact: true })
-      .click();
+    await this.getInviteUrlButton().click();
   }
 
   public async copyInviteUrl(): Promise<string | null> {
@@ -27,9 +47,7 @@ export class SessionPagePom {
   }
 
   public async clickVoteButton(value: string): Promise<void> {
-    await this.page
-      .getByRole("button", { name: value, exact: true })
-      .click();
+    await this.page.getByRole("button", { name: value, exact: true }).click();
   }
 
   public async clickOpenVoteButton(): Promise<void> {
