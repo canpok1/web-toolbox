@@ -253,20 +253,6 @@ test.describe("セッション画面", () => {
 
         // 画面表示確認
         // 参加者ユーザー画面に投票ボタンが表示されることを確認
-        const voteButtons = [
-          "0",
-          "1",
-          "2",
-          "3",
-          "5",
-          "8",
-          "13",
-          "21",
-          "34",
-          "55",
-          "89",
-          "?",
-        ];
         for (const voteButton of voteButtons) {
           await expect(
             participantPage.getByRole("button", {
