@@ -96,7 +96,7 @@ test.describe("セッション画面", () => {
 
   test.describe("ホスト用ボタンと投票ボタンと投票結果", () => {
     test.describe("フィボナッチ", () => {
-      test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
+      test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
         const participantPage = await hostPom.joinAsParticipant(
@@ -185,7 +185,7 @@ test.describe("セッション画面", () => {
         await pom.createSession(hostUserName, "t-shirt");
       });
 
-      test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
+      test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
         const participantPage = await hostPom.joinAsParticipant(
@@ -261,7 +261,7 @@ test.describe("セッション画面", () => {
         await pom.createSession(hostUserName, "power-of-two");
       });
 
-      test("投票開始→投票→投票公開→投票開始", async ({ page: hostPage }) => {
+      test("投票フロー", async ({ page: hostPage }) => {
         const hostPom = new SessionPagePom(hostPage);
         const participantUserName = "参加者ユーザー";
         const participantPage = await hostPom.joinAsParticipant(
