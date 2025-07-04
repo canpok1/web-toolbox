@@ -55,7 +55,8 @@ test.describe("セッション画面", () => {
         const hostInviteLinkValue = await hostInviteLink.getAttribute("href");
         let sessionId = "";
         if (hostInviteLinkValue) {
-          sessionId = hostInviteLinkValue.split("id=")[1];
+          const url = new URL(hostInviteLinkValue, "http://localhost");
+          sessionId = url.searchParams.get("id") ?? "";
         }
 
         // 参加者としてセッションに参加
@@ -145,7 +146,8 @@ test.describe("セッション画面", () => {
         const hostInviteLinkValue = await hostInviteLink.getAttribute("href");
         let sessionId = "";
         if (hostInviteLinkValue) {
-          sessionId = hostInviteLinkValue.split("id=")[1];
+          const url = new URL(hostInviteLinkValue, "http://localhost");
+          sessionId = url.searchParams.get("id") ?? "";
         }
 
         // 画面表示確認
