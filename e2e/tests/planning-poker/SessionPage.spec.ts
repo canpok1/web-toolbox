@@ -113,6 +113,44 @@ async function performVotingFlow(
   await checkVoteButtonsVisibility(hostPage, voteButtons);
 }
 
+function createVotingFlowTests(
+  scaleName: string,
+  scaleType: "fibonacci" | "t-shirt" | "power-of-two",
+  voteButtons: string[],
+  hostVote: string,
+  participantVote: string,
+  hostUserName: string,
+  joinAsParticipantAndGetPom: (
+    hostPom: SessionPagePom,
+    participantUserName: string,
+  ) => Promise<{ participantPage: Page; participantPom: SessionPagePom }>,
+) {
+  test.describe(scaleName, () => {
+    test.beforeEach(async ({ page }) => {
+      const pom = new CreateSessionPagePom(page);
+      await pom.goto();
+      await pom.createSession(hostUserName, scaleType);
+    });
+
+    test("投票フロー", async ({ page: hostPage }) => {
+      const hostPom = new SessionPagePom(hostPage);
+      const participantUserName = "参加者ユーザー";
+      const { participantPage, participantPom } =
+        await joinAsParticipantAndGetPom(hostPom, participantUserName);
+
+      await performVotingFlow(
+        hostPage,
+        participantPage,
+        hostPom,
+        participantPom,
+        voteButtons,
+        hostVote,
+        participantVote,
+      );
+    });
+  });
+}
+
 test.describe("セッション画面", () => {
   async function joinAsParticipantAndGetPom(
     hostPom: SessionPagePom,
@@ -205,77 +243,8 @@ test.describe("セッション画面", () => {
   });
 
   test.describe("ホスト用ボタンと投票ボタンと投票結果", () => {
-    test.beforeEach(async ({ page }, testInfo) => {
-      const pom = new CreateSessionPagePom(page);
-      await pom.goto();
-      let scaleType: "fibonacci" | "t-shirt" | "power-of-two";
-      if (testInfo.titlePath.includes("フィボナッチ")) {
-        scaleType = "fibonacci";
-      } else if (testInfo.titlePath.includes("Tシャツサイズ")) {
-        scaleType = "t-shirt";
-      } else if (testInfo.titlePath.includes("2の累乗")) {
-        scaleType = "power-of-two";
-      } else {
-        throw new Error("Unknown scale type");
-      }
-      await pom.createSession(hostUserName, scaleType);
-    });
-
-    test.describe("フィボナッチ", () => {
-      test("投票フロー", async ({ page: hostPage }) => {
-        const hostPom = new SessionPagePom(hostPage);
-        const participantUserName = "参加者ユーザー";
-        const { participantPage, participantPom } =
-          await joinAsParticipantAndGetPom(hostPom, participantUserName);
-
-        await performVotingFlow(
-          hostPage,
-          participantPage,
-          hostPom,
-          participantPom,
-          fibonacciVoteButtons,
-          "13",
-          "5",
-        );
-      });
-    });
-
-    test.describe("Tシャツサイズ", () => {
-      test("投票フロー", async ({ page: hostPage }) => {
-        const hostPom = new SessionPagePom(hostPage);
-        const participantUserName = "参加者ユーザー";
-        const { participantPage, participantPom } =
-          await joinAsParticipantAndGetPom(hostPom, participantUserName);
-
-        await performVotingFlow(
-          hostPage,
-          participantPage,
-          hostPom,
-          participantPom,
-          tShirtVoteButtons,
-          "L",
-          "M",
-        );
-      });
-    });
-
-    test.describe("2の累乗", () => {
-      test("投票フロー", async ({ page: hostPage }) => {
-        const hostPom = new SessionPagePom(hostPage);
-        const participantUserName = "参加者ユーザー";
-        const { participantPage, participantPom } =
-          await joinAsParticipantAndGetPom(hostPom, participantUserName);
-
-        await performVotingFlow(
-          hostPage,
-          participantPage,
-          hostPom,
-          participantPom,
-          powerOfTwoVoteButtons,
-          "32",
-          "8",
-        );
-      });
-    });
+    createVotingFlowTests("フィボナッチ", "fibonacci", fibonacciVoteButtons, "13", "5", hostUserName, joinAsParticipantAndGetPom);
+    createVotingFlowTests("Tシャツサイズ", "t-shirt", tShirtVoteButtons, "L", "M", hostUserName, joinAsParticipantAndGetPom);
+    createVotingFlowTests("2の累乗", "power-of-two", powerOfTwoVoteButtons, "32", "8", hostUserName, joinAsParticipantAndGetPom);
   });
 });
