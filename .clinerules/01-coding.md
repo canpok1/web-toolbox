@@ -90,7 +90,7 @@
 - **テスト構造**: `test.describe` でテストスイートを定義し、`test` で個別のテストケースを定義すること。
 - **Page Object Model (POM)**:
     - POMパターンを使用し、`pom/` ディレクトリにページオブジェクトを配置すること。
-    - ページオブジェクトのクラス名はPascalCaseを使用し、`PagePom` サフィックスを付けること (例: `CreateSessionPagePom`)。
+    - ページオブジェクトのクラス名はPascalCaseを使用し、`PagePom` サフィックスを付けること (例: `CreateSessionPagePom`)。ファイル名とクラス名を一致させる必要はなく、1つのファイルに複数のPOMクラスを定義してもよい。
     - ページオブジェクトのメソッドは、ユーザーのアクションやページの要素へのアクセスを抽象化すること (例: `inputUserName`, `clickCreateButton`)。
     - ページオブジェクトのコンストラクタは `Page` オブジェクトを受け取ること。
 - **要素の特定**: `page.getByRole`, `page.getByLabel` などのPlaywrightのロケータを使用し、堅牢なセレクタを記述すること。
