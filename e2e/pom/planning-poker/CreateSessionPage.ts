@@ -13,24 +13,38 @@ export class CreateSessionPagePom {
     await this.page.goto("/planning-poker/sessions/create");
   }
 
-  public async inputUserName(userName: string): Promise<void> {
-    await this.page.getByLabel("あなたの名前").fill(userName);
+  public get scaleSelect() {
+    return this.page.getByLabel("スケール");
+  }
+
+  public get yourNameInput() {
+    return this.page.getByLabel("あなたの名前");
+  }
+
+  public get createSessionButton() {
+    return this.page.getByRole("button", { name: "セッションを作成" });
+  }
+
+  public get backLink() {
+    return this.page.getByRole("link", { name: "戻る" });
+  }
+
+  public async fillYourName(userName: string): Promise<void> {
+    await this.yourNameInput.fill(userName);
   }
 
   public async selectScale(scale: Scale): Promise<void> {
-    await this.page.getByLabel("スケール").selectOption(scale);
+    await this.scaleSelect.selectOption(scale);
   }
 
-  public async clickCreateButton(): Promise<void> {
-    await this.page
-      .getByRole("button", { name: "セッションを作成", exact: true })
-      .click();
+  public async clickCreateSessionButton(): Promise<void> {
+    await this.createSessionButton.click();
     await this.page.waitForEvent("websocket");
   }
 
   public async createSession(userName: string, scale: Scale): Promise<void> {
-    await this.inputUserName(userName);
+    await this.fillYourName(userName);
     await this.selectScale(scale);
-    await this.clickCreateButton();
+    await this.clickCreateSessionButton();
   }
 }
