@@ -73,7 +73,7 @@
 - **コード生成**: `openapi/generate.go` にある `//go:generate oapi-codegen -config config.yml ../../docs/spec/openapi.yml` コメントから、OpenAPI仕様からコードを自動生成していることがわかる。`make generate` コマンドで実行される。
 - **命名規則**:
     - パッケージ名は小文字で単一の単語を使用すること (例: `planningpoker`, `infra`, `domain`)。
-    - 関数名、変数名、フィールド名はcamelCaseを使用すること。
+    - エクスポートされる識別子（関数、変数、型など）はPascalCase、アンエクスポートな識別子はcamelCaseを使用すること。
     - インターフェース名には `I` プレフィックスを付けず、可能であれば `er` サフィックスを使用すること (例: `Reader`, `Writer`)。振る舞いを表す動詞から命名できない場合は、`Repository` や `Client` のような型を表す名詞を使用してもよい (例: `SessionRepository`, `RedisClient`)。
     - 構造体名はPascalCaseを使用すること。
     - `New` プレフィックスを使用してコンストラクタ関数を定義すること (例: `NewServer`, `NewRedisClient`)。
