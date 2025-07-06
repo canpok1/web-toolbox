@@ -17,7 +17,7 @@
 - **コンポーネント命名**: コンポーネントのファイル名とコンポーネント名はPascalCaseを使用すること (例: `Layout.tsx`, `TopPage.tsx`)。
 - **カスタムフック命名**: カスタムフックは`use`プレフィックスを使用すること (例: `useLoading.ts`)。
 - **APIクライアント命名**: APIクライアントクラスは`Client`サフィックスを使用すること (例: `PlanningPokerClient.ts`)。
-- **エラーハンドリング**: 非同期処理には`try...catch`ブロックを使用し、エラーはログに記録し、ユーザーに表示すること。
+- **エラーハンドリング**: APIリクエストなどの非同期処理では、`try...catch` ブロックを用いてエラーを捕捉します。捕捉したエラーは、開発者向けにコンソールへログ出力すると同時に、ユーザーには汎用的なエラーメッセージを表示するか、具体的なエラー内容に応じて適切なUIフィードバックを提供してください。これにより、デバッグの容易性とユーザー体験の向上を両立します。
 - **スタイリング**: Tailwind CSSクラスをJSX内で直接使用し、DaisyUIコンポーネントを活用すること。
 - **インポート**: `src`内のモジュールをインポートする際は、絶対パスを使用すること。ただし、同じディレクトリ内のファイルをインポートする場合に限り、相対パスを使用してもよい。
 - **コンポーネント形式**: Reactの関数コンポーネントを使用すること。
@@ -52,10 +52,10 @@
     - レスポンスの返却には `ctx.JSON()` を使用し、適切なHTTPステータスコードを設定すること。
     - エラーレスポンスには `api.ErrorResponse` 構造体を使用すること。
 - **エラーハンドリング**:
-    - エラーは `fmt.Errorf` を使用してラップし、元のエラー情報を含めること。
-    - ログには `log.Printf` や `log.Fatalf` を使用すること。
-    - HTTPハンドラでは、エラーが発生した場合に `http.StatusInternalServerError` や `http.StatusBadRequest` などの適切なHTTPステータスコードを返すこと。
-- **依存性注入**: 依存関係はコンストラクタを通じて注入すること (例: `NewServer`, `NewRedisClient`, `NewCreateSessionUsecase`)。
+    - エラーは `fmt.Errorf` を用いてラップし、スタックトレースにコンテキスト情報を追加していくことを推奨します。これにより、エラーの原因特定が容易になります。 (例: `fmt.Errorf("failed to get session: %w", err)`)
+    - ログには `log.Printf` や `log.Fatalf` を使用します。特に、リクエスト処理中のエラーは `log.Printf` で記録し、サーバーの起動などクリティカルな処理の失敗時には `log.Fatalf` を使用してプロセスを終了させます。
+    - HTTPハンドラでは、エラーの種類に応じて `http.StatusInternalServerError` や `http.StatusBadRequest` など、適切なHTTPステータスコードを返却してください。クライアントに不要な詳細情報を漏らさないよう、エラーメッセージは汎用的なものに留めるのが基本です。
+- **依存性注入**: サーバー、ユースケース、リポジトリなどのコンポーネントは、コンストラクタ（`New...` 関数）を通じて依存関係を受け取ります。これにより、コンポーネントの結合度を下げ、テスト容易性を高めています。例えば、`NewCreateSessionUsecase` は `SessionRepository` インターフェースに依存し、具象的な実装（`RedisRepository` など）は main 関数で注入されます。このパターンに従い、コンポーネントの独立性を保ってください。
 - **Redisの使用**:
     - Redisクライアントには `github.com/redis/go-redis/v9` を使用すること。
     - Redisキーの命名規則は `web-toolbox:<feature>:<entity>:<id>` の形式に従うこと (例: `web-toolbox:planning-poker:session:<sessionId>`)。
