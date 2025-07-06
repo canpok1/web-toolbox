@@ -7,6 +7,10 @@ setup:
 setup-e2e:
 	make -C e2e setup
 
+.PHONY: run
+run: build-front
+	make run-back
+
 .PHONY: run-front
 run-front:
 	make -C frontend run

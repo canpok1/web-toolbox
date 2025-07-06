@@ -21,7 +21,6 @@ const TalkRouletteTopPage = () => {
     setTheme("テーマを読み込み中..."); // ロード中に表示
     setLiked(false);
     setDisliked(false);
-    setFeedbackMessage("");
     try {
       const response = await talkRouletteClient.getThemes(
         selectedGenre === "all" ? undefined : selectedGenre,
@@ -36,7 +35,9 @@ const TalkRouletteTopPage = () => {
     } catch (error) {
       console.error("Failed to fetch theme:", error);
       setTheme("テーマの取得に失敗しました。");
-      setFeedbackMessage("テーマの取得に失敗しました。時間を置いてから再度お試しください。");
+      setFeedbackMessage(
+        "テーマの取得に失敗しました。時間を置いてから再度お試しください。",
+      );
     }
   }, []);
 
@@ -59,7 +60,7 @@ const TalkRouletteTopPage = () => {
     if (!disliked) {
       setDisliked(true);
       setLiked(false);
-      setFeedbackMessage(""); // Clear previous feedback message
+      setFeedbackMessage("テーマを変更しますね。"); // Clear previous feedback message
       fetchTheme(genre); // テーマ変更時に新しいテーマを取得
     } else {
       setDisliked(false);

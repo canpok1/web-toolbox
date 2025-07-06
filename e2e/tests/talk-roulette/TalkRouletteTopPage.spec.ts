@@ -23,9 +23,6 @@ test("「新しいテーマ」ボタンをクリックするとテーマが変�
   const themeElement = page.getByTestId("talk-theme");
   const initialTheme = await themeElement.textContent();
   await page.getByRole("button", { name: "別のテーマを引く" }).click();
-  await themeElement.waitFor({
-    predicate: async (element) => (await element.textContent()) !== initialTheme,
-  });
   await expect(themeElement).not.toHaveText(initialTheme as string);
 });
 
