@@ -35,7 +35,7 @@
 ## バックエンド
 
 - **言語**: Goを使用すること。
-- **フレームワーク/ライブラリ**: Echo (Webフレームワーク), go-redis/redis (Redisクライアント), stretchr/testify (テスト), golang/mock (モック生成) を使用すること。
+- **主な使用ライブラリ**: Echo (Webフレームワーク), go-redis/redis (Redisクライアント), stretchr/testify (テスト), golang/mock (モック生成) を使用しています。
 - **プロジェクト構造**:
     - `cmd/server/`: アプリケーションのエントリポイント (`main.go`)。
     - `internal/`: 内部パッケージ。
