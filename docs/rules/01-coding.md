@@ -69,7 +69,7 @@
     - テストには `testing` パッケージを使用し、`httptest` でHTTPリクエストをモックすること。
     - アサーションには `github.com/stretchr/testify/assert` を使用すること。
     - モックの生成には `github.com/golang/mock/gomock` を使用すること。
-    - モックの期待値は `EXPECT().AnyTimes()` を使用して設定すること。
+    - モックの期待値は、呼び出し回数に応じて `Times(n)` や `AnyTimes()` を適切に使い分けること。
 - **コード生成**: `openapi/generate.go` にある `//go:generate oapi-codegen -config config.yml ../../docs/spec/openapi.yml` コメントから、OpenAPI仕様からコードを自動生成していることがわかる。`make generate` コマンドで実行される。
 - **命名規則**:
     - パッケージ名は小文字で単一の単語を使用すること (例: `planningpoker`, `infra`, `domain`)。
