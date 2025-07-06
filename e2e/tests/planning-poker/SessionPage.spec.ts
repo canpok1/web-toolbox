@@ -243,8 +243,32 @@ test.describe("セッション画面", () => {
   });
 
   test.describe("ホスト用ボタンと投票ボタンと投票結果", () => {
-    createVotingFlowTests("フィボナッチ", "fibonacci", fibonacciVoteButtons, "13", "5", hostUserName, joinAsParticipantAndGetPom);
-    createVotingFlowTests("Tシャツサイズ", "t-shirt", tShirtVoteButtons, "L", "M", hostUserName, joinAsParticipantAndGetPom);
-    createVotingFlowTests("2の累乗", "power-of-two", powerOfTwoVoteButtons, "32", "8", hostUserName, joinAsParticipantAndGetPom);
+    createVotingFlowTests(
+      "フィボナッチ",
+      "fibonacci",
+      fibonacciVoteButtons,
+      "13",
+      "5",
+      hostUserName,
+      joinAsParticipantAndGetPom,
+    );
+    createVotingFlowTests(
+      "Tシャツサイズ",
+      "t-shirt",
+      tShirtVoteButtons,
+      "L",
+      "M",
+      hostUserName,
+      joinAsParticipantAndGetPom,
+    );
+    createVotingFlowTests(
+      "2の累乗",
+      "power-of-two",
+      powerOfTwoVoteButtons,
+      "32",
+      "8",
+      hostUserName,
+      joinAsParticipantAndGetPom,
+    );
   });
 });

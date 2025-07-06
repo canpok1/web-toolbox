@@ -69,7 +69,11 @@ export class SessionPagePom {
 
     // 新しいページで参加者として参加
     const participantPage = await this.page.context().newPage();
-    await participantPage.goto(inviteLink!);
+    if (inviteLink) {
+      await participantPage.goto(inviteLink);
+    } else {
+      throw new Error("Invite link is null");
+    }
     const participantPom = new JoinSessionPagePom(participantPage);
     await participantPom.joinSession(participantName);
 
