@@ -9,25 +9,27 @@ export class TalkRoulettePagePom {
 
   public async startRoulette(): Promise<void> {
     // Example: Locating a button by its accessible name 'Start' and clicking it.
-    await this.page.getByRole('button', { name: 'Start' }).click();
+    await this.page.getByRole("button", { name: "Start" }).click();
     // Example: Wait for some network activity to settle after the action.
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState("networkidle");
   }
 
   public async stopRoulette(): Promise<void> {
     // Example: Locating a button by its accessible name 'Stop' and clicking it.
-    await this.page.getByRole('button', { name: 'Stop' }).click();
+    await this.page.getByRole("button", { name: "Stop" }).click();
     // Example: Wait for navigation or a specific element to ensure the page has updated.
     // await this.page.waitForNavigation({ waitUntil: 'domcontentloaded' });
   }
 
   public async selectRandomTalk(): Promise<void> {
     // Example: Locating a button by its accessible name 'Next Random Talk' and clicking it.
-    await this.page.getByRole('button', { name: 'Next Random Talk' }).click();
+    await this.page.getByRole("button", { name: "Next Random Talk" }).click();
     // Example: Wait for a specific response from the backend API.
     // await this.page.waitForResponse(resp => resp.url().includes('/api/talks/random') && resp.status() === 200);
     // Example: Or wait for a specific element that displays talk content to be visible.
-    await this.page.locator('.talk-content-wrapper').waitFor({ state: 'visible', timeout: 5000 });
+    await this.page
+      .locator(".talk-content-wrapper")
+      .waitFor({ state: "visible", timeout: 5000 });
   }
 
   public async getCurrentTalkTitle(): Promise<string | null> {

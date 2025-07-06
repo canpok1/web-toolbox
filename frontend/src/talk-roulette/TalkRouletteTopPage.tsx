@@ -151,7 +151,7 @@ const TalkRouletteTopPage = () => {
           今日のトークテーマ
         </h1>
 
-        <TalkTheme theme={theme} />
+        <TalkTheme theme={theme} data-testid="talk-theme" />
 
         <div className="mt-6 space-y-4">
           <FeedbackButtons
