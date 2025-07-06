@@ -62,7 +62,7 @@
     - Redisに保存するデータは `json.Marshal` でJSONにシリアライズすること。
     - Redisから取得したデータは `json.Unmarshal` でデシリアライズすること。
     - `context.Context` をRedis操作に渡すこと。
-    - `redislib.Nil` を使用してキーが存在しない場合をチェックすること。
+    - `redis.Nil` を使用してキーが存在しない場合をチェックすること。
 - **WebSocket**: WebSocket通信にはカスタムの `WebSocketHub` を使用すること。
 - **設定**: 環境変数は `os.Getenv` を使用して読み込み、デフォルト値を設定すること。
 - **テスト**:
