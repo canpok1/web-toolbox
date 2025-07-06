@@ -71,7 +71,9 @@ export class SessionPagePom {
     const participantPage = await this.page.context().newPage();
     await participantPage.goto(inviteLink as string);
     const participantPom = new JoinSessionPagePom(participantPage);
-    await participantPom.joinSession(participantName);
+    await participantPom.fillYourName(participantName);
+    await participantPom.clickJoinSessionButton();
+    await participantPage.waitForEvent("websocket");
 
     return participantPage;
   }

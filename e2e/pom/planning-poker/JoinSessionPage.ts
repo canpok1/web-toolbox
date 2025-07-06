@@ -35,20 +35,4 @@ export class JoinSessionPagePom {
   public async clickJoinSessionButton(): Promise<void> {
     await this.joinSessionButton.click();
   }
-
-  public async inputUserName(userName: string): Promise<void> {
-    await this.page.getByLabel("あなたの名前").fill(userName);
-  }
-
-  public async clickJoinButton(): Promise<void> {
-    await this.page
-      .getByRole("button", { name: "セッションに参加", exact: true })
-      .click();
-    await this.page.waitForEvent("websocket");
-  }
-
-  public async joinSession(userName: string): Promise<void> {
-    await this.inputUserName(userName);
-    await this.clickJoinButton();
-  }
 }

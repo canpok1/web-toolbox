@@ -17,13 +17,17 @@ test("トークルーレットページにアクセスできること", async ({
 test("初期表示でテーマが表示されていること", async () => {
   await expect(talkRoulettePage.talkTheme).toBeVisible();
   await expect(talkRoulettePage.talkTheme).not.toBeEmpty();
-  await expect(talkRoulettePage.talkTheme).not.toHaveText("テーマを読み込み中...");
+  await expect(talkRoulettePage.talkTheme).not.toHaveText(
+    "テーマを読み込み中...",
+  );
 });
 
 test("「新しいテーマ」ボタンをクリックするとテーマが変更されること", async () => {
   const initialTheme = await talkRoulettePage.getTalkThemeText();
   await talkRoulettePage.clickNewThemeButton();
-  await expect(talkRoulettePage.talkTheme).not.toHaveText(initialTheme as string);
+  await expect(talkRoulettePage.talkTheme).not.toHaveText(
+    initialTheme as string,
+  );
 });
 
 test("「良いね」ボタンをクリックするとフィードバックメッセージが表示されること", async () => {
@@ -45,5 +49,7 @@ test("「良くないね」ボタンをクリックするとフィードバッ�
 test("ジャンルを選択するとテーマが変更されること", async () => {
   const initialTheme = await talkRoulettePage.getTalkThemeText();
   await talkRoulettePage.selectGenre("hobby");
-  await expect(talkRoulettePage.talkTheme).not.toHaveText(initialTheme as string);
+  await expect(talkRoulettePage.talkTheme).not.toHaveText(
+    initialTheme as string,
+  );
 });

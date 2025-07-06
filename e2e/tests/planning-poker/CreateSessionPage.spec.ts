@@ -36,10 +36,7 @@ test.describe("セッション作成画面", () => {
   test("戻るボタンがあること", async () => {
     const backLink = createSessionPage.backLink;
     await expect(backLink).toBeVisible();
-    await expect(backLink).toHaveAttribute(
-      "href",
-      "/planning-poker",
-    );
+    await expect(backLink).toHaveAttribute("href", "/planning-poker");
   });
 
   test("名前が入力されていないときはセッション作成ボタンが押せないこと", async () => {
