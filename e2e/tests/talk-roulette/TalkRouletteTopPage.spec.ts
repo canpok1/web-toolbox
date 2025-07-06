@@ -13,7 +13,7 @@ test("トークルーレットページにアクセスできること", async ({
 test("初期表示でテーマが表示されていること", async ({ page }) => {
   const themeElement = page.getByTestId("talk-theme");
   await expect(themeElement).toBeVisible();
-  await expect(themeElement.textContent()).not.toBe("");
+  await expect(themeElement).not.toBeEmpty();
   await expect(themeElement).not.toHaveText("テーマを読み込み中...");
 });
 
