@@ -31,10 +31,12 @@ const TalkRouletteTopPage = () => {
         setTheme(response.themes[0].theme);
       } else {
         setTheme("テーマが見つかりませんでした。");
+        setFeedbackMessage("テーマが見つかりませんでした。");
       }
     } catch (error) {
       console.error("Failed to fetch theme:", error);
       setTheme("テーマの取得に失敗しました。");
+      setFeedbackMessage("テーマの取得に失敗しました。時間を置いてから再度お試しください。");
     }
   }, []);
 
@@ -57,7 +59,7 @@ const TalkRouletteTopPage = () => {
     if (!disliked) {
       setDisliked(true);
       setLiked(false);
-      setFeedbackMessage("テーマを変更しますね。");
+      setFeedbackMessage(""); // Clear previous feedback message
       fetchTheme(genre); // テーマ変更時に新しいテーマを取得
     } else {
       setDisliked(false);
@@ -70,6 +72,7 @@ const TalkRouletteTopPage = () => {
   };
 
   const handleNewThemeClick = () => {
+    setFeedbackMessage(""); // Clear previous feedback message
     fetchTheme(genre); // 新しいテーマボタンクリック時に新しいテーマを取得
   };
 
