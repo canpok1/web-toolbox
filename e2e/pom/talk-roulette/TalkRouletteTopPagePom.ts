@@ -1,24 +1,32 @@
 import type { Locator, Page } from "@playwright/test";
 
 export class TalkRouletteTopPagePom {
-  readonly page: Page;
-  readonly talkTheme: Locator;
-  readonly newThemeButton: Locator;
-  readonly goodThemeButton: Locator;
-  readonly badThemeButton: Locator;
-  readonly feedbackMessage: Locator;
-  readonly genreCombobox: Locator;
+  constructor(public readonly page: Page) {}
 
-  constructor(page: Page) {
-    this.page = page;
-    this.talkTheme = page.getByTestId("talk-theme");
-    this.newThemeButton = page.getByRole("button", {
+  public get talkTheme(): Locator {
+    return this.page.getByTestId("talk-theme");
+  }
+
+  public get newThemeButton(): Locator {
+    return this.page.getByRole("button", {
       name: "別のテーマを引く",
     });
-    this.goodThemeButton = page.getByRole("button", { name: "良いテーマ" });
-    this.badThemeButton = page.getByRole("button", { name: "悪いテーマ" });
-    this.feedbackMessage = page.getByTestId("feedback-message");
-    this.genreCombobox = page.getByRole("combobox");
+  }
+
+  public get goodThemeButton(): Locator {
+    return this.page.getByRole("button", { name: "良いテーマ" });
+  }
+
+  public get badThemeButton(): Locator {
+    return this.page.getByRole("button", { name: "悪いテーマ" });
+  }
+
+  public get feedbackMessage(): Locator {
+    return this.page.getByTestId("feedback-message");
+  }
+
+  public get genreCombobox(): Locator {
+    return this.page.getByRole("combobox");
   }
 
   async goto() {
