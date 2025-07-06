@@ -19,9 +19,10 @@ test.describe("セッション作成画面", () => {
   });
 
   test("スケールの選択肢がフィボナッチ・Tシャツサイズ・2の累乗であること", async () => {
-    await expect(createSessionPage.scaleSelect).toContainText("フィボナッチ");
-    await expect(createSessionPage.scaleSelect).toContainText("Tシャツサイズ");
-    await expect(createSessionPage.scaleSelect).toContainText("2の累乗");
+    const scaleSelect = createSessionPage.scaleSelect;
+    await expect(scaleSelect).toContainText("フィボナッチ");
+    await expect(scaleSelect).toContainText("Tシャツサイズ");
+    await expect(scaleSelect).toContainText("2の累乗");
   });
 
   test("参加者名を入力できること", async () => {
