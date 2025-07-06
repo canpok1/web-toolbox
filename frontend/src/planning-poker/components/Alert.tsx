@@ -10,7 +10,7 @@ function Alert({
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
       {messages.map((message) => (
-        <div key={message} role="alert" className="alert alert-error">
+        <div key={message} role="alert" className="alert alert-error" data-testid="alert-message">
           <CircleX />
           {message}
         </div>

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPage";
+import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPagePom";
 
 test.describe("セッション作成画面", () => {
   let createSessionPage: CreateSessionPagePom;
