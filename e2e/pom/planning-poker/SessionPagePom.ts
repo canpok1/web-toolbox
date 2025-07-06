@@ -38,20 +38,28 @@ export class SessionPagePom {
     return this.page.locator('a[href*="/planning-poker/sessions/join?id="]');
   }
 
+  get startVoteButton(): Locator {
+    return this.page.getByRole("button", { name: "投票を開始", exact: true });
+  }
+
+  get openVoteButton(): Locator {
+    return this.page.getByRole("button", { name: "投票を公開", exact: true });
+  }
+
+  getVoteButton(value: string): Locator {
+    return this.page.getByRole("button", { name: value, exact: true });
+  }
+
   async clickStartVoteButton(): Promise<void> {
-    await this.page
-      .getByRole("button", { name: "投票を開始", exact: true })
-      .click();
+    await this.startVoteButton.click();
   }
 
   async clickVoteButton(value: string): Promise<void> {
-    await this.page.getByRole("button", { name: value, exact: true }).click();
+    await this.getVoteButton(value).click();
   }
 
   async clickOpenVoteButton(): Promise<void> {
-    await this.page
-      .getByRole("button", { name: "投票を公開", exact: true })
-      .click();
+    await this.openVoteButton.click();
   }
 
   getVotedIndicator(): Locator {
