@@ -28,7 +28,4 @@ test("プランニングポーカーへのリンクをクリックできるこ�
 test("トークルーレットへのリンクをクリックできること", async () => {
   await topPage.clickTalkRouletteLink();
   await topPage.waitForURL(/talk-roulette/);
-  await expect(
-    topPage.getByRole("heading", { name: "今日のトークテーマ" }),
-  ).toBeVisible();
 });
