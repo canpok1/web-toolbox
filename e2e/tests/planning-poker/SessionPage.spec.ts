@@ -160,7 +160,6 @@ test.describe("セッション画面", () => {
         // ホストユーザー画面に自分の名前が表示されるか確認
         await expect(hostPom.getNameElement(hostUserName)).toBeVisible();
         await expect(hostPom.getParticipantNameElement(1)).toBeVisible();
-        await expect(hostPom.getNameElement(hostUserName)).toBeVisible();
         await expect(hostPom.getInviteUrlCopyButton()).toBeVisible();
 
         const pom = new SessionPagePom(hostPage);
@@ -192,10 +191,10 @@ test.describe("セッション画面", () => {
         // 参加者ユーザー画面に参加者一覧が表示されるか確認
         await expect(participantPom.getParticipantNameElement(2)).toBeVisible();
         await expect(
-          participantPage.getByText(participantUserName, { exact: true }),
+          participantPom.getParticipantByName(participantUserName),
         ).toBeVisible();
         await expect(
-          participantPage.getByText(hostUserName, { exact: true }),
+          participantPom.getParticipantByName(hostUserName),
         ).toBeVisible();
         // 参加者ユーザー画面で招待リンクをコピーできることを確認
         await expect(participantPom.getInviteUrlCopyButton()).toBeVisible();
@@ -216,10 +215,10 @@ test.describe("セッション画面", () => {
         // ホストユーザー画面に参加者一覧が表示されるか確認
         await expect(hostPom.getParticipantNameElement(2)).toBeVisible();
         await expect(
-          hostPage.getByText(hostUserName, { exact: true }),
+          hostPom.getParticipantByName(hostUserName),
         ).toBeVisible();
         await expect(
-          hostPage.getByText(participantUserName, { exact: true }),
+          hostPom.getParticipantByName(participantUserName),
         ).toBeVisible();
       });
     });

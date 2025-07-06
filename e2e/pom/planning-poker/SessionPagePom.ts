@@ -16,6 +16,10 @@ export class SessionPagePom {
     return this.page.getByText(`参加者 (${count}名):`);
   }
 
+  getParticipantByName(name: string): Locator {
+    return this.page.getByText(name, { exact: true });
+  }
+
   getInviteUrlButton(): Locator {
     return this.page.getByRole("button", {
       name: "招待URL/QRコード",
