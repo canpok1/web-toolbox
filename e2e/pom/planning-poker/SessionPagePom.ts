@@ -1,5 +1,5 @@
 import { type Locator, type Page, expect } from "@playwright/test";
-import { JoinSessionPagePom } from "./JoinSessionPage";
+import { JoinSessionPagePom } from "./JoinSessionPagePom";
 
 export class SessionPagePom {
   private page: Page;

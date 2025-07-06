@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { TopPagePom } from "../pom/TopPage";
+import { TopPagePom } from "../pom/TopPagePom";
 
 let topPage: TopPagePom;
 

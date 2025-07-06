@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { expect, test } from "@playwright/test";
-import { JoinSessionPagePom } from "../../pom/planning-poker/JoinSessionPage";
+import { JoinSessionPagePom } from "../../pom/planning-poker/JoinSessionPagePom";
 
 test.describe("セッション参加画面", () => {
   let joinSessionPage: JoinSessionPagePom;

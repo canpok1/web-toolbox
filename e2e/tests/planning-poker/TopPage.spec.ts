@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { PlanningPokerTopPagePom } from "../../pom/planning-poker/TopPage";
+import { PlanningPokerTopPagePom } from "../../pom/planning-poker/PlanningPokerTopPagePom";
 
 test.describe("トップページ", () => {
   let planningPokerTopPage: PlanningPokerTopPagePom;

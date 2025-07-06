@@ -1,6 +1,6 @@
 import { type Page, expect, test } from "@playwright/test";
-import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPage";
-import { SessionPagePom } from "../../pom/planning-poker/SessionPage";
+import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPagePom";
+import { SessionPagePom } from "../../pom/planning-poker/SessionPagePom";
 
 const fibonacciVoteButtons = [
   "0",
