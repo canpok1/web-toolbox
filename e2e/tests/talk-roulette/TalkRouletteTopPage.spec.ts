@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/talk-roulette");
+  await page.waitForLoadState('networkidle');
   await page.getByTestId("talk-theme").waitFor({ state: "visible" });
 });
 
@@ -26,17 +27,25 @@ test("「新しいテーマ」ボタンをクリックするとテーマが変�
   await expect(themeElement).not.toHaveText(initialTheme as string);
 });
 
-// TODO: プロダクトコードの不備により、ボタンが表示されないためテストをコメントアウト
-// test("「良いね」ボタンをクリックするとフィードバックメッセージが表示されること", async ({ page }) => {
-//   await page.getByRole("button", { name: "良いね" }).click();
-//   await expect(page.locator("#feedback-message")).toHaveText("良いテーマですね！");
-// });
+test("「良いね」ボタンをクリックするとフィードバックメッセージが表示されること", async ({
+  page,
+}) => {
+  await expect(page.locator("#like-button")).toBeVisible();
+  await page.locator("#like-button").click();
+  await expect(page.getByTestId("feedback-message")).toHaveText(
+    "良いテーマですね！",
+  );
+});
 
-// TODO: プロダクトコードの不備により、ボタンが表示されないためテストをコメントアウト
-// test("「良くないね」ボタンをクリックするとフィードバックメッセージが表示されること", async ({ page }) => {
-//   await page.getByRole("button", { name: "良くないね" }).click();
-//   await expect(page.locator("#feedback-message")).toHaveText("テーマを変更しますね。");
-// });
+test("「良くないね」ボタンをクリックするとフィードバックメッセージが表示されること", async ({
+  page,
+}) => {
+  await expect(page.locator("#dislike-button")).toBeVisible();
+  await page.locator("#dislike-button").click();
+  await expect(page.getByTestId("feedback-message")).toHaveText(
+    "テーマを変更しますね。",
+  );
+});
 
 test("ジャンルを選択するとテーマが変更されること", async ({ page }) => {
   const themeElement = page.getByTestId("talk-theme");

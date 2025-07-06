@@ -69,7 +69,7 @@ export class SessionPagePom {
 
     // 新しいページで参加者として参加
     const participantPage = await this.page.context().newPage();
-    await participantPage.goto(inviteLink!);
+    await participantPage.goto(inviteLink as string);
     const participantPom = new JoinSessionPagePom(participantPage);
     await participantPom.joinSession(participantName);
 

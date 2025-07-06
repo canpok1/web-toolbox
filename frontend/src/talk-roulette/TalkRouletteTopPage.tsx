@@ -160,7 +160,7 @@ const TalkRouletteTopPage = () => {
             handleLikeClick={handleLikeClick}
             handleDislikeClick={handleDislikeClick}
           />
-          <p id="feedback-message" className="text-gray-500 text-sm">
+          <p data-testid="feedback-message" className="text-gray-500 text-sm">
             {feedbackMessage}
           </p>
 
