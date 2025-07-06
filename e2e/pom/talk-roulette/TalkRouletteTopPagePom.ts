@@ -1,4 +1,4 @@
-import { Locator, Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 export class TalkRouletteTopPagePom {
   readonly page: Page;
@@ -12,7 +12,9 @@ export class TalkRouletteTopPagePom {
   constructor(page: Page) {
     this.page = page;
     this.talkTheme = page.getByTestId("talk-theme");
-    this.newThemeButton = page.getByRole("button", { name: "別のテーマを引く" });
+    this.newThemeButton = page.getByRole("button", {
+      name: "別のテーマを引く",
+    });
     this.goodThemeButton = page.getByRole("button", { name: "良いテーマ" });
     this.badThemeButton = page.getByRole("button", { name: "悪いテーマ" });
     this.feedbackMessage = page.getByTestId("feedback-message");
