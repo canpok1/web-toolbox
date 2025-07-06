@@ -1,9 +1,13 @@
 import crypto from "node:crypto";
 import { expect, test } from "@playwright/test";
+import { JoinSessionPagePom } from "../../pom/planning-poker/JoinSessionPage";
 
 test.describe("セッション参加画面", () => {
+  let joinSessionPage: JoinSessionPagePom;
+
   test.beforeEach(async ({ page }) => {
-    await page.goto("/planning-poker/sessions/join");
+    joinSessionPage = new JoinSessionPagePom(page);
+    await joinSessionPage.goto();
   });
 
   test("タイトルがあること", async ({ page }) => {
@@ -11,55 +15,41 @@ test.describe("セッション参加画面", () => {
     await expect(page).toHaveTitle(/Web Toolbox/);
   });
 
-  test("セッションIDを入力できること", async ({ page }) => {
-    await expect(page.getByLabel("セッションID")).toBeVisible();
+  test("セッションIDを入力できること", async () => {
+    await expect(joinSessionPage.sessionIdInput).toBeVisible();
   });
 
-  test("参加者名を入力できること", async ({ page }) => {
-    await expect(page.getByLabel("あなたの名前")).toBeVisible();
+  test("参加者名を入力できること", async () => {
+    await expect(joinSessionPage.yourNameInput).toBeVisible();
   });
 
-  test("「セッションに参加」ボタンがあること", async ({ page }) => {
-    await expect(
-      page.getByRole("button", { name: "セッションに参加" }),
-    ).toBeVisible();
+  test("「セッションに参加」ボタンがあること", async () => {
+    await expect(joinSessionPage.joinSessionButton).toBeVisible();
   });
 
-  test("戻るボタンがあること", async ({ page }) => {
-    await expect(page.getByRole("link", { name: "戻る" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "戻る" })).toHaveAttribute(
+  test("戻るボタンがあること", async () => {
+    await expect(joinSessionPage.backLink).toBeVisible();
+    await expect(joinSessionPage.backLink).toHaveAttribute(
       "href",
       "/planning-poker",
     );
   });
 
-  test("セッションIDと名前が入力されていないときはセッション参加ボタンが押せないこと", async ({
-    page,
-  }) => {
-    const joinSessionButton = page.getByRole("button", {
-      name: "セッションに参加",
-    });
-    await expect(joinSessionButton).toBeDisabled();
+  test("セッションIDと名前が入力されていないときはセッション参加ボタンが押せないこと", async () => {
+    await expect(joinSessionPage.joinSessionButton).toBeDisabled();
   });
 
-  test("セッションIDと名前が入力されたときはセッション参加ボタンが押せること", async ({
-    page,
-  }) => {
-    await page.getByLabel("セッションID").fill("test-session-id");
-    await page.getByLabel("名前").fill("テストユーザー");
-    const joinSessionButton = page.getByRole("button", {
-      name: "セッションに参加",
-    });
-    await expect(joinSessionButton).toBeEnabled();
+  test("セッションIDと名前が入力されたときはセッション参加ボタンが押せること", async () => {
+    await joinSessionPage.fillSessionId("test-session-id");
+    await joinSessionPage.fillYourName("テストユーザー");
+    await expect(joinSessionPage.joinSessionButton).toBeEnabled();
   });
 
-  test("存在しないセッションIDを入力してセッション参加ボタンを押すと画面遷移せずにエラーが表示されること", async ({
-    page,
-  }) => {
+  test("存在しないセッションIDを入力してセッション参加ボタンを押すと画面遷移せずにエラーが表示されること", async () => {
     const invalidSessionId = crypto.randomUUID();
-    await page.getByLabel("セッションID").fill(invalidSessionId);
-    await page.getByLabel("名前").fill("テストユーザー");
-    await page.getByRole("button", { name: "セッションに参加" }).click();
-    await expect(page.locator(".alert")).toBeVisible();
+    await joinSessionPage.fillSessionId(invalidSessionId);
+    await joinSessionPage.fillYourName("テストユーザー");
+    await joinSessionPage.clickJoinSessionButton();
+    await expect(joinSessionPage.alertMessage).toBeVisible();
   });
 });
