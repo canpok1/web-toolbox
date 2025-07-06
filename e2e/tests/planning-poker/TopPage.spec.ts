@@ -8,9 +8,9 @@ test.describe("トップページ", () => {
     await planningPokerTopPage.goto();
   });
 
-  test("タイトルがあること", async ({ page }) => {
-    await expect(page).toHaveTitle(/プランニングポーカー/);
-    await expect(page).toHaveTitle(/Web Toolbox/);
+  test("タイトルがあること", async () => {
+    await planningPokerTopPage.expectTitleToContain("プランニングポーカー");
+    await planningPokerTopPage.expectTitleToContain("Web Toolbox");
   });
 
   test("「セッションを作成」ボタンのリンク先が/planning-poker/sessions/createであること", async () => {

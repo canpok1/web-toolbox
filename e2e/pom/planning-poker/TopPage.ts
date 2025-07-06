@@ -1,10 +1,14 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 export class PlanningPokerTopPagePom {
   constructor(private readonly page: Page) {}
 
   async goto() {
     await this.page.goto("/planning-poker");
+  }
+
+  async expectTitleToContain(text: string) {
+    await expect(this.page).toHaveTitle(new RegExp(text));
   }
 
   get createSessionLink() {
