@@ -3,25 +3,34 @@ import type { Locator, Page } from "@playwright/test";
 export class JoinSessionPagePom {
   private page: Page;
 
-  readonly sessionIdInput: Locator;
-  readonly yourNameInput: Locator;
-  readonly joinSessionButton: Locator;
-  readonly backLink: Locator;
-  readonly alertMessage: Locator;
-
   constructor(page: Page) {
     this.page = page;
-    this.sessionIdInput = page.getByLabel("セッションID");
-    this.yourNameInput = page.getByLabel("あなたの名前");
-    this.joinSessionButton = page.getByRole("button", {
-      name: "セッションに参加",
-    });
-    this.backLink = page.getByRole("link", { name: "戻る" });
-    this.alertMessage = page.locator(".alert");
   }
 
   public async goto(): Promise<void> {
     await this.page.goto("/planning-poker/sessions/join");
+  }
+
+  public get sessionIdInput(): Locator {
+    return this.page.getByLabel("セッションID");
+  }
+
+  public get yourNameInput(): Locator {
+    return this.page.getByLabel("あなたの名前");
+  }
+
+  public get joinSessionButton(): Locator {
+    return this.page.getByRole("button", {
+      name: "セッションに参加",
+    });
+  }
+
+  public get backLink(): Locator {
+    return this.page.getByRole("link", { name: "戻る" });
+  }
+
+  public get alertMessage(): Locator {
+    return this.page.locator(".alert");
   }
 
   public async fillSessionId(sessionId: string): Promise<void> {
