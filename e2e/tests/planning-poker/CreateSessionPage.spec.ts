@@ -34,8 +34,9 @@ test.describe("セッション作成画面", () => {
   });
 
   test("戻るボタンがあること", async () => {
-    await expect(createSessionPage.backLink).toBeVisible();
-    await expect(createSessionPage.backLink).toHaveAttribute(
+    const backLink = createSessionPage.backLink;
+    await expect(backLink).toBeVisible();
+    await expect(backLink).toHaveAttribute(
       "href",
       "/planning-poker",
     );
