@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { type Page, expect } from "@playwright/test";
 
 export class TopPagePom {
   constructor(private readonly page: Page) {}
@@ -25,5 +25,16 @@ export class TopPagePom {
 
   async clickTalkRouletteLink() {
     await this.talkRouletteLink.click();
+  }
+
+  async waitForURL(url: string | RegExp) {
+    await this.page.waitForURL(url);
+  }
+
+  getByRole(
+    role: Parameters<Page["getByRole"]>[0],
+    options: { name?: string | RegExp; level?: number },
+  ) {
+    return this.page.getByRole(role, options);
   }
 }

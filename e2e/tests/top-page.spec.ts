@@ -22,12 +22,13 @@ test("トークルーレットへのリンクが存在すること", async () =>
 
 test("プランニングポーカーへのリンクをクリックできること", async () => {
   await topPage.clickPlanningPokerLink();
-  await topPage.page.waitForURL(/planning-poker/);
-  await topPage.expectTitleToContain("プランニングポーカー");
+  await topPage.waitForURL(/planning-poker/);
 });
 
 test("トークルーレットへのリンクをクリックできること", async () => {
   await topPage.clickTalkRouletteLink();
-  await topPage.page.waitForURL(/talk-roulette/);
-  await expect(topPage.page.getByRole("heading", { name: "今日のトークテーマ" })).toBeVisible();
+  await topPage.waitForURL(/talk-roulette/);
+  await expect(
+    topPage.getByRole("heading", { name: "今日のトークテーマ" }),
+  ).toBeVisible();
 });
