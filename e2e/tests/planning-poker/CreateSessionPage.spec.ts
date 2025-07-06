@@ -1,8 +1,12 @@
 import { expect, test } from "@playwright/test";
+import { CreateSessionPagePom } from "../../pom/planning-poker/CreateSessionPage";
 
 test.describe("セッション作成画面", () => {
+  let createSessionPage: CreateSessionPagePom;
+
   test.beforeEach(async ({ page }) => {
-    await page.goto("/planning-poker/sessions/create");
+    createSessionPage = new CreateSessionPagePom(page);
+    await createSessionPage.goto();
   });
 
   test("タイトルがあること", async ({ page }) => {
@@ -10,61 +14,45 @@ test.describe("セッション作成画面", () => {
     await expect(page).toHaveTitle(/Web Toolbox/);
   });
 
-  test("スケールを選択できること", async ({ page }) => {
-    await expect(page.getByLabel("スケール")).toBeVisible();
+  test("スケールを選択できること", async () => {
+    await expect(createSessionPage.scaleSelect).toBeVisible();
   });
 
-  test("スケールの選択肢がフィボナッチ・Tシャツサイズ・2の累乗であること", async ({
-    page,
-  }) => {
-    const scaleSelect = page.getByLabel("スケール");
-    await expect(scaleSelect).toContainText("フィボナッチ");
-    await expect(scaleSelect).toContainText("Tシャツサイズ");
-    await expect(scaleSelect).toContainText("2の累乗");
+  test("スケールの選択肢がフィボナッチ・Tシャツサイズ・2の累乗であること", async () => {
+    await expect(createSessionPage.scaleSelect).toContainText("フィボナッチ");
+    await expect(createSessionPage.scaleSelect).toContainText("Tシャツサイズ");
+    await expect(createSessionPage.scaleSelect).toContainText("2の累乗");
   });
 
-  test("参加者名を入力できること", async ({ page }) => {
-    await expect(page.getByLabel("あなたの名前")).toBeVisible();
+  test("参加者名を入力できること", async () => {
+    await expect(createSessionPage.yourNameInput).toBeVisible();
   });
 
-  test("「セッションを作成」ボタンがあること", async ({ page }) => {
-    await expect(
-      page.getByRole("button", { name: "セッションを作成" }),
-    ).toBeVisible();
+  test("「セッションを作成」ボタンがあること", async () => {
+    await expect(createSessionPage.createSessionButton).toBeVisible();
   });
 
-  test("戻るボタンがあること", async ({ page }) => {
-    await expect(page.getByRole("link", { name: "戻る" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "戻る" })).toHaveAttribute(
+  test("戻るボタンがあること", async () => {
+    await expect(createSessionPage.backLink).toBeVisible();
+    await expect(createSessionPage.backLink).toHaveAttribute(
       "href",
       "/planning-poker",
     );
   });
 
-  test("名前が入力されていないときはセッション作成ボタンが押せないこと", async ({
-    page,
-  }) => {
-    const createSessionButton = page.getByRole("button", {
-      name: "セッションを作成",
-    });
-    await expect(createSessionButton).toBeDisabled();
+  test("名前が入力されていないときはセッション作成ボタンが押せないこと", async () => {
+    await expect(createSessionPage.createSessionButton).toBeDisabled();
   });
 
-  test("名前が入力されたときはセッション作成ボタンが押せること", async ({
-    page,
-  }) => {
-    await page.getByLabel("あなたの名前").fill("テストユーザー");
-    const createSessionButton = page.getByRole("button", {
-      name: "セッションを作成",
-    });
-    await expect(createSessionButton).toBeEnabled();
+  test("名前が入力されたときはセッション作成ボタンが押せること", async () => {
+    await createSessionPage.fillYourName("テストユーザー");
+    await expect(createSessionPage.createSessionButton).toBeEnabled();
   });
 
   test("セッション作成ボタンを押すとセッションページに遷移すること", async ({
     page,
   }) => {
-    await page.getByLabel("あなたの名前").fill("テストユーザー");
-    await page.getByRole("button", { name: "セッションを作成" }).click();
+    await createSessionPage.createSession("テストユーザー", "fibonacci");
     await expect(page).toHaveURL(/planning-poker\/sessions\/.*/);
   });
 });
