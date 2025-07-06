@@ -30,6 +30,3 @@ dist/
 
 # environment file
 .env
-
-# temporary directory
-tmp/

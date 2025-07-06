@@ -1,11 +1,15 @@
 #!/bin/sh
+set -e
 
 # 使い方
 # ./makeToDoFileFromPR.sh PR番号
 
-if [ -z "$1" ]; then
-  exit 0
-fi
+case "$1" in
+    ''|*[!0-9]*)
+        echo "使い方: $0 PR番号 (数字のみ)" >&2
+        exit 1
+        ;;
+esac
 
 cd "$(dirname "$0")/.."
 
