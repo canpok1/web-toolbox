@@ -1,31 +1,31 @@
 import { expect, test } from "@playwright/test";
+import { TopPagePom } from "../pom/TopPage";
+
+let topPage: TopPagePom;
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/");
+  topPage = new TopPagePom(page);
+  await topPage.goto();
 });
 
-test("タイトルが設定されていること", async ({ page }) => {
-  await expect(page).toHaveTitle(/Web Toolbox/);
+test("タイトルが設定されていること", async () => {
+  await topPage.expectTitleToContain("Web Toolbox");
 });
 
-test("プランニングポーカーへのリンクが存在すること", async ({ page }) => {
-  await expect(
-    page.getByRole("link", { name: "プランニングポーカー" }),
-  ).toBeVisible();
+test("プランニングポーカーへのリンクが存在すること", async () => {
+  await expect(topPage.planningPokerLink).toBeVisible();
 });
 
-test("トークルーレットへのリンクが存在すること", async ({ page }) => {
-  await expect(
-    page.getByRole("link", { name: "トークルーレット" }),
-  ).toBeVisible();
+test("トークルーレットへのリンクが存在すること", async () => {
+  await expect(topPage.talkRouletteLink).toBeVisible();
 });
 
-test("プランニングポーカーへのリンクをクリックできること", async ({ page }) => {
-  await page.getByRole("link", { name: "プランニングポーカー" }).click();
-  await expect(page).toHaveURL(/planning-poker/);
+test("プランニングポーカーへのリンクをクリックできること", async () => {
+  await topPage.clickPlanningPokerLink();
+  await topPage.waitForURL(/planning-poker/);
 });
 
-test("トークルーレットへのリンクをクリックできること", async ({ page }) => {
-  await page.getByRole("link", { name: "トークルーレット" }).click();
-  await expect(page).toHaveURL(/talk-roulette/);
+test("トークルーレットへのリンクをクリックできること", async () => {
+  await topPage.clickTalkRouletteLink();
+  await topPage.waitForURL(/talk-roulette/);
 });

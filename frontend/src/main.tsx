@@ -65,7 +65,15 @@ if (rootElement) {
                 </>
               }
             />
-            <Route path="/talk-roulette" element={<TalkRouletteTopPage />} />
+            <Route
+              path="/talk-roulette"
+              element={
+                <>
+                  <title>トークルーレット | Web Toolbox</title>
+                  <TalkRouletteTopPage />
+                </>
+              }
+            />
           </Route>
         </Routes>
       </BrowserRouter>
