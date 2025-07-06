@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 export class TalkRouletteTopPagePom {
-  constructor(readonly page: Page) {}
+  constructor(private readonly page: Page) {}
 
   get talkTheme(): Locator {
     return this.page.getByTestId("talk-theme");
