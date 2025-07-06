@@ -30,7 +30,7 @@ export class JoinSessionPagePom {
   }
 
   get alertMessage(): Locator {
-    return this.page.locator(".alert");
+    return this.page.locator("[data-testid=\"alert-message\"]");
   }
 
   async fillSessionId(sessionId: string): Promise<void> {
