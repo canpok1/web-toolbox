@@ -1,7 +1,7 @@
-import { Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 export class PlanningPokerTopPagePom {
-  constructor(private page: Page) {}
+  constructor(private readonly page: Page) {}
 
   async goto() {
     await this.page.goto("/planning-poker");
