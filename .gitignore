@@ -27,3 +27,6 @@ build/
 # frontend
 node_modules/
 dist/
+
+# environment file
+.env
