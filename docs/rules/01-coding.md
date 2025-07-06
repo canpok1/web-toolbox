@@ -13,6 +13,7 @@
 ## フロントエンド
 
 - **言語**: TypeScriptを使用すること。
+- **アクセス修飾子**: `public` キーワードは明示的に記述しないこと。デフォルトで `public` となるため、冗長な記述を避ける。`private` や `protected` は明示的に記述すること。
 - **フレームワーク/ライブラリ**: React, React Router DOM, Tailwind CSS, DaisyUIを使用すること。
 - **コンポーネント命名**: コンポーネントのファイル名とコンポーネント名はPascalCaseを使用すること (例: `Layout.tsx`, `TopPage.tsx`)。
 - **カスタムフック命名**: カスタムフックは`use`プレフィックスを使用すること (例: `useLoading.ts`)。
