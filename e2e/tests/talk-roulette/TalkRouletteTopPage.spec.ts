@@ -2,7 +2,6 @@ import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/talk-roulette");
-  await page.waitForLoadState('networkidle');
   await page.getByTestId("talk-theme").waitFor({ state: "visible" });
 });
 
