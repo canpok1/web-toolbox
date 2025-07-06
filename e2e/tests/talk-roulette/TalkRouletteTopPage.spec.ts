@@ -23,14 +23,17 @@ test("「新しいテーマ」ボタンをクリックするとテーマが変�
   const themeElement = page.getByTestId("talk-theme");
   const initialTheme = await themeElement.textContent();
   await page.getByRole("button", { name: "別のテーマを引く" }).click();
+  await themeElement.waitFor({
+    predicate: async (element) => (await element.textContent()) !== initialTheme,
+  });
   await expect(themeElement).not.toHaveText(initialTheme as string);
 });
 
 test("「良いね」ボタンをクリックするとフィードバックメッセージが表示されること", async ({
   page,
 }) => {
-  await expect(page.locator("#like-button")).toBeVisible();
-  await page.locator("#like-button").click();
+  await expect(page.getByRole("button", { name: "良いテーマ" })).toBeVisible();
+  await page.getByRole("button", { name: "良いテーマ" }).click();
   await expect(page.getByTestId("feedback-message")).toHaveText(
     "良いテーマですね！",
   );
@@ -39,8 +42,8 @@ test("「良いね」ボタンをクリックするとフィードバックメ�
 test("「良くないね」ボタンをクリックするとフィードバックメッセージが表示されること", async ({
   page,
 }) => {
-  await expect(page.locator("#dislike-button")).toBeVisible();
-  await page.locator("#dislike-button").click();
+  await expect(page.getByRole("button", { name: "悪いテーマ" })).toBeVisible();
+  await page.getByRole("button", { name: "悪いテーマ" }).click();
   await expect(page.getByTestId("feedback-message")).toHaveText(
     "テーマを変更しますね。",
   );
