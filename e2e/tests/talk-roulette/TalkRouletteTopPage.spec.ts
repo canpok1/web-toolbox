@@ -20,14 +20,10 @@ test("初期表示でテーマが表示されていること", async ({ page }) 
 test("「新しいテーマ」ボタンをクリックするとテーマが変更されること", async ({
   page,
 }) => {
-  const initialTheme = await page.getByTestId("talk-theme").textContent();
+  const themeElement = page.getByTestId("talk-theme");
+  const initialTheme = await themeElement.textContent();
   await page.getByRole("button", { name: "別のテーマを引く" }).click();
-  await page.waitForFunction((initialTheme) => {
-    const el = document.querySelector('[data-testid="talk-theme"]');
-    return el && el.textContent !== initialTheme;
-  }, initialTheme);
-  const newTheme = await page.getByTestId("talk-theme").textContent();
-  expect(newTheme).not.toBe(initialTheme);
+  await expect(themeElement).not.toHaveText(initialTheme as string);
 });
 
 // TODO: プロダクトコードの不備により、ボタンが表示されないためテストをコメントアウト
@@ -43,12 +39,8 @@ test("「新しいテーマ」ボタンをクリックするとテーマが変�
 // });
 
 test("ジャンルを選択するとテーマが変更されること", async ({ page }) => {
-  const initialTheme = await page.getByTestId("talk-theme").textContent();
+  const themeElement = page.getByTestId("talk-theme");
+  const initialTheme = await themeElement.textContent();
   await page.getByRole("combobox").selectOption("hobby");
-  await page.waitForFunction((initialTheme) => {
-    const el = document.querySelector('[data-testid="talk-theme"]');
-    return el && el.textContent !== initialTheme;
-  }, initialTheme);
-  const newTheme = await page.getByTestId("talk-theme").textContent();
-  expect(newTheme).not.toBe(initialTheme);
+  await expect(themeElement).not.toHaveText(initialTheme as string);
 });
