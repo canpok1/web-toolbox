@@ -94,6 +94,7 @@
     - ページオブジェクトのクラス名はPascalCaseを使用し、`PagePom` サフィックスを付けること (例: `CreateSessionPagePom`)。ファイル名とクラス名を一致させ、1ファイル1クラスとすること。
     - ページオブジェクトのメソッドは、ユーザーのアクションやページの要素へのアクセスを抽象化すること (例: `inputUserName`, `clickCreateButton`)。
     - `Locator` の取得は getter メソッドで行うこと。
+- **Locatorの取得**: テストファイル内で直接 `page.locator` や `page.getBy*` を使用せず、必ずPOMのメソッドまたはgetterを介してLocatorを取得すること。
     - ページオブジェクトのコンストラクタは `Page` オブジェクトを受け取ること。
 - **要素の特定**: `page.getByRole`, `page.getByLabel` などのPlaywrightのロケータを使用し、堅牢なセレクタを記述すること。
 - **アサーション**: `expect` を使用してアサーションを行うこと (例: `expect(page).toHaveTitle()`, `expect(element).toBeVisible()`, `expect(element).toBeDisabled()`)。
