@@ -1,3 +1,4 @@
+import { ThumbsDown, ThumbsUp } from "lucide-react";
 import type React from "react";
 
 interface Props {
@@ -24,7 +25,7 @@ const FeedbackButtons: React.FC<Props> = ({
         aria-label="良いテーマ"
         onClick={handleLikeClick}
       >
-        <i className="fas fa-thumbs-up text-2xl" />
+        <ThumbsUp className="h-6 w-6" />
       </button>
       <button
         type="button"
@@ -35,7 +36,7 @@ const FeedbackButtons: React.FC<Props> = ({
         aria-label="悪いテーマ"
         onClick={handleDislikeClick}
       >
-        <i className="fas fa-thumbs-down text-2xl" />
+        <ThumbsDown className="h-6 w-6" />
       </button>
     </div>
   );

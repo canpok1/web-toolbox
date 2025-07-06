@@ -23,20 +23,31 @@ test("「新しいテーマ」ボタンをクリックするとテーマが変�
   const themeElement = page.getByTestId("talk-theme");
   const initialTheme = await themeElement.textContent();
   await page.getByRole("button", { name: "別のテーマを引く" }).click();
+  await themeElement.waitFor({
+    predicate: async (element) => (await element.textContent()) !== initialTheme,
+  });
   await expect(themeElement).not.toHaveText(initialTheme as string);
 });
 
-// TODO: プロダクトコードの不備により、ボタンが表示されないためテストをコメントアウト
-// test("「良いね」ボタンをクリックするとフィードバックメッセージが表示されること", async ({ page }) => {
-//   await page.getByRole("button", { name: "良いね" }).click();
-//   await expect(page.locator("#feedback-message")).toHaveText("良いテーマですね！");
-// });
+test("「良いね」ボタンをクリックするとフィードバックメッセージが表示されること", async ({
+  page,
+}) => {
+  await expect(page.getByRole("button", { name: "良いテーマ" })).toBeVisible();
+  await page.getByRole("button", { name: "良いテーマ" }).click();
+  await expect(page.getByTestId("feedback-message")).toHaveText(
+    "良いテーマですね！",
+  );
+});
 
-// TODO: プロダクトコードの不備により、ボタンが表示されないためテストをコメントアウト
-// test("「良くないね」ボタンをクリックするとフィードバックメッセージが表示されること", async ({ page }) => {
-//   await page.getByRole("button", { name: "良くないね" }).click();
-//   await expect(page.locator("#feedback-message")).toHaveText("テーマを変更しますね。");
-// });
+test("「良くないね」ボタンをクリックするとフィードバックメッセージが表示されること", async ({
+  page,
+}) => {
+  await expect(page.getByRole("button", { name: "悪いテーマ" })).toBeVisible();
+  await page.getByRole("button", { name: "悪いテーマ" }).click();
+  await expect(page.getByTestId("feedback-message")).toHaveText(
+    "テーマを変更しますね。",
+  );
+});
 
 test("ジャンルを選択するとテーマが変更されること", async ({ page }) => {
   const themeElement = page.getByTestId("talk-theme");
